@@ -57,7 +57,7 @@ func Flags(prefix string) map[string]*string {
 
 // Ping indicate if Mailjet is ready or not
 func (a *App) Ping() bool {
-	if a.headers != nil {
+	if a.headers == nil {
 		return true
 	}
 
