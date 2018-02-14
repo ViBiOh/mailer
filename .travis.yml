@@ -1,0 +1,20 @@
+language: go
+sudo: required
+services:
+- docker
+go: 1.9
+after_success: |
+  bash <(curl -s https://codecov.io/bash)
+
+  if [ "${TRAVIS_BRANCH}" == "master" ]; then
+    make docker-push
+    curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/mailer
+  fi
+notifications:
+  email: false
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/containers/mailer/ --data-binary @docker-compose.yml"
+  on:
+    branch: master
