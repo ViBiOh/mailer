@@ -42,5 +42,4 @@ docker-push:
 	docker push ${DOCKER_USER}/mailer
 
 start-mailer:
-	go run mailer.go \
-	  -tls
+	go run mailer.go

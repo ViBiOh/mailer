@@ -61,7 +61,7 @@ func main() {
 	renderHandler = http.StripPrefix(mailPath, renderApp.Handler())
 
 	healthcheckApp := healthcheck.NewApp(mailjetApp)
-	healthcheckHandler = http.StripPrefix(mailPath, healthcheckApp.Handler())
+	healthcheckHandler = http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
 
 	server := &http.Server{
 		Addr:    `:` + *port,
