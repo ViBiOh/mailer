@@ -6,7 +6,6 @@
   name = "github.com/ViBiOh/alcotest"
   packages = [
     "alcotest",
-    "healthcheck",
     "httpclient"
   ]
   revision = "7820b5444e1a46e9edefbc45d504df7723bb0ca8"
@@ -52,6 +51,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9df042f41903a5f3e1771ca1da8b63697ffdffd0abdcc72babcfe58043dc8870"
+  inputs-digest = "3979b144cbd71ffbebfff8b2d6bdb9c05bffa521e3b5cc494489b9360580602f"
   solver-name = "gps-cdcl"
   solver-version = 1

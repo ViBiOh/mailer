@@ -7,24 +7,23 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/alcotest/alcotest"
-	"github.com/ViBiOh/alcotest/healthcheck"
 	"github.com/ViBiOh/httputils"
 	"github.com/ViBiOh/httputils/cert"
 	"github.com/ViBiOh/httputils/cors"
 	"github.com/ViBiOh/httputils/owasp"
+	"github.com/ViBiOh/mailer/healthcheck"
+	"github.com/ViBiOh/mailer/mailjet"
 	"github.com/ViBiOh/mailer/render"
 )
 
 const (
 	healthcheckPath = `/health`
-
-	mailPath = `/mail`
+	mailPath        = `/mail`
 )
 
 var (
-	healthcheckHandler = http.StripPrefix(healthcheckPath, healthcheck.Handler())
-
-	renderHandler http.Handler
+	healthcheckHandler http.Handler
+	renderHandler      http.Handler
 )
 
 func handler() http.Handler {
@@ -48,14 +47,21 @@ func main() {
 	corsConfig := cors.Flags(`cors`)
 	owaspConfig := owasp.Flags(``)
 
+	mailjetConfig := mailjet.Flags(``)
+
 	flag.Parse()
 
 	alcotest.DoAndExit(alcotestConfig)
 
 	log.Printf(`Starting server on port %s`, *port)
 
+	mailjetApp := mailjet.NewApp(mailjetConfig)
+
 	renderApp := render.NewApp()
 	renderHandler = http.StripPrefix(mailPath, renderApp.Handler())
+
+	healthcheckApp := healthcheck.NewApp(mailjetApp)
+	healthcheckHandler = http.StripPrefix(mailPath, healthcheckApp.Handler())
 
 	server := &http.Server{
 		Addr:    `:` + *port,
