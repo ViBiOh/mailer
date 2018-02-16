@@ -27,7 +27,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/ViBiOh/alcotest"
+  name = "github.com/ViBiOh/auth"
 
 [[constraint]]
   branch = "master"

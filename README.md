@@ -8,6 +8,12 @@
 
 ```
 Usage of mailer:
+  -authUrl string
+      [auth] Auth URL, if remote
+  -authUsers string
+      [auth] List of allowed users and profiles (e.g. user:profile1|profile2,user2:profile3)
+  -basicUsers string
+      [Basic] Users in the form "id:username:password,id2:username2:password2"
   -c string
       [health] URL to check
   -corsCredentials
@@ -26,6 +32,10 @@ Usage of mailer:
       [owasp] X-Frame-Options (default "deny")
   -hsts
       [owasp] Indicate Strict Transport Security (default true)
+  -mailjetPrivateKey string
+      Mailjet Private Key
+  -mailjetPublicKey string
+      Mailjet Public Key
   -port string
       Listen port (default "1080")
   -tls

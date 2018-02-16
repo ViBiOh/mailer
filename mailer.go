@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ViBiOh/auth/auth"
+	authProvider "github.com/ViBiOh/auth/provider"
+	"github.com/ViBiOh/auth/provider/basic"
+	authService "github.com/ViBiOh/auth/service"
 	"github.com/ViBiOh/httputils"
 	"github.com/ViBiOh/httputils/cors"
 	"github.com/ViBiOh/httputils/owasp"
@@ -17,10 +21,23 @@ const (
 	mailPath        = `/mail`
 )
 
+func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
+	if auth.IsForbiddenErr(err) {
+		httputils.Forbidden(w)
+	} else if err == authProvider.ErrMalformedAuth || err == authProvider.ErrUnknownAuthType {
+		httputils.BadRequest(w, err)
+	} else {
+		w.Header().Add(`WWW-Authenticate`, `Basic`)
+		httputils.Unauthorized(w, err)
+	}
+}
+
 func main() {
 	corsConfig := cors.Flags(`cors`)
 	owaspConfig := owasp.Flags(``)
 	mailjetConfig := mailjet.Flags(``)
+	authConfig := auth.Flags(`auth`)
+	basicConfig := basic.Flags(`basic`)
 
 	httputils.StartMainServer(func() http.Handler {
 		mailjetApp := mailjet.NewApp(mailjetConfig)
@@ -31,16 +48,23 @@ func main() {
 		healthcheckApp := healthcheck.NewApp(mailjetApp)
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
 
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, healthcheckPath) {
-				healthcheckHandler.ServeHTTP(w, r)
-			} else if strings.HasPrefix(r.URL.Path, mailPath) {
+		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
+		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *authProvider.User) {
+			if strings.HasPrefix(r.URL.Path, mailPath) {
 				renderHandler.ServeHTTP(w, r)
 			} else {
 				httputils.NotFound(w)
 			}
+		}, handleAnonymousRequest)
+
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, healthcheckPath) {
+				healthcheckHandler.ServeHTTP(w, r)
+			} else {
+				authHandler.ServeHTTP(w, r)
+			}
 		})
 
 		return owasp.Handler(owaspConfig, cors.Handler(corsConfig, handler))
-	})
+	}, nil)
 }

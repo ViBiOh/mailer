@@ -3,24 +3,36 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/ViBiOh/alcotest"
+  name = "github.com/ViBiOh/auth"
   packages = [
-    "alcotest",
-    "httpclient"
+    "auth",
+    "cookie",
+    "provider",
+    "provider/basic",
+    "provider/github",
+    "service"
   ]
-  revision = "7820b5444e1a46e9edefbc45d504df7723bb0ca8"
+  revision = "e29a7a30fed7f4860c2f0bbbba839f2fea0de457"
 
 [[projects]]
   branch = "master"
   name = "github.com/ViBiOh/httputils"
   packages = [
     ".",
+    "alcotest",
     "cert",
     "cors",
     "owasp",
-    "tools"
+    "tools",
+    "uuid"
   ]
-  revision = "ea8da0656b64e1b5d610eaf6b7dc08f8a69eeb81"
+  revision = "5ba574fa9b59230694a75168d2219f0d7f2f5190"
+
+[[projects]]
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/tdewolff/minify"
@@ -48,9 +60,51 @@
   revision = "639f6272aec6b52094db77b9ec488214b0b4b1a1"
   version = "v2.3.2"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = [
+    "bcrypt",
+    "blowfish"
+  ]
+  revision = "650f4a345ab4e5b245a3034b110ebc7299e68186"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "context",
+    "context/ctxhttp"
+  ]
+  revision = "dc948dff8834a7fe1ca525f8d04e261c2b56e70d"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "github",
+    "internal"
+  ]
+  revision = "543e37812f10c46c622c9575afd7ad22f22a12ba"
+
+[[projects]]
+  name = "google.golang.org/appengine"
+  packages = [
+    "internal",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch"
+  ]
+  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
+  version = "v1.0.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3979b144cbd71ffbebfff8b2d6bdb9c05bffa521e3b5cc494489b9360580602f"
+  inputs-digest = "4e6d8a61ad498e8d4eff58f7ac42efa6860857c852e2972fa62a66d660a4d5c0"
   solver-name = "gps-cdcl"
   solver-version = 1

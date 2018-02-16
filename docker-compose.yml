@@ -5,6 +5,10 @@ services:
     image: vibioh/mailer
     command:
     - -tls
+    - -authUsers
+    - vibioh:admin
+    - -basicUsers
+    - 1:vibioh:$$2a$$12$$olmecpG4nNkrt0WZ72tDMuki1QR9pK4yjev82kffHVbCJkMor586m
     labels:
       traefik.frontend.passHostHeader: 'true'
       traefik.frontend.rule: 'Host: mailer.vibioh.fr'
