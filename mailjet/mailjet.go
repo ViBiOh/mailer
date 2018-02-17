@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ViBiOh/httputils"
+	"github.com/ViBiOh/httputils/request"
 	"github.com/ViBiOh/httputils/tools"
 )
 
@@ -43,7 +43,7 @@ func NewApp(config map[string]*string) *App {
 	}
 
 	return &App{
-		headers: map[string]string{`Authorization`: httputils.GetBasicAuth(*config[`apiPublicKey`], *config[`apiPrivateKey`])},
+		headers: map[string]string{`Authorization`: request.GetBasicAuth(*config[`apiPublicKey`], *config[`apiPrivateKey`])},
 	}
 }
 
@@ -61,7 +61,7 @@ func (a *App) Ping() bool {
 		return true
 	}
 
-	if _, err := httputils.Request(userURL, nil, a.headers, http.MethodGet); err != nil {
+	if _, err := request.Request(userURL, nil, a.headers, http.MethodGet); err != nil {
 		log.Printf(`[mailjet] Error while pinging: %v`, err)
 		return false
 	}
@@ -76,7 +76,7 @@ func (a *App) SendMail(fromEmail string, fromName string, subject string, to []s
 	}
 
 	mailjetMail := mailjetMail{FromEmail: fromEmail, FromName: fromName, Subject: subject, Recipients: recipients, HTML: html}
-	if _, err := httputils.RequestJSON(sendURL, mailjetMail, a.headers, http.MethodPost); err != nil {
+	if _, err := request.RequestJSON(sendURL, mailjetMail, a.headers, http.MethodPost); err != nil {
 		return fmt.Errorf(`Error while sending data to %s: %v`, sendURL, err)
 	}
 

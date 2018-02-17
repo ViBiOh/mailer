@@ -3,7 +3,7 @@ package render
 import (
 	"net/http"
 
-	"github.com/ViBiOh/httputils"
+	"github.com/ViBiOh/httputils/httperror"
 )
 
 // App stores informations
@@ -19,7 +19,7 @@ func NewApp() *App {
 func (a *App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, err := w.Write([]byte(`Hello World !`)); err != nil {
-			httputils.InternalServerError(w, err)
+			httperror.InternalServerError(w, err)
 		}
 	})
 }

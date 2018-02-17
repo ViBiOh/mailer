@@ -10,6 +10,7 @@ import (
 	authService "github.com/ViBiOh/auth/service"
 	"github.com/ViBiOh/httputils"
 	"github.com/ViBiOh/httputils/cors"
+	"github.com/ViBiOh/httputils/httperror"
 	"github.com/ViBiOh/httputils/owasp"
 	"github.com/ViBiOh/mailer/healthcheck"
 	"github.com/ViBiOh/mailer/mailjet"
@@ -23,12 +24,12 @@ const (
 
 func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
 	if auth.IsForbiddenErr(err) {
-		httputils.Forbidden(w)
+		httperror.Forbidden(w)
 	} else if err == authProvider.ErrMalformedAuth || err == authProvider.ErrUnknownAuthType {
-		httputils.BadRequest(w, err)
+		httperror.BadRequest(w, err)
 	} else {
 		w.Header().Add(`WWW-Authenticate`, `Basic`)
-		httputils.Unauthorized(w, err)
+		httperror.Unauthorized(w, err)
 	}
 }
 
@@ -53,7 +54,7 @@ func main() {
 			if strings.HasPrefix(r.URL.Path, mailPath) {
 				renderHandler.ServeHTTP(w, r)
 			} else {
-				httputils.NotFound(w)
+				httperror.NotFound(w)
 			}
 		}, handleAnonymousRequest)
 
