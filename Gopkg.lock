@@ -12,7 +12,7 @@
     "provider/github",
     "service"
   ]
-  revision = "74feea8d2ec00d4ff1aced25ced0447071973343"
+  revision = "8ae37b8a43d51d92eec3008ad5117da229558ffc"
 
 [[projects]]
   branch = "master"
@@ -30,7 +30,7 @@
     "tools",
     "uuid"
   ]
-  revision = "2802a9be4581106f0f41023d815ed5239145382d"
+  revision = "ffedff675f711425bed74940efee7021ba098536"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -45,7 +45,7 @@
     "bcrypt",
     "blowfish"
   ]
-  revision = "650f4a345ab4e5b245a3034b110ebc7299e68186"
+  revision = "432090b8f568c018896cd8a0fb0345872bbac6ce"
 
 [[projects]]
   branch = "master"
@@ -54,7 +54,7 @@
     "context",
     "context/ctxhttp"
   ]
-  revision = "136a25c244d3019482a795d728110278d6ba09a4"
+  revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
 
 [[projects]]
   branch = "master"
@@ -83,6 +83,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a6953cd3bd7d87e4994f9b0a218dc76db41fdcf356da248ce1adab79619a876"
+  inputs-digest = "553f09ffac110358ad416f628df9da855ffc1f901cf6c90f53967d2ecae18af1"
   solver-name = "gps-cdcl"
   solver-version = 1

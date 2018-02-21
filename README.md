@@ -14,8 +14,6 @@ Usage of mailer:
       [auth] List of allowed users and profiles (e.g. user:profile1|profile2,user2:profile3)
   -basicUsers string
       [Basic] Users in the form "id:username:password,id2:username2:password2"
-  -c string
-      [health] URL to check
   -corsCredentials
       [cors] Access-Control-Allow-Credentials
   -corsExpose string
@@ -46,4 +44,6 @@ Usage of mailer:
       [tls] Self-signed certificate hosts, comma separated (default "localhost")
   -tlsKey string
       [tls] PEM Key file
+  -url string
+      [health] URL to check
 ```

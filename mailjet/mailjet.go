@@ -61,7 +61,7 @@ func (a *App) Ping() bool {
 		return true
 	}
 
-	if _, err := request.Request(userURL, nil, a.headers, http.MethodGet); err != nil {
+	if _, err := request.Do(userURL, nil, a.headers, http.MethodGet); err != nil {
 		log.Printf(`[mailjet] Error while pinging: %v`, err)
 		return false
 	}
@@ -76,7 +76,7 @@ func (a *App) SendMail(fromEmail string, fromName string, subject string, to []s
 	}
 
 	mailjetMail := mailjetMail{FromEmail: fromEmail, FromName: fromName, Subject: subject, Recipients: recipients, HTML: html}
-	if _, err := request.RequestJSON(sendURL, mailjetMail, a.headers, http.MethodPost); err != nil {
+	if _, err := request.DoJSON(sendURL, mailjetMail, a.headers, http.MethodPost); err != nil {
 		return fmt.Errorf(`Error while sending data to %s: %v`, sendURL, err)
 	}
 
