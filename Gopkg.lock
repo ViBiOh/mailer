@@ -12,7 +12,7 @@
     "provider/github",
     "service"
   ]
-  revision = "8ae37b8a43d51d92eec3008ad5117da229558ffc"
+  revision = "c5e1f2deb74c0bbb918e20cef2874e1555c90e00"
 
 [[projects]]
   branch = "master"
@@ -27,10 +27,11 @@
     "owasp",
     "request",
     "server",
+    "templates",
     "tools",
     "uuid"
   ]
-  revision = "ffedff675f711425bed74940efee7021ba098536"
+  revision = "d22289a34ef2a0552e7693ce8ce6869e8954c8c6"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -39,13 +40,39 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/tdewolff/minify"
+  packages = [
+    ".",
+    "css",
+    "html",
+    "js",
+    "xml"
+  ]
+  revision = "222672169d634c440a73abc47685074e1a9daa60"
+  version = "v2.3.4"
+
+[[projects]]
+  name = "github.com/tdewolff/parse"
+  packages = [
+    ".",
+    "buffer",
+    "css",
+    "html",
+    "js",
+    "strconv",
+    "xml"
+  ]
+  revision = "639f6272aec6b52094db77b9ec488214b0b4b1a1"
+  version = "v2.3.2"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
     "blowfish"
   ]
-  revision = "432090b8f568c018896cd8a0fb0345872bbac6ce"
+  revision = "49796115aa4b964c318aad4f3084fdb41e9aa067"
 
 [[projects]]
   branch = "master"
@@ -83,6 +110,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "553f09ffac110358ad416f628df9da855ffc1f901cf6c90f53967d2ecae18af1"
+  inputs-digest = "d9db70e11a8d9a8da8e67f79522fcfb7c1b10e7cbaa7fba130094c41abc7d3c3"
   solver-name = "gps-cdcl"
   solver-version = 1

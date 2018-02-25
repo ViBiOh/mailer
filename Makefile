@@ -41,5 +41,10 @@ docker-push:
 	docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
 	docker push ${DOCKER_USER}/mailer
 
+start-deps:
+	go get -u github.com/ViBiOh/auth/bcrypt
+
 start-mailer:
-	go run mailer.go
+	go run mailer.go \
+		-authUsers "admin:admin" \
+		-basicUsers "1:admin:`bcrypt admin`"
