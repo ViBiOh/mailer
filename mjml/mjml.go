@@ -51,7 +51,7 @@ func Flags(prefix string) map[string]*string {
 func (a *App) Render(template string) (string, error) {
 	content, err := request.DoJSON(renderURL, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
-		return ``, fmt.Errorf(`Error while sending data to %s: %v`, renderURL, err)
+		return ``, fmt.Errorf(`Error while sending data: %v %s`, err, content)
 	}
 
 	var response mjmlResponse
