@@ -9,12 +9,20 @@ after_success: |
   if [ "${TRAVIS_BRANCH}" == "master" ]; then
     make docker-push
     curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/mailer
+
+    sed \
+      -e "s|\${BASIC_USERS}|${BASIC_USERS}|g" \
+      -e "s|\${MAILJET_APIKEY_PUBLIC}|${MAILJET_APIKEY_PUBLIC}|g" \
+      -e "s|\${MAILJET_APIKEY_PRIVATE}|${MAILJET_APIKEY_PRIVATE}|g" \
+      -e "s|\${MJML_APPLICATION_ID}|${MJML_APPLICATION_ID}|g" \
+      -e "s|\${MJML_SECRET_KEY}|${MJML_SECRET_KEY}|g" \
+      docker-compose.yml > docker-compose-env.yml
   fi
 notifications:
   email: false
 deploy:
 - provider: script
   skip_cleanup: true
-  script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/containers/mailer/ --data-binary @docker-compose.yml"
+  script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/containers/mailer/ --data-binary @docker-compose-env.yml"
   on:
     branch: master

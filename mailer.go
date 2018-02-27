@@ -14,6 +14,7 @@ import (
 	"github.com/ViBiOh/httputils/owasp"
 	"github.com/ViBiOh/mailer/healthcheck"
 	"github.com/ViBiOh/mailer/mailjet"
+	"github.com/ViBiOh/mailer/mjml"
 	"github.com/ViBiOh/mailer/render"
 )
 
@@ -36,17 +37,19 @@ func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
 func main() {
 	corsConfig := cors.Flags(`cors`)
 	owaspConfig := owasp.Flags(``)
-	mailjetConfig := mailjet.Flags(``)
+	mailjetConfig := mailjet.Flags(`mailjet`)
+	mjmlConfig := mjml.Flags(`mjml`)
 	authConfig := auth.Flags(`auth`)
 	basicConfig := basic.Flags(`basic`)
 
 	httputils.StartMainServer(func() http.Handler {
 		mailjetApp := mailjet.NewApp(mailjetConfig)
+		mjmlApp := mjml.NewApp(mjmlConfig)
 
 		renderApp := render.NewApp()
 		renderHandler := http.StripPrefix(mailPath, renderApp.Handler())
 
-		healthcheckApp := healthcheck.NewApp(mailjetApp)
+		healthcheckApp := healthcheck.NewApp(mailjetApp, mjmlApp)
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
 
 		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))

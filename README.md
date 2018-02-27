@@ -34,6 +34,10 @@ Usage of mailer:
       Mailjet Private Key
   -mailjetPublicKey string
       Mailjet Public Key
+  -mjmlApplicationID string
+      [mjml] Application ID
+  -mjmlSecretKey string
+      [mjml] Secret Key
   -port string
       Listen port (default "1080")
   -tls

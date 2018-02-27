@@ -8,7 +8,15 @@ services:
     - -authUsers
     - vibioh:admin
     - -basicUsers
-    - 1:vibioh:$$2a$$12$$olmecpG4nNkrt0WZ72tDMuki1QR9pK4yjev82kffHVbCJkMor586m
+    - ${BASIC_USERS}
+    - -mailjetPublicKey
+    - ${MAILJET_APIKEY_PUBLIC}
+    - -mailjetPrivateKey
+    - ${MAILJET_APIKEY_PRIVATE}
+    - -mjmlApplicationID
+    - ${MJML_APPLICATION_ID}
+    - -mjmlSecretKey
+    - ${MJML_SECRET_KEY}
     labels:
       traefik.frontend.passHostHeader: 'true'
       traefik.frontend.rule: 'Host: mailer.vibioh.fr'

@@ -38,20 +38,20 @@ type App struct {
 
 // NewApp creates new App from Flags' config
 func NewApp(config map[string]*string) *App {
-	if *config[`apiPublicKey`] == `` {
+	if *config[`publicKey`] == `` {
 		return &App{}
 	}
 
 	return &App{
-		headers: map[string]string{`Authorization`: request.GetBasicAuth(*config[`apiPublicKey`], *config[`apiPrivateKey`])},
+		headers: map[string]string{`Authorization`: request.GetBasicAuth(*config[`publicKey`], *config[`privateKey`])},
 	}
 }
 
 // Flags adds flags for given prefix
 func Flags(prefix string) map[string]*string {
 	return map[string]*string{
-		`apiPublicKey`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sMailjetPublicKey`, prefix)), ``, `Mailjet Public Key`),
-		`apiPrivateKey`: flag.String(tools.ToCamel(fmt.Sprintf(`%sMailjetPrivateKey`, prefix)), ``, `Mailjet Private Key`),
+		`publicKey`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sPublicKey`, prefix)), ``, `Mailjet Public Key`),
+		`privateKey`: flag.String(tools.ToCamel(fmt.Sprintf(`%sPrivateKey`, prefix)), ``, `Mailjet Private Key`),
 	}
 }
 
