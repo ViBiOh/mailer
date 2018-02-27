@@ -3,7 +3,6 @@ package mailjet
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/ViBiOh/httputils/request"
@@ -11,7 +10,6 @@ import (
 )
 
 const (
-	userURL = `https://api.mailjet.com/v3/user`
 	sendURL = `https://api.mailjet.com/v3/send`
 )
 
@@ -53,19 +51,6 @@ func Flags(prefix string) map[string]*string {
 		`publicKey`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sPublicKey`, prefix)), ``, `Mailjet Public Key`),
 		`privateKey`: flag.String(tools.ToCamel(fmt.Sprintf(`%sPrivateKey`, prefix)), ``, `Mailjet Private Key`),
 	}
-}
-
-// Ping indicate if Mailjet is ready or not
-func (a *App) Ping() bool {
-	if a.headers == nil {
-		return true
-	}
-
-	if payload, err := request.Do(userURL, nil, a.headers, http.MethodGet); err != nil {
-		log.Printf(`[mailjet] Error while pinging: %v %s`, err, payload)
-		return false
-	}
-	return true
 }
 
 // SendMail send mailjet mail

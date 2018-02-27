@@ -25,11 +25,7 @@ func NewApp(mailjetAppDep *mailjet.App, mjmlAppDep *mjml.App) *App {
 func (a *App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			if a.mailjetApp.Ping() {
-				w.WriteHeader(http.StatusOK)
-			} else {
-				w.WriteHeader(http.StatusServiceUnavailable)
-			}
+			w.WriteHeader(http.StatusOK)
 		} else {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
