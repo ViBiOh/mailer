@@ -58,7 +58,7 @@ func (a *App) Handler() http.Handler {
 		output := writer.Create()
 
 		if err := templates.WriteHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
-			httperror.InternalServerError(w, err)
+			httperror.InternalServerError(w, fmt.Errorf(`Error while writing template: %v`, err))
 			return
 		}
 
@@ -77,6 +77,9 @@ func (a *App) Handler() http.Handler {
 			}
 		}
 
-		output.WriteResponse(w)
+		if _, err := output.WriteResponse(w); err != nil {
+			httperror.InternalServerError(w, fmt.Errorf(`Error while writing output to response: %v`, err))
+			return
+		}
 	})
 }
