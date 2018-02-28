@@ -4,6 +4,8 @@ services:
   mailer:
     image: vibioh/mailer
     command:
+    - -csp
+    - default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com
     - -tls
     - -authUsers
     - vibioh:admin
