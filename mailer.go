@@ -46,10 +46,10 @@ func main() {
 		mailjetApp := mailjet.NewApp(mailjetConfig)
 		mjmlApp := mjml.NewApp(mjmlConfig)
 
-		renderApp := render.NewApp()
+		renderApp := render.NewApp(mjmlApp)
 		renderHandler := http.StripPrefix(mailPath, renderApp.Handler())
 
-		healthcheckApp := healthcheck.NewApp(mailjetApp, mjmlApp)
+		healthcheckApp := healthcheck.NewApp(mailjetApp)
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
 
 		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))

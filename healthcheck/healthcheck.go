@@ -4,20 +4,17 @@ import (
 	"net/http"
 
 	"github.com/ViBiOh/mailer/mailjet"
-	"github.com/ViBiOh/mailer/mjml"
 )
 
 // App stores informations
 type App struct {
 	mailjetApp *mailjet.App
-	mjmlApp    *mjml.App
 }
 
 // NewApp creates new App from Flags' config
-func NewApp(mailjetAppDep *mailjet.App, mjmlAppDep *mjml.App) *App {
+func NewApp(mailjetAppDep *mailjet.App) *App {
 	return &App{
 		mailjetApp: mailjetAppDep,
-		mjmlApp:    mjmlAppDep,
 	}
 }
 
