@@ -51,7 +51,7 @@ func (a *App) Handler() http.Handler {
 
 		var content map[string]interface{}
 		if err := json.Unmarshal(rawContent, &content); err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`Error while unmarshalling default fixture: %v`, rawContent, err))
+			httperror.InternalServerError(w, fmt.Errorf(`Error while unmarshalling default fixture: %v`, err))
 			return
 		}
 
