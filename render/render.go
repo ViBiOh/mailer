@@ -43,6 +43,7 @@ func (a *App) Handler() http.Handler {
 		var content map[string]interface{}
 		if err := json.Unmarshal(payload, &content); err != nil {
 			httperror.BadRequest(w, fmt.Errorf(`Error while unmarshalling payload %s: %v`, payload, err))
+			return
 		}
 
 		if err := templates.WriteHTMLTemplate(tpl, w, content, http.StatusOK); err != nil {
