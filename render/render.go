@@ -15,8 +15,6 @@ import (
 	"github.com/ViBiOh/mailer/mjml"
 )
 
-var mjmlPrefix = []byte(`<mjml>`)
-
 // App stores informations
 type App struct {
 	mjmlApp *mjml.App
@@ -29,6 +27,26 @@ func NewApp(mjmlAppDep *mjml.App) *App {
 		mjmlApp: mjmlAppDep,
 		tpl:     template.Must(template.New(`mailer`).ParseGlob(`./templates/*.gohtml`)),
 	}
+}
+
+func (a *App) handleMjml(content *bytes.Buffer) error {
+	payload := content.Bytes()
+
+	if !mjml.IsMJML(payload) {
+		return nil
+	}
+
+	output, err := a.mjmlApp.Render(string(payload))
+	if err != nil {
+		return fmt.Errorf(`Error while converting MJML template: %v`, err)
+	}
+
+	content.Reset()
+	if _, err := content.WriteString(output); err != nil {
+		return fmt.Errorf(`Error while replacing MJML content: %v`, err)
+	}
+
+	return nil
 }
 
 // Handler for Render request. Should be use with net/http
@@ -62,19 +80,9 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		renderedTemplate := output.Content().Bytes()
-		if bytes.HasPrefix(renderedTemplate, mjmlPrefix) {
-			mjmlTemplate, err := a.mjmlApp.Render(string(renderedTemplate))
-			if err != nil {
-				httperror.BadRequest(w, fmt.Errorf(`Error while converting MJML template: %v`, err))
-				return
-			}
-
-			output.Content().Reset()
-			if _, err := output.Content().WriteString(mjmlTemplate); err != nil {
-				httperror.InternalServerError(w, fmt.Errorf(`Error while replacing output content: %v`, err))
-				return
-			}
+		if err := a.handleMjml(output.Content()); err != nil {
+			httperror.InternalServerError(w, fmt.Errorf(`Error while handling MJML: %v`, err))
+			return
 		}
 
 		if _, err := output.WriteResponse(w); err != nil {

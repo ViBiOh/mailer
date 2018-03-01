@@ -1,6 +1,7 @@
 package mjml
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,6 +13,10 @@ import (
 
 const (
 	renderURL = `https://api.mjml.io/v1/render`
+)
+
+var (
+	prefix = []byte(`<mjml>`)
 )
 
 type mjmlRequest struct {
@@ -45,6 +50,11 @@ func Flags(prefix string) map[string]*string {
 		`applicationID`: flag.String(tools.ToCamel(fmt.Sprintf(`%sApplicationID`, prefix)), ``, `[mjml] Application ID`),
 		`secretKey`:     flag.String(tools.ToCamel(fmt.Sprintf(`%sSecretKey`, prefix)), ``, `[mjml] Secret Key`),
 	}
+}
+
+// IsMJML determines if provided content is a MJML template or not
+func IsMJML(content []byte) bool {
+	return bytes.HasPrefix(content, prefix)
 }
 
 // Render MJML template
