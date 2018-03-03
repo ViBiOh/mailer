@@ -20,7 +20,7 @@ import (
 
 const (
 	healthcheckPath = `/health`
-	mailPath        = `/mail`
+	mailPath        = `/render`
 )
 
 func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
