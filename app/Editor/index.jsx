@@ -1,16 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
-const Editor = ({}) => {
-  return (
-    <div>Coucou</div>
-  );
-}
+const Editor = () => <div>Hello World</div>;
 
 Editor.displayName = 'Editor';
-
-Editor.propTypes = {
-};
 
 /**
  * Editor Functional Component.

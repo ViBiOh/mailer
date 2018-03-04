@@ -8,6 +8,8 @@ node_modules/
 package-lock.json
 dist/
 .cache/
+.nyc_output/
+coverage/
 
 # Docker
 cacert.pem
