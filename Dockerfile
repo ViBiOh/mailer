@@ -8,3 +8,4 @@ EXPOSE 1080
 COPY cacert.pem /etc/ssl/certs/ca-certificates.crt
 COPY templates/ /templates
 COPY bin/mailer /mailer
+COPY dist/ /www/

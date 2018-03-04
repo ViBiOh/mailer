@@ -3,5 +3,11 @@ bin/
 vendor/
 coverage.*
 
+# JS
+node_modules/
+package-lock.json
+dist/
+.cache/
+
 # Docker
 cacert.pem

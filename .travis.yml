@@ -3,6 +3,10 @@ sudo: required
 services:
 - docker
 go: 1.9
+install:
+- nvm install 8
+- npm i -g npm
+- npm i
 after_success: |
   bash <(curl -s https://codecov.io/bash)
 

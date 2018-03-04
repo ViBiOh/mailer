@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/ViBiOh/mailer/mailjet"
 	"github.com/ViBiOh/mailer/mjml"
 	"github.com/ViBiOh/mailer/render"
+	"github.com/ViBiOh/viws/viws"
 )
 
 const (
@@ -41,6 +43,7 @@ func main() {
 	mjmlConfig := mjml.Flags(`mjml`)
 	authConfig := auth.Flags(`auth`)
 	basicConfig := basic.Flags(`basic`)
+	viwsConfig := viws.Flags(``)
 
 	httputils.StartMainServer(func() http.Handler {
 		mailjetApp := mailjet.NewApp(mailjetConfig)
@@ -48,6 +51,12 @@ func main() {
 
 		renderApp := render.NewApp(mjmlApp)
 		renderHandler := http.StripPrefix(mailPath, renderApp.Handler())
+
+		viwsApp, err := viws.NewApp(viwsConfig)
+		if err != nil {
+			log.Fatalf(`Error while initializing viws: %v`, err)
+		}
+		viwsHandler := viwsApp.FileHandler()
 
 		healthcheckApp := healthcheck.NewApp(mailjetApp)
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
@@ -57,7 +66,7 @@ func main() {
 			if strings.HasPrefix(r.URL.Path, mailPath) {
 				renderHandler.ServeHTTP(w, r)
 			} else {
-				httperror.NotFound(w)
+				viwsHandler.ServeHTTP(w, r)
 			}
 		}, handleAnonymousRequest)
 
