@@ -17,6 +17,10 @@ import (
 	"github.com/ViBiOh/mailer/mjml"
 )
 
+const (
+	templateSuffix = `.gohtml`
+)
+
 // App stores informations
 type App struct {
 	mjmlApp *mjml.App
@@ -27,7 +31,7 @@ type App struct {
 func NewApp(mjmlAppDep *mjml.App) *App {
 	return &App{
 		mjmlApp: mjmlAppDep,
-		tpl:     template.Must(template.New(`mailer`).ParseGlob(`./templates/*.gohtml`)),
+		tpl:     template.Must(template.New(`mailer`).ParseGlob(fmt.Sprintf(`./templates/*%s`, templateSuffix))),
 	}
 }
 
@@ -82,7 +86,7 @@ func (a *App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 	templateList := make([]string, len(a.tpl.Templates()))
 
 	for index, tpl := range a.tpl.Templates() {
-		templateList[index] = tpl.Name()
+		templateList[index] = strings.TrimSuffix(tpl.Name(), templateSuffix)
 	}
 
 	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, templateList, httpjson.IsPretty(r.URL.RawQuery)); err != nil {
