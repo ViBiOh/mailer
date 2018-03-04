@@ -50,4 +50,5 @@ start-deps:
 start-mailer:
 	go run mailer.go \
 		-authUsers "admin:admin" \
-		-basicUsers "1:admin:`bcrypt admin`"
+		-basicUsers "1:admin:`bcrypt admin`" \
+		-directory "./dist"

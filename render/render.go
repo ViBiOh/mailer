@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/ViBiOh/httputils/httperror"
+	httpjson "github.com/ViBiOh/httputils/json"
 	"github.com/ViBiOh/httputils/request"
 	"github.com/ViBiOh/httputils/templates"
 	"github.com/ViBiOh/httputils/writer"
+	"github.com/ViBiOh/mailer/fixtures"
 	"github.com/ViBiOh/mailer/mjml"
 )
 
@@ -28,20 +29,6 @@ func NewApp(mjmlAppDep *mjml.App) *App {
 		mjmlApp: mjmlAppDep,
 		tpl:     template.Must(template.New(`mailer`).ParseGlob(`./templates/*.gohtml`)),
 	}
-}
-
-func (a *App) getFixtureContent(templateName, fixtureName string) (map[string]interface{}, error) {
-	rawContent, err := ioutil.ReadFile(fmt.Sprintf(`./templates/%s/%s.json`, templateName, fixtureName))
-	if err != nil {
-		return nil, fmt.Errorf(`Error while reading %s fixture: %v`, fixtureName, err)
-	}
-
-	var content map[string]interface{}
-	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, fmt.Errorf(`Error while unmarshalling %s fixture: %v`, fixtureName, err)
-	}
-
-	return content, nil
 }
 
 func (a *App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
@@ -65,7 +52,7 @@ func (a *App) getContent(templateName string, r *http.Request) (map[string]inter
 			fixtureName = `default`
 		}
 
-		return a.getFixtureContent(templateName, fixtureName)
+		return fixtures.Get(templateName, fixtureName)
 	}
 
 	return a.getBodyContent(r)
@@ -91,9 +78,26 @@ func (a *App) handleMjml(content *bytes.Buffer) error {
 	return nil
 }
 
+func (a *App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
+	templateList := make([]string, len(a.tpl.Templates()))
+
+	for index, tpl := range a.tpl.Templates() {
+		templateList[index] = tpl.Name()
+	}
+
+	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, templateList, httpjson.IsPretty(r.URL.RawQuery)); err != nil {
+		httperror.InternalServerError(w, err)
+	}
+}
+
 // Handler for Render request. Should be use with net/http
 func (a *App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == `` || r.URL.Path == `/` {
+			a.listTemplatesHandler(w, r)
+			return
+		}
+
 		templateName := strings.Trim(r.URL.Path, `/`)
 
 		tpl := a.tpl.Lookup(fmt.Sprintf(`%s.gohtml`, templateName))
@@ -105,7 +109,11 @@ func (a *App) Handler() http.Handler {
 
 		content, err := a.getContent(templateName, r)
 		if err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`Error while getting content: %v`, err))
+			if err == fixtures.ErrNoTemplate {
+				httperror.NotFound(w)
+			} else {
+				httperror.InternalServerError(w, fmt.Errorf(`Error while getting content: %v`, err))
+			}
 			return
 		}
 

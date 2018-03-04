@@ -13,6 +13,7 @@ import (
 	"github.com/ViBiOh/httputils/cors"
 	"github.com/ViBiOh/httputils/httperror"
 	"github.com/ViBiOh/httputils/owasp"
+	"github.com/ViBiOh/mailer/fixtures"
 	"github.com/ViBiOh/mailer/healthcheck"
 	"github.com/ViBiOh/mailer/mailjet"
 	"github.com/ViBiOh/mailer/mjml"
@@ -22,7 +23,8 @@ import (
 
 const (
 	healthcheckPath = `/health`
-	mailPath        = `/render`
+	fixturesPath    = `/fixtures`
+	renderPath      = `/render`
 )
 
 func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
@@ -50,7 +52,9 @@ func main() {
 		mjmlApp := mjml.NewApp(mjmlConfig)
 
 		renderApp := render.NewApp(mjmlApp)
-		renderHandler := http.StripPrefix(mailPath, renderApp.Handler())
+		renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
+
+		fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
 
 		viwsApp, err := viws.NewApp(viwsConfig)
 		if err != nil {
@@ -63,8 +67,10 @@ func main() {
 
 		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
 		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *authProvider.User) {
-			if strings.HasPrefix(r.URL.Path, mailPath) {
+			if strings.HasPrefix(r.URL.Path, renderPath) {
 				renderHandler.ServeHTTP(w, r)
+			} else if strings.HasPrefix(r.URL.Path, fixturesPath) {
+				fixtureHandler.ServeHTTP(w, r)
 			} else {
 				viwsHandler.ServeHTTP(w, r)
 			}
