@@ -46,7 +46,7 @@
     "eslint-plugin-react": "latest",
     "identity-obj-proxy": "latest",
     "jsdom": "latest",
-    "less": "latest",
+    "less": "^3.0.1",
     "nyc": "latest",
     "parcel-bundler": "latest",
     "prettier": "latest",

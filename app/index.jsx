@@ -1,5 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Editor from './Editor';
+import MailEditor from './MailEditor';
 
-ReactDOM.render(<Editor />, document.getElementById('root'));
+ReactDOM.render(<MailEditor />, document.getElementById('root'));
