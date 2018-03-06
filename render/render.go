@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/httputils/httperror"
-	httpjson "github.com/ViBiOh/httputils/json"
+	"github.com/ViBiOh/httputils/httpjson"
 	"github.com/ViBiOh/httputils/request"
 	"github.com/ViBiOh/httputils/templates"
 	"github.com/ViBiOh/httputils/writer"
