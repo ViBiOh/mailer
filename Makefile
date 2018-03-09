@@ -39,8 +39,6 @@ docker-deps:
 
 docker-build:
 	docker build -t ${DOCKER_USER}/mailer .
-	docker build -t ${DOCKER_USER}/mailer -f Dockerifle_arm .
-	docker build -t ${DOCKER_USER}/mailer -f Dockerifle_arm64 .
 
 docker-push:
 	docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
