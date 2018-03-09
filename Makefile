@@ -30,6 +30,8 @@ bench:
 
 build:
 	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/mailer mailer.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w" -installsuffix nocgo -o bin/mailer-arm mailer.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -installsuffix nocgo -o bin/mailer-arm64 mailer.go
 
 ui:
 	npm run build
@@ -39,10 +41,14 @@ docker-deps:
 
 docker-build:
 	docker build -t ${DOCKER_USER}/mailer .
+	docker build -t ${DOCKER_USER}/mailer -f Dockerifle_arm .
+	docker build -t ${DOCKER_USER}/mailer -f Dockerifle_arm64 .
 
 docker-push:
 	docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
 	docker push ${DOCKER_USER}/mailer
+	docker push ${DOCKER_USER}/mailer:arm
+	docker push ${DOCKER_USER}/mailer:arm64
 
 start-deps:
 	go get -u github.com/ViBiOh/auth/bcrypt
