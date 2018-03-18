@@ -47,7 +47,7 @@ func main() {
 	basicConfig := basic.Flags(`basic`)
 	viwsConfig := viws.Flags(``)
 
-	httputils.StartMainServer(func() http.Handler {
+	httputils.NewApp(httputils.Flags(``), func() http.Handler {
 		mailjetApp := mailjet.NewApp(mailjetConfig)
 		mjmlApp := mjml.NewApp(mjmlConfig)
 
@@ -85,5 +85,5 @@ func main() {
 		})
 
 		return owasp.Handler(owaspConfig, cors.Handler(corsConfig, handler))
-	}, nil)
+	}, nil).ListenAndServe()
 }
