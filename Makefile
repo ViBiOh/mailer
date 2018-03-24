@@ -1,4 +1,4 @@
-default: go ui docker
+default: go docker
 
 go: deps dev
 
@@ -38,11 +38,11 @@ docker-deps:
 	curl -s -o cacert.pem https://curl.haxx.se/ca/cacert.pem
 
 docker-build:
-	docker build -t ${DOCKER_USER}/mailer .
+	docker build -t $(DOCKER_USER)/mailer .
 
 docker-push:
-	docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-	docker push ${DOCKER_USER}/mailer
+	echo $(DOCKER_PASS) | docker login -u $(DOCKER_USER) --password-stdin
+	docker push $(DOCKER_USER)/mailer
 
 start-deps:
 	go get -u github.com/ViBiOh/auth/bcrypt
