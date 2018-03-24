@@ -1,4 +1,4 @@
-default: go docker
+default: go ui docker
 
 go: deps dev
 
