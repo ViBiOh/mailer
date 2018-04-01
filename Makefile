@@ -43,7 +43,7 @@ docker-deps:
 docker-login:
 	echo $(DOCKER_PASS) | docker login -u $(DOCKER_USER) --password-stdin
 
-docker-pull: docker-pull-api docker-pull-notifier docker-pull-ui
+docker-pull: docker-pull-api docker-pull-ui
 
 docker-promote: docker-pull docker-promote-api docker-promote-ui
 
