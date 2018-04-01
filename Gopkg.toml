@@ -33,10 +33,6 @@
   branch = "master"
   name = "github.com/ViBiOh/httputils"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/ViBiOh/viws"
-
 [prune]
   go-tests = true
   unused-packages = true

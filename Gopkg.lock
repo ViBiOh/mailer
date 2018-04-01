@@ -36,15 +36,6 @@
   revision = "fe606d9cdfe10039ae176d5ef70cc5c7015bb0a3"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/ViBiOh/viws"
-  packages = [
-    "pkg/utils",
-    "pkg/viws"
-  ]
-  revision = "109bf306828944016662d17940042e03427b2c0f"
-
-[[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
@@ -121,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dcf947ee18fb123df2d42db101cea16d731af993313f5b99cc51bfefdf476352"
+  inputs-digest = "13a7c81f8067a11496d8698c9d20a3ade62ba55613ee5dbb26eff2945d724e2c"
   solver-name = "gps-cdcl"
   solver-version = 1

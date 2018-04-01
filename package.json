@@ -63,10 +63,10 @@
   },
   "ava": {
     "files": [
-      "ui/**/*.test.js"
+      "./ui/**/*.test.js"
     ],
     "require": [
-      "ui/Util/Test.js"
+      "./ui/Util/Test.js"
     ],
     "concurrency": 4,
     "babel": "inherit"

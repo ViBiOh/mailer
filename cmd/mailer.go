@@ -17,7 +17,6 @@ import (
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/render"
-	"github.com/ViBiOh/viws/pkg/viws"
 )
 
 const (
@@ -44,7 +43,6 @@ func main() {
 	mjmlConfig := mjml.Flags(`mjml`)
 	authConfig := auth.Flags(`auth`)
 	basicConfig := basic.Flags(`basic`)
-	viwsConfig := viws.Flags(``)
 
 	httputils.NewApp(httputils.Flags(``), func() http.Handler {
 		mailjetApp := mailjet.NewApp(mailjetConfig)
