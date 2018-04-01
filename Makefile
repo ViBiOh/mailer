@@ -3,9 +3,9 @@ DOCKER_VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
 
 default: go
 
-go: deps dev docker-build-api docker-push-api
+go: deps api docker-build-api docker-push-api
 
-dev: format lint tst bench build
+api: format lint tst bench build
 
 ui: node docker-build-ui docker-push-ui
 
