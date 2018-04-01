@@ -45,7 +45,7 @@ docker-push:
 	docker push $(DOCKER_USER)/mailer
 
 start-deps:
-	go get -u github.com/ViBiOh/auth/bcrypt
+	go get -u github.com/ViBiOh/auth/cmd/bcrypt
 
 start-mailer:
 	go run mailer.go \
