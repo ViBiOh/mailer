@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ViBiOh/httputils/request"
-	"github.com/ViBiOh/httputils/tools"
+	"github.com/ViBiOh/httputils/pkg/request"
+	"github.com/ViBiOh/httputils/pkg/tools"
 )
 
 const (

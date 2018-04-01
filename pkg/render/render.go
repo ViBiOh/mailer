@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/httperror"
-	"github.com/ViBiOh/httputils/httpjson"
-	"github.com/ViBiOh/httputils/request"
-	"github.com/ViBiOh/httputils/templates"
-	"github.com/ViBiOh/httputils/writer"
-	"github.com/ViBiOh/mailer/fixtures"
-	"github.com/ViBiOh/mailer/mjml"
+	"github.com/ViBiOh/httputils/pkg/httperror"
+	"github.com/ViBiOh/httputils/pkg/httpjson"
+	"github.com/ViBiOh/httputils/pkg/request"
+	"github.com/ViBiOh/httputils/pkg/templates"
+	"github.com/ViBiOh/httputils/pkg/writer"
+	"github.com/ViBiOh/mailer/pkg/fixtures"
+	"github.com/ViBiOh/mailer/pkg/mjml"
 )
 
 const (

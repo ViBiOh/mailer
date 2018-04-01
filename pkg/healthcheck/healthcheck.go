@@ -3,7 +3,7 @@ package healthcheck
 import (
 	"net/http"
 
-	"github.com/ViBiOh/mailer/mailjet"
+	"github.com/ViBiOh/mailer/pkg/mailjet"
 )
 
 // App stores informations

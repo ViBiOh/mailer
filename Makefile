@@ -14,8 +14,8 @@ deps:
 	dep ensure
 
 format:
-	goimports -w **/*.go *.go
-	gofmt -s -w **/*.go *.go
+	goimports -w */*.go */*/*.go
+	gofmt -s -w */*.go */*/*.go
 
 lint:
 	golint `go list ./... | grep -v vendor`
@@ -29,7 +29,7 @@ bench:
 	go test ./... -bench . -benchmem -run Benchmark.*
 
 build:
-	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/mailer mailer.go
+	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/mailer cmd/mailer.go
 
 ui:
 	npm run build
@@ -48,7 +48,7 @@ start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt
 
 start-mailer:
-	go run mailer.go \
+	go run cmd/mailer.go \
 		-authUsers "admin:admin" \
 		-basicUsers "1:admin:`bcrypt admin`" \
 		-directory "./dist"

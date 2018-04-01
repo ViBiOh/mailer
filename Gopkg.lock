@@ -5,44 +5,44 @@
   branch = "master"
   name = "github.com/ViBiOh/auth"
   packages = [
-    "auth",
-    "cookie",
-    "provider",
-    "provider/basic",
-    "provider/github",
-    "provider/twitter",
-    "service"
+    "pkg/auth",
+    "pkg/cookie",
+    "pkg/provider",
+    "pkg/provider/basic",
+    "pkg/provider/github",
+    "pkg/provider/twitter",
+    "pkg/service"
   ]
-  revision = "9f023884fbc6cebb58f1fbb3f556b7b1417e2580"
+  revision = "2e321a28bb6732c741faf7af2501c9228edb6009"
 
 [[projects]]
   branch = "master"
   name = "github.com/ViBiOh/httputils"
   packages = [
-    ".",
-    "alcotest",
-    "cert",
-    "cors",
-    "httperror",
-    "httpjson",
-    "owasp",
-    "request",
-    "server",
-    "templates",
-    "tools",
-    "uuid",
-    "writer"
+    "pkg",
+    "pkg/alcotest",
+    "pkg/cert",
+    "pkg/cors",
+    "pkg/httperror",
+    "pkg/httpjson",
+    "pkg/owasp",
+    "pkg/request",
+    "pkg/server",
+    "pkg/templates",
+    "pkg/tools",
+    "pkg/uuid",
+    "pkg/writer"
   ]
-  revision = "9fdf00023e957b3f8b87805f09a4a3f589fa06b7"
+  revision = "fe606d9cdfe10039ae176d5ef70cc5c7015bb0a3"
 
 [[projects]]
   branch = "master"
   name = "github.com/ViBiOh/viws"
   packages = [
-    "utils",
-    "viws"
+    "pkg/utils",
+    "pkg/viws"
   ]
-  revision = "76b8c0179d63e8d7f6bb1515d418d6dfa3be4ff6"
+  revision = "109bf306828944016662d17940042e03427b2c0f"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -83,7 +83,7 @@
     "bcrypt",
     "blowfish"
   ]
-  revision = "374053ea96cb300f8671b8d3b07edeeb06e203b4"
+  revision = "12892e8c234f4fe6f6803f052061de9057903bb2"
 
 [[projects]]
   branch = "master"
@@ -92,7 +92,7 @@
     "context",
     "context/ctxhttp"
   ]
-  revision = "24dd3780ca4f75fed9f321890729414a4b5d3f13"
+  revision = "b68f30494add4df6bd8ef5e82803f308e7f7c59c"
 
 [[projects]]
   branch = "master"
@@ -121,6 +121,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "204bc76e9e678fd38310318c28662ae54d4eba13bc9f699ff6d0a18ea7168ffa"
+  inputs-digest = "dcf947ee18fb123df2d42db101cea16d731af993313f5b99cc51bfefdf476352"
   solver-name = "gps-cdcl"
   solver-version = 1

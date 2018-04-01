@@ -6,7 +6,7 @@ coverage.*
 # JS
 node_modules/
 package-lock.json
-dist/
+ui/dist/
 .cache/
 .nyc_output/
 coverage/

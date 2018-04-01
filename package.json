@@ -4,14 +4,14 @@
   "description": "[![Build Status](https://travis-ci.org/ViBiOh/mailer.svg?branch=master)](https://travis-ci.org/ViBiOh/mailer) [![codecov](https://codecov.io/gh/ViBiOh/mailer/branch/master/graph/badge.svg)](https://codecov.io/gh/ViBiOh/mailer) [![Go Report Card](https://goreportcard.com/badge/github.com/ViBiOh/mailer)](https://goreportcard.com/report/github.com/ViBiOh/mailer)",
   "main": "index.js",
   "scripts": {
-    "format": "./node_modules/.bin/prettier --write \"./app/**/*.{js,jsx,less}\"",
-    "stylelint": "./node_modules/.bin/stylelint --fix \"app/**/*.{css,less}\"",
-    "eslint": "./node_modules/.bin/eslint --fix --ext .jsx \"./app/**/*.{js,jsx}\"",
+    "format": "./node_modules/.bin/prettier --write \"ui/**/*.{js,jsx,less}\"",
+    "stylelint": "./node_modules/.bin/stylelint --fix \"ui/**/*.{css,less}\"",
+    "eslint": "./node_modules/.bin/eslint --fix --ext .jsx \"ui/**/*.{js,jsx}\"",
     "lint": "npm run eslint && npm run stylelint",
     "test": "./node_modules/.bin/nyc --reporter text --reporter lcov --extension .jsx --require babel-core/register ./node_modules/.bin/ava",
-    "start": "./node_modules/.bin/parcel app/index.html --open",
+    "start": "./node_modules/.bin/parcel ui/index.html --open",
     "prebuild": "npm run format && npm run lint && npm run test",
-    "build": "./node_modules/.bin/parcel build app/index.html --public-url /"
+    "build": "./node_modules/.bin/parcel build ui/index.html -d ui/dist --public-url /"
   },
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
     "eslint-plugin-react": "latest",
     "identity-obj-proxy": "latest",
     "jsdom": "latest",
-    "less": "^3.0.1",
+    "less": "latest",
     "nyc": "latest",
     "parcel-bundler": "latest",
     "prettier": "latest",
@@ -63,10 +63,10 @@
   },
   "ava": {
     "files": [
-      "app/**/*.test.js"
+      "ui/**/*.test.js"
     ],
     "require": [
-      "./app/Util/Test.js"
+      "ui/Util/Test.js"
     ],
     "concurrency": 4,
     "babel": "inherit"

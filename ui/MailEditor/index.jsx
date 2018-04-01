@@ -33,9 +33,7 @@ export default class MailEditor extends Component {
     return (
       <div id="live-editor">
         <Editor editorState={this.state.editorState} onChange={this.onChange} />
-        <div>
-          Output goes here
-        </div>
+        <div>Output goes here</div>
       </div>
     );
   }

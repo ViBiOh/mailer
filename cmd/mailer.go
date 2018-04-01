@@ -5,20 +5,20 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/auth/auth"
-	authProvider "github.com/ViBiOh/auth/provider"
-	"github.com/ViBiOh/auth/provider/basic"
-	authService "github.com/ViBiOh/auth/service"
-	"github.com/ViBiOh/httputils"
-	"github.com/ViBiOh/httputils/cors"
-	"github.com/ViBiOh/httputils/httperror"
-	"github.com/ViBiOh/httputils/owasp"
-	"github.com/ViBiOh/mailer/fixtures"
-	"github.com/ViBiOh/mailer/healthcheck"
-	"github.com/ViBiOh/mailer/mailjet"
-	"github.com/ViBiOh/mailer/mjml"
-	"github.com/ViBiOh/mailer/render"
-	"github.com/ViBiOh/viws/viws"
+	"github.com/ViBiOh/auth/pkg/auth"
+	authProvider "github.com/ViBiOh/auth/pkg/provider"
+	"github.com/ViBiOh/auth/pkg/provider/basic"
+	authService "github.com/ViBiOh/auth/pkg/service"
+	"github.com/ViBiOh/httputils/pkg"
+	"github.com/ViBiOh/httputils/pkg/cors"
+	"github.com/ViBiOh/httputils/pkg/httperror"
+	"github.com/ViBiOh/httputils/pkg/owasp"
+	"github.com/ViBiOh/mailer/pkg/fixtures"
+	"github.com/ViBiOh/mailer/pkg/healthcheck"
+	"github.com/ViBiOh/mailer/pkg/mailjet"
+	"github.com/ViBiOh/mailer/pkg/mjml"
+	"github.com/ViBiOh/mailer/pkg/render"
+	"github.com/ViBiOh/viws/pkg/viws"
 )
 
 const (
@@ -60,7 +60,7 @@ func main() {
 		if err != nil {
 			log.Fatalf(`Error while initializing viws: %v`, err)
 		}
-		viwsHandler := viwsApp.FileHandler()
+		viwsHandler := viwsApp.Handler()
 
 		healthcheckApp := healthcheck.NewApp(mailjetApp)
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
