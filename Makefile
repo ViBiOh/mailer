@@ -1,10 +1,13 @@
-default: go ui docker
+SHELL := /bin/bash
+DOCKER_VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
 
-go: deps dev
+default: go
+
+go: deps dev docker-build-api docker-push-api
 
 dev: format lint tst bench build
 
-docker: docker-deps docker-build
+ui: node docker-build-ui docker-push-ui
 
 deps:
 	go get -u github.com/golang/dep/cmd/dep
@@ -31,18 +34,44 @@ bench:
 build:
 	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/mailer cmd/mailer.go
 
-ui:
+node:
 	npm run build
 
 docker-deps:
 	curl -s -o cacert.pem https://curl.haxx.se/ca/cacert.pem
 
-docker-build:
-	docker build -t $(DOCKER_USER)/mailer .
-
-docker-push:
+docker-login:
 	echo $(DOCKER_PASS) | docker login -u $(DOCKER_USER) --password-stdin
-	docker push $(DOCKER_USER)/mailer
+
+docker-pull: docker-pull-api docker-pull-notifier docker-pull-ui
+
+docker-promote: docker-pull docker-promote-api docker-promote-ui
+
+docker-push: docker-push-api docker-push-ui
+
+docker-build-api: docker-deps
+	docker build -t $(DOCKER_USER)/mailer-api:$(DOCKER_VERSION) .
+
+docker-push-api: docker-login
+	docker push $(DOCKER_USER)/mailer-api:$(DOCKER_VERSION)
+
+docker-pull-api:
+	docker pull $(DOCKER_USER)/mailer-api:$(DOCKER_VERSION)
+
+docker-promote-api:
+	docker tag $(DOCKER_USER)/mailer-api:$(DOCKER_VERSION) $(DOCKER_USER)/mailer-api:latest
+
+docker-build-ui: docker-deps
+	docker build -t $(DOCKER_USER)/mailer-ui:$(DOCKER_VERSION) -f ui/Dockerfile .
+
+docker-push-ui: docker-login
+	docker push $(DOCKER_USER)/mailer-ui:$(DOCKER_VERSION)
+
+docker-pull-api:
+	docker pull $(DOCKER_USER)/mailer-ui:$(DOCKER_VERSION)
+
+docker-promote-ui:
+	docker tag $(DOCKER_USER)/mailer-ui:$(DOCKER_VERSION) $(DOCKER_USER)/mailer-ui:latest
 
 start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt

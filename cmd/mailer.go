@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -56,12 +55,6 @@ func main() {
 
 		fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
 
-		viwsApp, err := viws.NewApp(viwsConfig)
-		if err != nil {
-			log.Fatalf(`Error while initializing viws: %v`, err)
-		}
-		viwsHandler := viwsApp.Handler()
-
 		healthcheckApp := healthcheck.NewApp(mailjetApp)
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
 
@@ -72,7 +65,7 @@ func main() {
 			} else if strings.HasPrefix(r.URL.Path, fixturesPath) {
 				fixtureHandler.ServeHTTP(w, r)
 			} else {
-				viwsHandler.ServeHTTP(w, r)
+				httperror.NotFound(w)
 			}
 		}, handleAnonymousRequest)
 

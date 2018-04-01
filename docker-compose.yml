@@ -1,11 +1,9 @@
 version: '2'
 
 services:
-  mailer:
-    image: vibioh/mailer
+  api:
+    image: vibioh/mailer-api
     command:
-    - -csp
-    - default-src 'self'; base-uri 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com
     - -authUsers
     - vibioh:admin
     - -basicUsers
@@ -18,6 +16,31 @@ services:
     - ${MJML_APPLICATION_ID}
     - -mjmlSecretKey
     - ${MJML_SECRET_KEY}
+    labels:
+      traefik.frontend.passHostHeader: 'true'
+      traefik.frontend.rule: 'Host: mailer-api.vibioh.fr'
+      traefik.protocol: 'https'
+      traefik.port: '1080'
+      traefik.frontend.rateLimit.extractorFunc: 'client.ip'
+      traefik.frontend.rateLimit.rateSet.first.period: '60s'
+      traefik.frontend.rateLimit.rateSet.first.average: '100'
+      traefik.frontend.rateLimit.rateSet.first.burst: '200'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+    restart: on-failure:5
+    read_only: true
+    cpu_shares: 128
+    mem_limit: 67108864
+    security_opt:
+    - no-new-privileges
+
+  ui:
+    image: vibioh/mailer-ui
+    command:
+    - -csp
+    - default-src 'self'; base-uri 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com
     labels:
       traefik.frontend.passHostHeader: 'true'
       traefik.frontend.rule: 'Host: mailer.vibioh.fr'

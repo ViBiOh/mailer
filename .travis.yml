@@ -1,32 +1,54 @@
-language: go
-sudo: required
-services:
-- docker
-go : '1.10'
-install:
-- nvm install 8
-- npm i -g npm
-- npm i
-after_success: |
-  bash <(curl -s https://codecov.io/bash)
+jobs:
+  include:
+  - stage: Build
 
-  if [ "${TRAVIS_BRANCH}" == "master" ]; then
-    make docker-push
-    curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/mailer
+    language: go
+    sudo: required
+    services:
+    - docker
+    go: '1.10'
+    after_success: |
+      if [ "${TRAVIS_BRANCH}" == "master" ]; then
+        curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/mailer
+      fi
 
-    sed \
-      -e "s|\${BASIC_USERS}|${BASIC_USERS}|g" \
-      -e "s|\${MAILJET_APIKEY_PUBLIC}|${MAILJET_APIKEY_PUBLIC}|g" \
-      -e "s|\${MAILJET_APIKEY_PRIVATE}|${MAILJET_APIKEY_PRIVATE}|g" \
-      -e "s|\${MJML_APPLICATION_ID}|${MJML_APPLICATION_ID}|g" \
-      -e "s|\${MJML_SECRET_KEY}|${MJML_SECRET_KEY}|g" \
-      docker-compose.yml > docker-compose-env.yml
-  fi
+  - stage: Build
+
+    language: node_js
+    sudo: required
+    services:
+    - docker
+    node_js: 8
+    script: |
+      make ui
+    after_success: |
+      if [ "${TRAVIS_BRANCH}" == "master" ]; then
+        bash <(curl -s https://codecov.io/bash)
+        curl -X POST --data-urlencode "gitUrl=git@github.com:ViBiOh/mailer.git" https://doc.esdoc.org/api/create
+      fi
+
+  - stage: Deploy
+
+    script: |
+      make docker-promote
+      DOCKER_VERSION=latest make docker-push
+
+      sed \
+        -e "s|\${BASIC_USERS}|${BASIC_USERS}|g" \
+        -e "s|\${MAILJET_APIKEY_PUBLIC}|${MAILJET_APIKEY_PUBLIC}|g" \
+        -e "s|\${MAILJET_APIKEY_PRIVATE}|${MAILJET_APIKEY_PRIVATE}|g" \
+        -e "s|\${MJML_APPLICATION_ID}|${MJML_APPLICATION_ID}|g" \
+        -e "s|\${MJML_SECRET_KEY}|${MJML_SECRET_KEY}|g" \
+        docker-compose.yml > docker-compose-env.yml
+    deploy:
+    - provider: script
+      skip_cleanup: true
+      script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/containers/mailer/ --data-binary @docker-compose-env.yml"
+
+stages:
+  - Build
+  - name: Deploy
+    if: branch = master
+
 notifications:
   email: false
-deploy:
-- provider: script
-  skip_cleanup: true
-  script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/containers/mailer/ --data-binary @docker-compose-env.yml"
-  on:
-    branch: master

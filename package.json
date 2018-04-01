@@ -11,7 +11,7 @@
     "test": "./node_modules/.bin/nyc --reporter text --reporter lcov --extension .jsx --require babel-core/register ./node_modules/.bin/ava",
     "start": "./node_modules/.bin/parcel ui/index.html --open",
     "prebuild": "npm run format && npm run lint && npm run test",
-    "build": "./node_modules/.bin/parcel build ui/index.html -d ui/dist --public-url /"
+    "build": "./node_modules/.bin/parcel build ui/index.html --public-url /"
   },
   "repository": {
     "type": "git",
