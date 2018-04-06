@@ -15,8 +15,8 @@ body {
 }
 
 header {
-  background-color: @dark;
-  color: @clear;
+  background-color: var(--dark);
+  color: var(--clear);
   width: 100%;
   text-align: center;
 }
