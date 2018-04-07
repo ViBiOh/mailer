@@ -80,8 +80,10 @@ docker-promote-ui:
 start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt
 
-start-$(APP_NAME):
+start-api:
 	go run cmd/$(APP_NAME).go \
 		-authUsers "admin:admin" \
 		-basicUsers "1:admin:`bcrypt admin`" \
 		-directory "./dist"
+
+.PHONY: api ui go deps format lint tst bench build node docker-deps docker-login docker-pull docker-promote docker-push docker-api docker-build-api docker-push-api docker-pull-api docker-promote-api docker-ui docker-build-ui docker-push-ui docker-pull-ui docker-promote-ui start-deps start-api
