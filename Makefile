@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 DOCKER_VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
 APP_NAME := mailer
 
