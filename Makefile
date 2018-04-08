@@ -1,4 +1,4 @@
-DOCKER_VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
+VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
 APP_NAME := mailer
 
 default: api
@@ -8,6 +8,9 @@ api: deps go docker-api
 ui: node docker-ui
 
 go: format lint tst bench build
+
+version:
+	@echo -n $(VERSION)
 
 deps:
 	go get -u github.com/golang/dep/cmd/dep
@@ -52,30 +55,30 @@ docker-push: docker-push-api docker-push-ui
 docker-api: docker-build-api docker-push-api
 
 docker-build-api: docker-deps
-	docker build -t $(DOCKER_USER)/$(APP_NAME)-api:$(DOCKER_VERSION) .
+	docker build -t $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) .
 
 docker-push-api: docker-login
-	docker push $(DOCKER_USER)/$(APP_NAME)-api:$(DOCKER_VERSION)
+	docker push $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION)
 
 docker-pull-api:
-	docker pull $(DOCKER_USER)/$(APP_NAME)-api:$(DOCKER_VERSION)
+	docker pull $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION)
 
 docker-promote-api:
-	docker tag $(DOCKER_USER)/$(APP_NAME)-api:$(DOCKER_VERSION) $(DOCKER_USER)/$(APP_NAME)-api:latest
+	docker tag $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-api:latest
 
 docker-ui: docker-build-ui docker-push-ui
 
 docker-build-ui: docker-deps
-	docker build -t $(DOCKER_USER)/$(APP_NAME)-ui:$(DOCKER_VERSION) -f ui/Dockerfile .
+	docker build -t $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) -f ui/Dockerfile .
 
 docker-push-ui: docker-login
-	docker push $(DOCKER_USER)/$(APP_NAME)-ui:$(DOCKER_VERSION)
+	docker push $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION)
 
 docker-pull-ui:
-	docker pull $(DOCKER_USER)/$(APP_NAME)-ui:$(DOCKER_VERSION)
+	docker pull $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION)
 
 docker-promote-ui:
-	docker tag $(DOCKER_USER)/$(APP_NAME)-ui:$(DOCKER_VERSION) $(DOCKER_USER)/$(APP_NAME)-ui:latest
+	docker tag $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-ui:latest
 
 start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt
