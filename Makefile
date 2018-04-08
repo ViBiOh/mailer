@@ -5,8 +5,6 @@ default: api
 
 api: deps go docker-api
 
-ui: node docker-ui
-
 go: format lint tst bench build
 
 version:
@@ -37,9 +35,6 @@ bench:
 build:
 	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/$(APP_NAME) cmd/$(APP_NAME).go
 
-node:
-	npm run build
-
 docker-deps:
 	curl -s -o cacert.pem https://curl.haxx.se/ca/cacert.pem
 
@@ -54,6 +49,8 @@ docker-push: docker-push-api docker-push-ui
 
 docker-api: docker-build-api docker-push-api
 
+docker-ui: docker-build-ui docker-push-ui
+
 docker-build-api: docker-deps
 	docker build -t $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) .
 
@@ -65,8 +62,6 @@ docker-pull-api:
 
 docker-promote-api:
 	docker tag $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-api:latest
-
-docker-ui: docker-build-ui docker-push-ui
 
 docker-build-ui: docker-deps
 	docker build -t $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) -f ui/Dockerfile .
@@ -89,4 +84,4 @@ start-api:
 		-basicUsers "1:admin:`bcrypt admin`" \
 		-directory "./dist"
 
-.PHONY: api ui go deps format lint tst bench build node docker-deps docker-login docker-pull docker-promote docker-push docker-api docker-build-api docker-push-api docker-pull-api docker-promote-api docker-ui docker-build-ui docker-push-ui docker-pull-ui docker-promote-ui start-deps start-api
+.PHONY: api go deps format lint tst bench build docker-deps docker-login docker-pull docker-promote docker-push docker-api docker-build-api docker-push-api docker-pull-api docker-promote-api docker-ui docker-build-ui docker-push-ui docker-pull-ui docker-promote-ui start-deps start-api
