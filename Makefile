@@ -45,6 +45,8 @@ docker-pull: docker-pull-api docker-pull-ui
 
 docker-promote: docker-pull docker-promote-api docker-promote-ui
 
+docker-delete: docker-delete-api docker-delete-ui
+
 docker-push: docker-push-api docker-push-ui
 
 docker-api: docker-build-api docker-push-api
@@ -63,6 +65,9 @@ docker-pull-api:
 docker-promote-api:
 	docker tag $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-api:latest
 
+docker-delete-api:
+	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)-api/tags/$(VERSION)/"
+
 docker-build-ui: docker-deps
 	docker build -t $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) -f ui/Dockerfile .
 
@@ -74,6 +79,9 @@ docker-pull-ui:
 
 docker-promote-ui:
 	docker tag $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-ui:latest
+
+docker-delete-ui:
+	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)-ui/tags/$(VERSION)/"
 
 start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt
