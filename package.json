@@ -43,6 +43,7 @@
     "eslint-plugin-jsx-a11y": "latest",
     "eslint-plugin-react": "latest",
     "identity-obj-proxy": "latest",
+    "ignore-styles": "latest",
     "jsdom": "latest",
     "nyc": "latest",
     "parcel-bundler": "latest",
@@ -68,6 +69,7 @@
       "./ui/**/*.test.js"
     ],
     "require": [
+      "ignore-styles",
       "./ui/Util/Test.js"
     ],
     "concurrency": 4,

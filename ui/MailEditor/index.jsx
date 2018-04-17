@@ -55,7 +55,11 @@ export default class MailEditor extends Component {
   render() {
     return (
       <div className={style.editor}>
-        <Editor editorState={this.state.editorState} plugins={this.state.plugins} onChange={this.onChange} />
+        <Editor
+          editorState={this.state.editorState}
+          plugins={this.state.plugins}
+          onChange={this.onChange}
+        />
         <div>Output goes here</div>
       </div>
     );
