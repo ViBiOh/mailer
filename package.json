@@ -55,11 +55,7 @@
   "dependencies": {
     "classnames": "latest",
     "draft-js": "latest",
-    "draft-js-code-editor-plugin": "latest",
-    "draft-js-plugins-editor": "latest",
-    "draft-js-prism-plugin": "latest",
     "funtch": "latest",
-    "prismjs": "latest",
     "prop-types": "latest",
     "react": "latest",
     "react-dom": "latest"

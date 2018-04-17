@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-import { EditorState, ContentState } from 'draft-js';
-import Prism from 'prismjs';
-import Editor from 'draft-js-plugins-editor';
-import createCodeEditorPlugin from 'draft-js-code-editor-plugin';
-import createPrismPlugin from 'draft-js-prism-plugin';
+import { Editor, EditorState, ContentState } from 'draft-js';
 import style from './index.css';
 
 /**
@@ -19,27 +15,19 @@ export default class MailEditor extends Component {
 
     this.state = {
       editorState: EditorState.createWithContent(
-        ContentState.createFromText(`
-<mjml>
+        ContentState.createFromText(`<mjml>
   <mj-body>
     <mj-container>
       <mj-section>
         <mj-column>
-          <mj-text>Hello {{ .Name }} !</mj-text>
+          <mj-text>Hello World !</mj-text>
         </mj-column>
       </mj-section>
     </mj-container>
   </mj-body>
-</mjml>
-`),
+</mjml>`),
         this.decorator,
       ),
-      plugins: [
-        createCodeEditorPlugin(),
-        createPrismPlugin({
-          prism: Prism,
-        }),
-      ],
     };
 
     this.onChange = this.onChange.bind(this);
@@ -55,11 +43,7 @@ export default class MailEditor extends Component {
   render() {
     return (
       <div className={style.editor}>
-        <Editor
-          editorState={this.state.editorState}
-          plugins={this.state.plugins}
-          onChange={this.onChange}
-        />
+        <Editor editorState={this.state.editorState} onChange={this.onChange} />
         <div>Output goes here</div>
       </div>
     );
