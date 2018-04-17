@@ -17,14 +17,15 @@ body {
 header {
   background-color: var(--dark);
   color: var(--clear);
-  width: 100%;
   text-align: center;
+  height: var(--header-height);
+  width: 100%;
 }
 
 h1 {
-  padding: 1rem;
   font-size: 3rem;
   margin: 0;
+  padding: 1rem;
 }
 
 @media print {

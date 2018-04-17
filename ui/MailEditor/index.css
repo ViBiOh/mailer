@@ -1,8 +1,9 @@
-#live-editor {
-  height: 100%;
+.editor {
+  height: calc(100vh - var(--header-height));
+  display: flex;
 }
 
-#live-editor > * {
+.editor > * {
   display: inline-block;
-  width: 50%;
+  flex: 1 1;
 }
