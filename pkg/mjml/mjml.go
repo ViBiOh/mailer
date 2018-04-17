@@ -36,7 +36,7 @@ type App struct {
 // NewApp creates new App from Flags' config
 func NewApp(config map[string]*string) *App {
 	if *config[`applicationID`] == `` {
-		return &App{}
+		return nil
 	}
 
 	return &App{

@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	templatesDir   = `./templates/`
 	templateSuffix = `.gohtml`
 )
 
@@ -28,10 +29,10 @@ type App struct {
 }
 
 // NewApp creates new App from Flags' config
-func NewApp(mjmlAppDep *mjml.App) *App {
+func NewApp(mjmlApp *mjml.App) *App {
 	return &App{
-		mjmlApp: mjmlAppDep,
-		tpl:     template.Must(template.New(`mailer`).ParseGlob(fmt.Sprintf(`./templates/*%s`, templateSuffix))),
+		mjmlApp: mjmlApp,
+		tpl:     template.Must(template.New(`mailer`).ParseGlob(fmt.Sprintf(`%s*%s`, templatesDir, templateSuffix))),
 	}
 }
 
@@ -63,8 +64,11 @@ func (a *App) getContent(templateName string, r *http.Request) (map[string]inter
 }
 
 func (a *App) handleMjml(content *bytes.Buffer) error {
-	payload := content.Bytes()
+	if a.mjmlApp == nil {
+		return nil
+	}
 
+	payload := content.Bytes()
 	if !mjml.IsMJML(payload) {
 		return nil
 	}
@@ -83,13 +87,15 @@ func (a *App) handleMjml(content *bytes.Buffer) error {
 }
 
 func (a *App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
-	templateList := make([]string, len(a.tpl.Templates()))
+	templatesList := make([]string, 0)
 
-	for index, tpl := range a.tpl.Templates() {
-		templateList[index] = strings.TrimSuffix(tpl.Name(), templateSuffix)
+	for _, tpl := range a.tpl.Templates() {
+		if strings.HasSuffix(tpl.Name(), templateSuffix) {
+			templatesList = append(templatesList, strings.TrimSuffix(tpl.Name(), templateSuffix))
+		}
 	}
 
-	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, templateList, httpjson.IsPretty(r.URL.RawQuery)); err != nil {
+	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, templatesList, httpjson.IsPretty(r.URL.RawQuery)); err != nil {
 		httperror.InternalServerError(w, err)
 	}
 }
@@ -104,7 +110,7 @@ func (a *App) Handler() http.Handler {
 
 		templateName := strings.Trim(r.URL.Path, `/`)
 
-		tpl := a.tpl.Lookup(fmt.Sprintf(`%s.gohtml`, templateName))
+		tpl := a.tpl.Lookup(fmt.Sprintf(`%s%s`, templateName, templateSuffix))
 
 		if tpl == nil {
 			httperror.NotFound(w)
