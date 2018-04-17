@@ -40,7 +40,7 @@ services:
     image: vibioh/mailer-ui
     command:
     - -csp
-    - default-src 'self'; base-uri 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com
+    - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com
     labels:
       traefik.frontend.passHostHeader: 'true'
       traefik.frontend.rule: 'Host: mailer.vibioh.fr'
