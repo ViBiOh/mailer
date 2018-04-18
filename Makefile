@@ -65,6 +65,7 @@ start-api:
 	go run cmd/$(APP_NAME).go \
 		-tls=false \
 		-authUsers "admin:admin" \
-		-basicUsers "1:admin:`bcrypt admin`"
+		-basicUsers "1:admin:`bcrypt admin`" \
+		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com"
 
 .PHONY: api go docker version deps format lint tst bench build docker-deps docker-login docker-build docker-push docker-pull docker-promote docker-delete start-deps start-api

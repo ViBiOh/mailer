@@ -32,7 +32,11 @@ type App struct {
 func NewApp(mjmlApp *mjml.App) *App {
 	return &App{
 		mjmlApp: mjmlApp,
-		tpl:     template.Must(template.New(`mailer`).ParseGlob(fmt.Sprintf(`%s*%s`, templatesDir, templateSuffix))),
+		tpl: template.Must(template.New(`mailer`).Funcs(template.FuncMap{
+			`odd`: func(i int) bool {
+				return i%2 == 0
+			},
+		}).ParseGlob(fmt.Sprintf(`%s*%s`, templatesDir, templateSuffix))),
 	}
 }
 
