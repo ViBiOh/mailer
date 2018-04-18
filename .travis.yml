@@ -9,22 +9,10 @@ jobs:
     go: '1.10'
     after_success: |
       if [ "${TRAVIS_BRANCH}" == "master" ]; then
-        curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/mailer
-      fi
-
-  - stage: Build
-
-    language: node_js
-    sudo: required
-    services:
-    - docker
-    node_js: 8
-    script: |
-      npm run build && make docker-ui
-    after_success: |
-      if [ "${TRAVIS_BRANCH}" == "master" ]; then
         bash <(curl -s https://codecov.io/bash)
-        curl -X POST --data-urlencode "gitUrl=git@github.com:ViBiOh/mailer.git" https://doc.esdoc.org/api/create
+        curl -s -X POST https://goreportcard.com/checks?repo=github.com/ViBiOh/mailer
+      else
+        make docker-delete
       fi
 
   - stage: Deploy

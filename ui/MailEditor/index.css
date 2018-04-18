@@ -1,9 +1,0 @@
-.editor {
-  height: calc(100vh - var(--header-height));
-  display: flex;
-}
-
-.editor > * {
-  display: inline-block;
-  flex: 1 1;
-}

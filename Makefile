@@ -3,9 +3,11 @@ APP_NAME := mailer
 
 default: api
 
-api: deps go docker-api
+api: deps go docker
 
 go: format lint tst bench build
+
+docker: docker-build docker-push
 
 version:
 	@echo -n $(VERSION)
@@ -41,47 +43,20 @@ docker-deps:
 docker-login:
 	echo $(DOCKER_PASS) | docker login -u $(DOCKER_USER) --password-stdin
 
-docker-pull: docker-pull-api docker-pull-ui
+docker-build: docker-deps
+	docker build -t $(DOCKER_USER)/$(APP_NAME):$(VERSION) .
 
-docker-promote: docker-pull docker-promote-api docker-promote-ui
+docker-push: docker-login
+	docker push $(DOCKER_USER)/$(APP_NAME):$(VERSION)
 
-docker-delete: docker-delete-api docker-delete-ui
+docker-pull:
+	docker pull $(DOCKER_USER)/$(APP_NAME):$(VERSION)
 
-docker-push: docker-push-api docker-push-ui
+docker-promote: docker-pull
+	docker tag $(DOCKER_USER)/$(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):latest
 
-docker-api: docker-build-api docker-push-api
-
-docker-ui: docker-build-ui docker-push-ui
-
-docker-build-api: docker-deps
-	docker build -t $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) .
-
-docker-push-api: docker-login
-	docker push $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION)
-
-docker-pull-api:
-	docker pull $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION)
-
-docker-promote-api:
-	docker tag $(DOCKER_USER)/$(APP_NAME)-api:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-api:latest
-
-docker-delete-api:
-	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)-api/tags/$(VERSION)/"
-
-docker-build-ui: docker-deps
-	docker build -t $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) -f ui/Dockerfile .
-
-docker-push-ui: docker-login
-	docker push $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION)
-
-docker-pull-ui:
-	docker pull $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION)
-
-docker-promote-ui:
-	docker tag $(DOCKER_USER)/$(APP_NAME)-ui:$(VERSION) $(DOCKER_USER)/$(APP_NAME)-ui:latest
-
-docker-delete-ui:
-	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)-ui/tags/$(VERSION)/"
+docker-delete:
+	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)/tags/$(VERSION)/"
 
 start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt
@@ -92,4 +67,4 @@ start-api:
 		-authUsers "admin:admin" \
 		-basicUsers "1:admin:`bcrypt admin`"
 
-.PHONY: api go deps format lint tst bench build docker-deps docker-login docker-pull docker-promote docker-push docker-api docker-build-api docker-push-api docker-pull-api docker-promote-api docker-ui docker-build-ui docker-push-ui docker-pull-ui docker-promote-ui start-deps start-api
+.PHONY: api go docker version deps format lint tst bench build docker-deps docker-login docker-build docker-push docker-pull docker-promote docker-delete start-deps start-api
