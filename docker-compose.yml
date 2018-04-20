@@ -29,6 +29,8 @@ services:
       traefik.frontend.rateLimit.rateSet.first.period: '60s'
       traefik.frontend.rateLimit.rateSet.first.average: '100'
       traefik.frontend.rateLimit.rateSet.first.burst: '200'
+    external_links:
+    - datadog_agent_1:dd-agent
     logging:
       driver: json-file
       options:
