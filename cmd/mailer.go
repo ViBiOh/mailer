@@ -32,7 +32,7 @@ func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
 	} else if err == authProvider.ErrMalformedAuth || err == authProvider.ErrUnknownAuthType {
 		httperror.BadRequest(w, err)
 	} else {
-		w.Header().Add(`WWW-Authenticate`, `Basic`)
+		w.Header().Add(`WWW-Authenticate`, `Basic charset="UTF-8"`)
 		httperror.Unauthorized(w, err)
 	}
 }
