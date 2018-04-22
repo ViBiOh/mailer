@@ -23,7 +23,7 @@
     "pkg/provider/twitter",
     "pkg/service"
   ]
-  revision = "abaa04084f5b97fb47e501870ab3ebeabf4e1504"
+  revision = "887a9abbe77431d9b30b7fb9e48e183670601ae7"
 
 [[projects]]
   branch = "master"
@@ -44,7 +44,7 @@
     "pkg/uuid",
     "pkg/writer"
   ]
-  revision = "da906830ec72be878b36faf08d0bc9fdbefc7814"
+  revision = "ffc550079fc35ebf9b5872c3771e45c3157b6138"
 
 [[projects]]
   name = "github.com/golang/protobuf"
