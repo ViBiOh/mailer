@@ -24,6 +24,7 @@ const (
 	healthcheckPath = `/health`
 	fixturesPath    = `/fixtures`
 	renderPath      = `/render`
+	sendPath        = `/send`
 )
 
 func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
@@ -47,10 +48,12 @@ func main() {
 	datadogConfig := datadog.Flags(`datadog`)
 
 	httputils.NewApp(httputils.Flags(``), func() http.Handler {
-		mailjetApp := mailjet.NewApp(mailjetConfig)
 		mjmlApp := mjml.NewApp(mjmlConfig)
 
-		renderApp := render.NewApp(mjmlApp)
+		mailjetApp := mailjet.NewApp(mailjetConfig)
+		mailjetHandler := mailjetApp.Handler()
+
+		renderApp := render.NewApp(mjmlApp, mailjetApp)
 		renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
 
 		fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
@@ -62,6 +65,8 @@ func main() {
 		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *authProvider.User) {
 			if strings.HasPrefix(r.URL.Path, renderPath) {
 				renderHandler.ServeHTTP(w, r)
+			} else if strings.HasPrefix(r.URL.Path, sendPath) {
+				mailjetHandler.ServeHTTP(w, r)
 			} else if strings.HasPrefix(r.URL.Path, fixturesPath) {
 				fixtureHandler.ServeHTTP(w, r)
 			} else {

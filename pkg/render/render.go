@@ -14,6 +14,7 @@ import (
 	"github.com/ViBiOh/httputils/pkg/templates"
 	"github.com/ViBiOh/httputils/pkg/writer"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
+	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 )
 
@@ -24,14 +25,16 @@ const (
 
 // App stores informations
 type App struct {
-	mjmlApp *mjml.App
-	tpl     *template.Template
+	mjmlApp    *mjml.App
+	mailjetApp *mailjet.App
+	tpl        *template.Template
 }
 
 // NewApp creates new App from Flags' config
-func NewApp(mjmlApp *mjml.App) *App {
+func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	return &App{
-		mjmlApp: mjmlApp,
+		mjmlApp:    mjmlApp,
+		mailjetApp: mailjetApp,
 		tpl: template.Must(template.New(`mailer`).Funcs(template.FuncMap{
 			`odd`: func(i int) bool {
 				return i%2 == 0
@@ -107,13 +110,22 @@ func (a *App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 // Handler for Render request. Should be use with net/http
 func (a *App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+
 		if r.URL.Path == `` || r.URL.Path == `/` {
-			a.listTemplatesHandler(w, r)
+			if r.Method == http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+			} else {
+				a.listTemplatesHandler(w, r)
+			}
+
 			return
 		}
 
 		templateName := strings.Trim(r.URL.Path, `/`)
-
 		tpl := a.tpl.Lookup(fmt.Sprintf(`%s%s`, templateName, templateSuffix))
 
 		if tpl == nil {
@@ -143,9 +155,17 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		if _, err := output.WriteResponse(w); err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`Error while writing output to response: %v`, err))
+		if r.Method == http.MethodGet {
+			if _, err := output.WriteResponse(w); err != nil {
+				httperror.InternalServerError(w, fmt.Errorf(`Error while writing output to response: %v`, err))
+			}
 			return
 		}
+
+		if err := a.mailjetApp.SendFromRequest(r, output.Content().String()); err != nil {
+			httperror.InternalServerError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	})
 }
