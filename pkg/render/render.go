@@ -125,6 +125,15 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
+		var mail *mailjet.Mail
+		if r.Method == http.MethodPost {
+			mail = a.mailjetApp.GetParameters(r)
+			if err := a.mailjetApp.CheckParameters(mail); err != nil {
+				httperror.BadRequest(w, err)
+				return
+			}
+		}
+
 		templateName := strings.Trim(r.URL.Path, `/`)
 		tpl := a.tpl.Lookup(fmt.Sprintf(`%s%s`, templateName, templateSuffix))
 
@@ -162,8 +171,12 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		if err := a.mailjetApp.SendFromRequest(r, output.Content().String()); err != nil {
-			httperror.InternalServerError(w, err)
+		if err := a.mailjetApp.SendMail(mail, output.Content().String()); err != nil {
+			if err == mailjet.ErrEmptyFrom || err == mailjet.ErrEmptyTo || err == mailjet.ErrBlankTo {
+				httperror.BadRequest(w, err)
+			} else {
+				httperror.InternalServerError(w, err)
+			}
 			return
 		}
 		w.WriteHeader(http.StatusOK)

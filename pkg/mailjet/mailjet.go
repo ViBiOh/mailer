@@ -16,20 +16,37 @@ const (
 	sendURL = `https://api.mailjet.com/v3/send`
 )
 
-type mailjetRecipient struct {
+var (
+	// ErrNoConfiguration occurs when configuration is missing
+	ErrNoConfiguration = errors.New(`No configuration for mailjet`)
+
+	// ErrEmptyFrom occurs when from parameter is empty
+	ErrEmptyFrom = errors.New(`"from" parameter is empty`)
+
+	// ErrEmptyTo occurs when to parameter is empty
+	ErrEmptyTo = errors.New(`"to" parameter is empty`)
+
+	// ErrBlankTo occurs when a to recipient is blank
+	ErrBlankTo = errors.New(`"to" item is blank`)
+)
+
+// Recipient of an email
+type Recipient struct {
 	Email string `json:"Email"`
 }
 
-type mailjetMail struct {
-	FromEmail  string             `json:"FromEmail"`
-	FromName   string             `json:"FromName"`
-	Subject    string             `json:"Subject"`
-	Recipients []mailjetRecipient `json:"Recipients"`
-	HTML       string             `json:"Html-part"`
+// Mail descriptor
+type Mail struct {
+	From    string      `json:"FromEmail"`
+	Sender  string      `json:"FromName"`
+	Subject string      `json:"Subject"`
+	To      []Recipient `json:"Recipients"`
+	HTML    string      `json:"Html-part"`
 }
 
-type mailjetResponse struct {
-	Sent []mailjetRecipient `json:"Sent"`
+// Response from Mailjet
+type Response struct {
+	Sent []Recipient `json:"Sent"`
 }
 
 // App stores informations
@@ -39,7 +56,7 @@ type App struct {
 
 // NewApp creates new App from Flags' config
 func NewApp(config map[string]*string) *App {
-	if *config[`publicKey`] == `` {
+	if *config[`publicKey`] == `` || *config[`privateKey`] == `` {
 		return &App{}
 	}
 
@@ -56,33 +73,59 @@ func Flags(prefix string) map[string]*string {
 	}
 }
 
-// SendMail send mailjet mail
-func (a *App) SendMail(fromEmail, sender, subject string, to []string, html string) error {
+// CheckParameters checks mail descriptor
+func (a *App) CheckParameters(mail *Mail) error {
 	if len(a.headers) == 0 {
-		return errors.New(`No configuration provided for Mailjet`)
+		return ErrNoConfiguration
 	}
 
-	recipients := make([]mailjetRecipient, 0, len(to))
-	for _, rawTo := range to {
-		recipients = append(recipients, mailjetRecipient{Email: rawTo})
+	if strings.TrimSpace(mail.From) == `` {
+		return ErrEmptyFrom
 	}
 
-	mailjetMail := mailjetMail{FromEmail: fromEmail, FromName: sender, Subject: subject, Recipients: recipients, HTML: html}
-	if payload, err := request.DoJSON(sendURL, mailjetMail, a.headers, http.MethodPost); err != nil {
-		return fmt.Errorf(`Error while sending data: %v %s`, err, payload)
+	if len(mail.To) == 0 {
+		return ErrEmptyTo
+	}
+
+	for _, to := range mail.To {
+		if strings.TrimSpace(to.Email) == `` {
+			return ErrBlankTo
+		}
 	}
 
 	return nil
 }
 
-// SendFromRequest send mailjet mail
-func (a *App) SendFromRequest(r *http.Request, html string) error {
-	from := r.URL.Query().Get(`from`)
-	sender := r.URL.Query().Get(`sender`)
-	subject := r.URL.Query().Get(`subject`)
-	to := strings.Split(r.URL.Query().Get(`to`), `,`)
+// GetParameters retrieves mail descriptor from Query
+func (a *App) GetParameters(r *http.Request) *Mail {
+	mail := &Mail{
+		From:    strings.TrimSpace(r.URL.Query().Get(`from`)),
+		Sender:  strings.TrimSpace(r.URL.Query().Get(`sender`)),
+		Subject: strings.TrimSpace(r.URL.Query().Get(`subject`)),
+		To:      []Recipient{},
+	}
 
-	return a.SendMail(from, sender, subject, to, html)
+	for _, rawTo := range strings.Split(r.URL.Query().Get(`to`), `,`) {
+		if cleanTo := strings.TrimSpace(rawTo); cleanTo != `` {
+			mail.To = append(mail.To, Recipient{Email: cleanTo})
+		}
+	}
+
+	return mail
+}
+
+// SendMail send mailjet mail
+func (a *App) SendMail(mail *Mail, html string) error {
+	if err := a.CheckParameters(mail); err != nil {
+		return nil
+	}
+
+	mail.HTML = html
+	if payload, err := request.DoJSON(sendURL, mail, a.headers, http.MethodPost); err != nil {
+		return fmt.Errorf(`Error while sending data: %v %s`, err, payload)
+	}
+
+	return nil
 }
 
 // Handler for Render request. Should be use with net/http
@@ -99,8 +142,12 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		if err := a.SendFromRequest(r, string(content)); err != nil {
-			httperror.InternalServerError(w, err)
+		if err := a.SendMail(a.GetParameters(r), string(content)); err != nil {
+			if err == ErrEmptyFrom || err == ErrEmptyTo || err == ErrBlankTo {
+				httperror.BadRequest(w, err)
+			} else {
+				httperror.InternalServerError(w, err)
+			}
 			return
 		}
 
