@@ -32,7 +32,7 @@ jobs:
     deploy:
     - provider: script
       skip_cleanup: true
-      script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/containers/mailer/ --data-binary @docker-compose-env.yml"
+      script: "curl -H 'Authorization: GitHub ${GITHUB_OAUTH_TOKEN}' -X POST https://dashboard-api.vibioh.fr/deploy/mailer/ --data-binary @docker-compose-env.yml"
 
 stages:
   - Build
