@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/auth/pkg/auth"
+	"github.com/ViBiOh/auth/pkg/model"
 	authProvider "github.com/ViBiOh/auth/pkg/provider"
 	"github.com/ViBiOh/auth/pkg/provider/basic"
 	authService "github.com/ViBiOh/auth/pkg/service"
@@ -62,7 +63,7 @@ func main() {
 		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
 
 		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
-		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *authProvider.User) {
+		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *model.User) {
 			if strings.HasPrefix(r.URL.Path, renderPath) {
 				renderHandler.ServeHTTP(w, r)
 			} else if strings.HasPrefix(r.URL.Path, sendPath) {
