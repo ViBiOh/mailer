@@ -24,7 +24,7 @@
     "pkg/provider/twitter",
     "pkg/service"
   ]
-  revision = "95a1e8bcc4990dc4d2613b106b3c96920e3eb55b"
+  revision = "6a119930783b1e06488ea356cc620f564cbd6352"
 
 [[projects]]
   branch = "master"
@@ -135,6 +135,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8e99726247713ad49fb7172fd008ee1e243dccf5e3a5cf9698715be84e97bb88"
+  inputs-digest = "337ba899fa95fe9287767bb7ffb3a3a44c02ed24bfb5a24cb421c5a36f1d221b"
   solver-name = "gps-cdcl"
   solver-version = 1
