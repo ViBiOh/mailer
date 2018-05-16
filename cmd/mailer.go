@@ -12,6 +12,7 @@ import (
 	"github.com/ViBiOh/httputils/pkg"
 	"github.com/ViBiOh/httputils/pkg/cors"
 	"github.com/ViBiOh/httputils/pkg/datadog"
+	httpHealthcheck "github.com/ViBiOh/httputils/pkg/healthcheck"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/owasp"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
@@ -22,10 +23,9 @@ import (
 )
 
 const (
-	healthcheckPath = `/health`
-	fixturesPath    = `/fixtures`
-	renderPath      = `/render`
-	sendPath        = `/send`
+	fixturesPath = `/fixtures`
+	renderPath   = `/render`
+	sendPath     = `/send`
 )
 
 func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
@@ -48,6 +48,8 @@ func main() {
 	basicConfig := basic.Flags(`basic`)
 	datadogConfig := datadog.Flags(`datadog`)
 
+	healthcheckApp := httpHealthcheck.NewApp()
+
 	httputils.NewApp(httputils.Flags(``), func() http.Handler {
 		mjmlApp := mjml.NewApp(mjmlConfig)
 
@@ -59,8 +61,7 @@ func main() {
 
 		fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
 
-		healthcheckApp := healthcheck.NewApp(mailjetApp)
-		healthcheckHandler := http.StripPrefix(healthcheckPath, healthcheckApp.Handler())
+		healthcheckHandler := healthcheckApp.Handler(healthcheck.NewApp(mailjetApp).Handler())
 
 		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
 		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *model.User) {
@@ -76,7 +77,7 @@ func main() {
 		}, handleAnonymousRequest)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, healthcheckPath) {
+			if r.URL.Path == `/health` {
 				healthcheckHandler.ServeHTTP(w, r)
 			} else {
 				authHandler.ServeHTTP(w, r)
@@ -84,5 +85,5 @@ func main() {
 		})
 
 		return datadog.NewApp(datadogConfig).Handler(owasp.Handler(owaspConfig, cors.Handler(corsConfig, handler)))
-	}, nil).ListenAndServe()
+	}, nil, healthcheckApp).ListenAndServe()
 }

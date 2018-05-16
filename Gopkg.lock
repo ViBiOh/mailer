@@ -35,6 +35,7 @@
     "pkg/cert",
     "pkg/cors",
     "pkg/datadog",
+    "pkg/healthcheck",
     "pkg/httperror",
     "pkg/httpjson",
     "pkg/owasp",
@@ -45,7 +46,7 @@
     "pkg/uuid",
     "pkg/writer"
   ]
-  revision = "e7c1fd8a46a63382a359fa2164174aa1f33e1d75"
+  revision = "8028a990597f0ec475330fe26c1ba1bd60a50ccc"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -91,7 +92,7 @@
     "bcrypt",
     "blowfish"
   ]
-  revision = "4ec37c66abab2c7e02ae775328b2ff001c3f025a"
+  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
 
 [[projects]]
   branch = "master"
@@ -100,7 +101,7 @@
     "context",
     "context/ctxhttp"
   ]
-  revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
+  revision = "2491c5de3490fced2f6cff376127c667efeed857"
 
 [[projects]]
   branch = "master"
@@ -116,7 +117,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["windows"]
-  revision = "6f686a352de66814cdd080d970febae7767857a3"
+  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
 
 [[projects]]
   name = "google.golang.org/appengine"
