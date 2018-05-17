@@ -2,16 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/DataDog/dd-trace-go"
-  packages = [
-    "contrib/net/http",
-    "tracer",
-    "tracer/ext"
-  ]
-  revision = "27617015d45e6cd550b9a7ac7715c37cc2f7d020"
-  version = "v0.6.1"
-
-[[projects]]
   branch = "master"
   name = "github.com/ViBiOh/auth"
   packages = [
@@ -24,7 +14,7 @@
     "pkg/provider/twitter",
     "pkg/service"
   ]
-  revision = "6a119930783b1e06488ea356cc620f564cbd6352"
+  revision = "acd4fa56195f886e1188cba649555ff3c24da205"
 
 [[projects]]
   branch = "master"
@@ -34,7 +24,6 @@
     "pkg/alcotest",
     "pkg/cert",
     "pkg/cors",
-    "pkg/datadog",
     "pkg/healthcheck",
     "pkg/httperror",
     "pkg/httpjson",
@@ -46,7 +35,7 @@
     "pkg/uuid",
     "pkg/writer"
   ]
-  revision = "8028a990597f0ec475330fe26c1ba1bd60a50ccc"
+  revision = "c31f6daa198242a777750942bd41d092cd438101"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -81,11 +70,6 @@
   version = "v2.3.2"
 
 [[projects]]
-  name = "github.com/ugorji/go"
-  packages = ["codec"]
-  revision = "9c7f9b7a2bc3a520f7c7b30b34b7f85f47fe27b6"
-
-[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -114,12 +98,6 @@
   revision = "cdc340f7c179dbbfa4afd43b7614e8fcadde4269"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/sys"
-  packages = ["windows"]
-  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
-
-[[projects]]
   name = "google.golang.org/appengine"
   packages = [
     "internal",
@@ -136,6 +114,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "337ba899fa95fe9287767bb7ffb3a3a44c02ed24bfb5a24cb421c5a36f1d221b"
+  inputs-digest = "2bce2b660081c1c30e88389e93258802ba1bdb0cc7630d6843f3c21c5ebdfc35"
   solver-name = "gps-cdcl"
   solver-version = 1

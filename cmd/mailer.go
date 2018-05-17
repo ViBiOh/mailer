@@ -11,7 +11,6 @@ import (
 	authService "github.com/ViBiOh/auth/pkg/service"
 	"github.com/ViBiOh/httputils/pkg"
 	"github.com/ViBiOh/httputils/pkg/cors"
-	"github.com/ViBiOh/httputils/pkg/datadog"
 	httpHealthcheck "github.com/ViBiOh/httputils/pkg/healthcheck"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/owasp"
@@ -46,7 +45,6 @@ func main() {
 	mjmlConfig := mjml.Flags(`mjml`)
 	authConfig := auth.Flags(`auth`)
 	basicConfig := basic.Flags(`basic`)
-	datadogConfig := datadog.Flags(`datadog`)
 
 	healthcheckApp := httpHealthcheck.NewApp()
 
@@ -84,6 +82,6 @@ func main() {
 			}
 		})
 
-		return datadog.NewApp(datadogConfig).Handler(owasp.Handler(owaspConfig, cors.Handler(corsConfig, handler)))
+		return owasp.Handler(owaspConfig, cors.Handler(corsConfig, handler))
 	}, nil, healthcheckApp).ListenAndServe()
 }
