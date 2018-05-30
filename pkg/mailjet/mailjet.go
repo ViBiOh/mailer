@@ -1,6 +1,7 @@
 package mailjet
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -51,7 +52,7 @@ type Response struct {
 
 // App stores informations
 type App struct {
-	headers map[string]string
+	headers http.Header
 }
 
 // NewApp creates new App from Flags' config
@@ -61,7 +62,7 @@ func NewApp(config map[string]*string) *App {
 	}
 
 	return &App{
-		headers: map[string]string{`Authorization`: request.GetBasicAuth(*config[`publicKey`], *config[`privateKey`])},
+		headers: http.Header{`Authorization`: []string{request.GetBasicAuth(*config[`publicKey`], *config[`privateKey`])}},
 	}
 }
 
@@ -74,7 +75,7 @@ func Flags(prefix string) map[string]*string {
 }
 
 // CheckParameters checks mail descriptor
-func (a *App) CheckParameters(mail *Mail) error {
+func (a App) CheckParameters(mail *Mail) error {
 	if len(a.headers) == 0 {
 		return ErrNoConfiguration
 	}
@@ -97,7 +98,7 @@ func (a *App) CheckParameters(mail *Mail) error {
 }
 
 // GetParameters retrieves mail descriptor from Query
-func (a *App) GetParameters(r *http.Request) *Mail {
+func (a App) GetParameters(r *http.Request) *Mail {
 	mail := &Mail{
 		From:    strings.TrimSpace(r.URL.Query().Get(`from`)),
 		Sender:  strings.TrimSpace(r.URL.Query().Get(`sender`)),
@@ -115,13 +116,13 @@ func (a *App) GetParameters(r *http.Request) *Mail {
 }
 
 // SendMail send mailjet mail
-func (a *App) SendMail(mail *Mail, html string) error {
+func (a *App) SendMail(ctx context.Context, mail *Mail, html string) error {
 	if err := a.CheckParameters(mail); err != nil {
 		return nil
 	}
 
 	mail.HTML = html
-	if payload, err := request.DoJSON(sendURL, mail, a.headers, http.MethodPost); err != nil {
+	if payload, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
 		return fmt.Errorf(`Error while sending data: %v %s`, err, payload)
 	}
 
@@ -129,7 +130,7 @@ func (a *App) SendMail(mail *Mail, html string) error {
 }
 
 // Handler for Render request. Should be use with net/http
-func (a *App) Handler() http.Handler {
+func (a App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -142,7 +143,7 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		if err := a.SendMail(a.GetParameters(r), string(content)); err != nil {
+		if err := a.SendMail(r.Context(), a.GetParameters(r), string(content)); err != nil {
 			if err == ErrEmptyFrom || err == ErrEmptyTo || err == ErrBlankTo {
 				httperror.BadRequest(w, err)
 			} else {

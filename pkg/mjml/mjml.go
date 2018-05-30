@@ -2,6 +2,7 @@ package mjml
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -30,7 +31,7 @@ type mjmlResponse struct {
 
 // App stores informations
 type App struct {
-	headers map[string]string
+	headers http.Header
 }
 
 // NewApp creates new App from Flags' config
@@ -40,7 +41,7 @@ func NewApp(config map[string]*string) *App {
 	}
 
 	return &App{
-		headers: map[string]string{`Authorization`: request.GetBasicAuth(*config[`applicationID`], *config[`secretKey`])},
+		headers: http.Header{`Authorization`: []string{request.GetBasicAuth(*config[`applicationID`], *config[`secretKey`])}},
 	}
 }
 
@@ -58,8 +59,8 @@ func IsMJML(content []byte) bool {
 }
 
 // Render MJML template
-func (a *App) Render(template string) (string, error) {
-	content, err := request.DoJSON(renderURL, mjmlRequest{template}, a.headers, http.MethodPost)
+func (a App) Render(ctx context.Context, template string) (string, error) {
+	content, err := request.DoJSON(ctx, renderURL, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
 		return ``, fmt.Errorf(`Error while sending data: %s`, err)
 	}

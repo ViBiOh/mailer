@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 	"strings"
 
@@ -10,12 +11,16 @@ import (
 	"github.com/ViBiOh/auth/pkg/provider/basic"
 	authService "github.com/ViBiOh/auth/pkg/service"
 	"github.com/ViBiOh/httputils/pkg"
+	"github.com/ViBiOh/httputils/pkg/alcotest"
 	"github.com/ViBiOh/httputils/pkg/cors"
-	httpHealthcheck "github.com/ViBiOh/httputils/pkg/healthcheck"
+	"github.com/ViBiOh/httputils/pkg/gzip"
+	"github.com/ViBiOh/httputils/pkg/healthcheck"
 	"github.com/ViBiOh/httputils/pkg/httperror"
+	"github.com/ViBiOh/httputils/pkg/opentracing"
 	"github.com/ViBiOh/httputils/pkg/owasp"
+	"github.com/ViBiOh/httputils/pkg/server"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
-	"github.com/ViBiOh/mailer/pkg/healthcheck"
+	mailerHealthcheck "github.com/ViBiOh/mailer/pkg/healthcheck"
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/render"
@@ -39,49 +44,52 @@ func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 func main() {
-	corsConfig := cors.Flags(`cors`)
+	serverConfig := httputils.Flags(``)
+	alcotestConfig := alcotest.Flags(``)
+	opentracingConfig := opentracing.Flags(`tracing`)
 	owaspConfig := owasp.Flags(``)
+	corsConfig := cors.Flags(`cors`)
+
 	mailjetConfig := mailjet.Flags(`mailjet`)
 	mjmlConfig := mjml.Flags(`mjml`)
 	authConfig := auth.Flags(`auth`)
 	basicConfig := basic.Flags(`basic`)
 
-	healthcheckApp := httpHealthcheck.NewApp()
+	flag.Parse()
 
-	httputils.NewApp(httputils.Flags(``), func() http.Handler {
-		mjmlApp := mjml.NewApp(mjmlConfig)
+	alcotest.DoAndExit(alcotestConfig)
 
-		mailjetApp := mailjet.NewApp(mailjetConfig)
-		mailjetHandler := mailjetApp.Handler()
+	serverApp := httputils.NewApp(serverConfig)
+	healthcheckApp := healthcheck.NewApp()
+	opentracingApp := opentracing.NewApp(opentracingConfig)
+	owaspApp := owasp.NewApp(owaspConfig)
+	corsApp := cors.NewApp(corsConfig)
+	gzipApp := gzip.NewApp()
 
-		renderApp := render.NewApp(mjmlApp, mailjetApp)
-		renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
+	mjmlApp := mjml.NewApp(mjmlConfig)
+	mailjetApp := mailjet.NewApp(mailjetConfig)
+	renderApp := render.NewApp(mjmlApp, mailjetApp)
 
-		fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
+	healthcheckApp.NextHealthcheck(mailerHealthcheck.NewApp(mailjetApp).Handler())
 
-		healthcheckHandler := healthcheckApp.Handler(healthcheck.NewApp(mailjetApp).Handler())
+	mailjetHandler := mailjetApp.Handler()
+	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
+	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
 
-		authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
-		authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *model.User) {
-			if strings.HasPrefix(r.URL.Path, renderPath) {
-				renderHandler.ServeHTTP(w, r)
-			} else if strings.HasPrefix(r.URL.Path, sendPath) {
-				mailjetHandler.ServeHTTP(w, r)
-			} else if strings.HasPrefix(r.URL.Path, fixturesPath) {
-				fixtureHandler.ServeHTTP(w, r)
-			} else {
-				httperror.NotFound(w)
-			}
-		}, handleAnonymousRequest)
+	authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
+	authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *model.User) {
+		if strings.HasPrefix(r.URL.Path, renderPath) {
+			renderHandler.ServeHTTP(w, r)
+		} else if strings.HasPrefix(r.URL.Path, sendPath) {
+			mailjetHandler.ServeHTTP(w, r)
+		} else if strings.HasPrefix(r.URL.Path, fixturesPath) {
+			fixtureHandler.ServeHTTP(w, r)
+		} else {
+			httperror.NotFound(w)
+		}
+	}, handleAnonymousRequest)
 
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == `/health` {
-				healthcheckHandler.ServeHTTP(w, r)
-			} else {
-				authHandler.ServeHTTP(w, r)
-			}
-		})
+	handler := server.ChainMiddlewares(authHandler, opentracingApp, gzipApp, owaspApp, corsApp)
 
-		return owasp.Handler(owaspConfig, cors.Handler(corsConfig, handler))
-	}, nil, healthcheckApp).ListenAndServe()
+	serverApp.ListenAndServe(handler, nil, healthcheckApp)
 }

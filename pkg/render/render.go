@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -70,7 +71,7 @@ func (a *App) getContent(templateName string, r *http.Request) (map[string]inter
 	return a.getBodyContent(r)
 }
 
-func (a *App) handleMjml(content *bytes.Buffer) error {
+func (a *App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 	if a.mjmlApp == nil {
 		return nil
 	}
@@ -80,7 +81,7 @@ func (a *App) handleMjml(content *bytes.Buffer) error {
 		return nil
 	}
 
-	output, err := a.mjmlApp.Render(string(payload))
+	output, err := a.mjmlApp.Render(ctx, string(payload))
 	if err != nil {
 		return fmt.Errorf(`Error while converting MJML template: %v`, err)
 	}
@@ -114,6 +115,8 @@ func (a *App) Handler() http.Handler {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
+
+		ctx := r.Context()
 
 		if r.URL.Path == `` || r.URL.Path == `/` {
 			if r.Method == http.MethodPost {
@@ -159,7 +162,7 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		if err := a.handleMjml(output.Content()); err != nil {
+		if err := a.handleMjml(ctx, output.Content()); err != nil {
 			httperror.InternalServerError(w, fmt.Errorf(`Error while handling MJML: %v`, err))
 			return
 		}
@@ -171,7 +174,7 @@ func (a *App) Handler() http.Handler {
 			return
 		}
 
-		if err := a.mailjetApp.SendMail(mail, output.Content().String()); err != nil {
+		if err := a.mailjetApp.SendMail(ctx, mail, output.Content().String()); err != nil {
 			if err == mailjet.ErrEmptyFrom || err == mailjet.ErrEmptyTo || err == mailjet.ErrBlankTo {
 				httperror.BadRequest(w, err)
 			} else {
