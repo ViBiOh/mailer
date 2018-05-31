@@ -116,7 +116,7 @@ func (a App) GetParameters(r *http.Request) *Mail {
 }
 
 // SendMail send mailjet mail
-func (a *App) SendMail(ctx context.Context, mail *Mail, html string) error {
+func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 	if err := a.CheckParameters(mail); err != nil {
 		return nil
 	}

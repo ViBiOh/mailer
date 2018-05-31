@@ -19,7 +19,7 @@ func NewApp(mailjetAppDep *mailjet.App) *App {
 }
 
 // Handler for Healthcheck request. Should be use with net/http
-func (a *App) Handler() http.Handler {
+func (a App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			w.WriteHeader(http.StatusOK)

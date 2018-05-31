@@ -44,7 +44,7 @@ func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	}
 }
 
-func (a *App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
+func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 	rawContent, err := request.ReadBody(r.Body)
 	if err != nil {
 		return nil, fmt.Errorf(`Error while reading body's content: %v`, err)
@@ -58,7 +58,7 @@ func (a *App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 	return content, nil
 }
 
-func (a *App) getContent(templateName string, r *http.Request) (map[string]interface{}, error) {
+func (a App) getContent(templateName string, r *http.Request) (map[string]interface{}, error) {
 	if r.Method == http.MethodGet {
 		fixtureName := r.URL.Query().Get(`fixture`)
 		if fixtureName == `` {
@@ -71,7 +71,7 @@ func (a *App) getContent(templateName string, r *http.Request) (map[string]inter
 	return a.getBodyContent(r)
 }
 
-func (a *App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
+func (a App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 	if a.mjmlApp == nil {
 		return nil
 	}
@@ -94,7 +94,7 @@ func (a *App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 	return nil
 }
 
-func (a *App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
+func (a App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 	templatesList := make([]string, 0)
 
 	for _, tpl := range a.tpl.Templates() {
@@ -109,7 +109,7 @@ func (a *App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handler for Render request. Should be use with net/http
-func (a *App) Handler() http.Handler {
+func (a App) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost && r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusMethodNotAllowed)
