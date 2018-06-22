@@ -21,7 +21,7 @@ import (
 
 const (
 	templatesDir   = `./templates/`
-	templateSuffix = `.gohtml`
+	templateSuffix = `.html`
 )
 
 // App stores informations
