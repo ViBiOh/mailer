@@ -62,12 +62,12 @@ func IsMJML(content []byte) bool {
 func (a App) Render(ctx context.Context, template string) (string, error) {
 	content, err := request.DoJSON(ctx, renderURL, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
-		return ``, fmt.Errorf(`Error while sending data: %s`, err)
+		return ``, fmt.Errorf(`Error while sending data: %s: %s`, err, content)
 	}
 
 	var response mjmlResponse
 	if err := json.Unmarshal(content, &response); err != nil {
-		return ``, fmt.Errorf(`Error while unmarshalling data: %v`, err)
+		return ``, fmt.Errorf(`Error while unmarshalling data: %v: %s`, err, content)
 	}
 
 	return response.HTML, nil

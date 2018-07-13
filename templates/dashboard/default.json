@@ -1,9 +1,43 @@
 {
+  "success": true,
   "app": "dashboard",
   "url": "https://dashboard.vibioh.fr",
   "services": [
-    { "name": "api", "containerId": "a7741071878d", "containerName": "dasboard_api", "image": "vibioh/dashboard", "logs": [] },
-    { "name": "auth", "containerId": "1b725e791872", "containerName": "dasboard_auth", "image": "vibioh/auth", "logs": [] },
-    { "name": "site", "containerId": "ff29abe2b071", "containerName": "dasboard_site", "image": "vibioh/viws", "logs": [] }
+    {
+      "sucess": true,
+      "name": "api",
+      "containerId": "a7741071878d",
+      "containerName": "dasboard_api",
+      "image": "vibioh/dashboard",
+      "logs": [
+        "2018/06/23 21:16:20 Starting HTTP server on port :1080",
+        "2018/06/23 21:16:20 Listening with TLS ✅",
+        "2018/06/23 21:16:20 Self-signed certificate generated"
+      ]
+    },
+    {
+      "sucess": true,
+      "name": "auth",
+      "containerId": "1b725e791872",
+      "containerName": "dasboard_auth",
+      "image": "vibioh/auth",
+      "logs": [
+        "2018/06/23 21:16:20 Starting HTTP server on port :1080",
+        "2018/06/23 21:16:20 Listening with TLS ✅",
+        "2018/06/23 21:16:20 Self-signed certificate generated"
+      ]
+    },
+    {
+      "sucess": false,
+      "name": "site",
+      "containerId": "ff29abe2b071",
+      "containerName": "dasboard_site",
+      "image": "vibioh/viws",
+      "logs": [
+        "2018/06/23 21:16:20 Starting HTTP server on port :1080",
+        "2018/06/23 21:16:20 Listening with TLS ✅",
+        "2018/06/23 21:16:20 Error"
+      ]
+    }
   ]
 }
