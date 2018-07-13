@@ -4,10 +4,10 @@
   "url": "https://dashboard.vibioh.fr",
   "services": [
     {
-      "success": true,
       "name": "api",
+      "state": "healthy",
       "containerId": "a7741071878d",
-      "image": "vibioh/dashboard",
+      "imageName": "vibioh/dashboard",
       "logs": [
         "2018/06/23 21:16:20 Starting HTTP server on port :1080",
         "2018/06/23 21:16:20 Listening with TLS ✅",
@@ -15,10 +15,10 @@
       ]
     },
     {
-      "success": true,
       "name": "auth",
+      "state": "unhealthy",
       "containerId": "1b725e791872",
-      "image": "vibioh/auth",
+      "imageName": "vibioh/auth",
       "logs": [
         "2018/06/23 21:16:20 Starting HTTP server on port :1080",
         "2018/06/23 21:16:20 Listening with TLS ✅",
@@ -26,10 +26,10 @@
       ]
     },
     {
-      "success": false,
       "name": "site",
+      "state": "",
       "containerId": "ff29abe2b071",
-      "image": "vibioh/viws",
+      "imageName": "vibioh/viws",
       "logs": [
         "2018/06/23 21:16:20 Starting HTTP server on port :1080",
         "2018/06/23 21:16:20 Listening with TLS ✅",

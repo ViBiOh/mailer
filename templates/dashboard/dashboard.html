@@ -3,16 +3,16 @@
     {{- range $index, $service := . -}}
       <mj-accordion-element>
         <mj-accordion-title font-size="24px">
-          {{- if .success -}}
+          {{- if eq $service.state "healthy" -}}
             ✅
-          {{- else -}}
+          {{- else if eq $service.state "unhealthy" -}}
             🔴
-          {{- end -}}&nbsp;{{- $service.name -}}
+          {{- end -}} {{- $service.name -}}
         </mj-accordion-title>
         <mj-accordion-text background-color="#f5f5f5">
             ID:&nbsp;<span style="font-family: 'Courier new';">{{- $service.containerId -}}</span>
             <br />
-            Image:&nbsp;<span style="font-family: 'Courier new';">{{- $service.image -}}</span>
+            Image:&nbsp;<span style="font-family: 'Courier new';">{{- $service.imageName -}}</span>
 
             <h3>Logs</h3>
             <div style="padding: 2px; background-color: #3a3a3a; color: #f8f8f8; font-size: 10px; font-family: 'Courier new';">
