@@ -17,7 +17,7 @@ services:
     - -mjmlSecretKey
     - ${MJML_SECRET_KEY}
     - -csp
-    - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com
+    - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' i.imgur.com
     - -tracingName
     - mailer
     labels:

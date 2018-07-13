@@ -3,7 +3,7 @@
     {{- range $index, $service := . -}}
       <mj-accordion-element>
         <mj-accordion-title font-size="24px">
-          {{- if .sucess -}}
+          {{- if .success -}}
             ✅
           {{- else -}}
             🔴
@@ -40,7 +40,7 @@
           <mj-text align="center">
             <h1>
               {{- if .success -}}
-                <span style="color: #4cae4c;">Sucessful</span>
+                <span style="color: #4cae4c;">Successful</span>
               {{- else -}}
                 <span style="color: #ff6347;">Failed</span>
               {{- end -}}
