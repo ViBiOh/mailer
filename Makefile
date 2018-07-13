@@ -62,10 +62,12 @@ start-deps:
 	go get -u github.com/ViBiOh/auth/cmd/bcrypt
 
 start-api:
-	go run -race cmd/$(APP_NAME).go \
+	go run cmd/$(APP_NAME).go \
 		-tls=false \
 		-authUsers "admin:admin" \
 		-basicUsers "1:admin:`bcrypt admin`" \
-		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com"
+		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com" \
+    -mjmlApplicationID $(MJML_APPLICATION_ID) \
+    -mjmlSecretKey $(MJML_SECRET_KEY)
 
 .PHONY: api go docker version deps format lint tst bench build docker-deps docker-login docker-build docker-push docker-pull docker-promote docker-delete start-deps start-api

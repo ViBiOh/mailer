@@ -1,0 +1,9 @@
+{
+  "app": "dashboard",
+  "url": "https://dashboard.vibioh.fr",
+  "services": [
+    { "name": "api", "containerId": "a7741071878d", "containerName": "dasboard_api", "image": "vibioh/dashboard", "logs": [] },
+    { "name": "auth", "containerId": "1b725e791872", "containerName": "dasboard_auth", "image": "vibioh/auth", "logs": [] },
+    { "name": "site", "containerId": "ff29abe2b071", "containerName": "dasboard_site", "image": "vibioh/viws", "logs": [] }
+  ]
+}

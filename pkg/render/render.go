@@ -6,9 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
+	"github.com/ViBiOh/fibr/pkg/utils"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/httpjson"
 	"github.com/ViBiOh/httputils/pkg/request"
@@ -31,8 +36,29 @@ type App struct {
 	tpl        *template.Template
 }
 
+func listFilesByExt(dir, ext string) ([]string, error) {
+	output := make([]string, 0)
+
+	if err := filepath.Walk(dir, func(walkedPath string, info os.FileInfo, _ error) error {
+		if path.Ext(info.Name()) == ext {
+			output = append(output, walkedPath)
+		}
+
+		return nil
+	}); err != nil {
+		return nil, fmt.Errorf(`Error while listing files: %v`, err)
+	}
+
+	return output, nil
+}
+
 // NewApp creates new App from Flags' config
 func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
+	templates, err := utils.ListFilesByExt(templatesDir, templateSuffix)
+	if err != nil {
+		log.Fatalf(`Error while getting templates: %v`, err)
+	}
+
 	return &App{
 		mjmlApp:    mjmlApp,
 		mailjetApp: mailjetApp,
@@ -40,7 +66,7 @@ func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 			`odd`: func(i int) bool {
 				return i%2 == 0
 			},
-		}).ParseGlob(fmt.Sprintf(`%s*%s`, templatesDir, templateSuffix))),
+		}).ParseFiles(templates...)),
 	}
 }
 
