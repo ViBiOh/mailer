@@ -4,9 +4,28 @@
 [![codecov](https://codecov.io/gh/ViBiOh/mailer/branch/master/graph/badge.svg)](https://codecov.io/gh/ViBiOh/mailer)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ViBiOh/mailer)](https://goreportcard.com/report/github.com/ViBiOh/mailer)
 
+Mailer is a service for rendering and sending email based on Golang Template with the help of MJML and Mailjet.
+
+
+# Getting Started
+
+## Docker
+
+Docker image is available, `vibioh/mailer` and a sample `docker-compose.yml`. Everything is almost configured, you only have to tweak domain's name, mainly configured for being used with [traefik](https://traefik.io), and adjust some secrets.
+
+## Mailjet
+
+In order to use the Mailjet sender, you need to register to [Mailjet](https://www.mailjet.com/) for having credentials.
+
+## MJML
+
+In order to use the MJML converter, you need to register to [MJML API](https://mjml.io/api) for having credentials.
+
+# Build
+
 ## Usage
 
-```
+```bash
 Usage of mailer:
   -authUrl string
       [auth] Auth URL, if remote
@@ -48,6 +67,14 @@ Usage of mailer:
       [tls] Self-signed certificate hosts, comma separated (default "localhost")
   -tlsKey string
       [tls] PEM Key file
+  -tlsOrganization string
+      [tls] Self-signed certificate organization (default "ViBiOh")
+  -tracingAgent string
+      [opentracing] Jaeger Agent (e.g. host:port) (default "jaeger:6831")
+  -tracingName string
+      [opentracing] Service name
   -url string
       [health] URL to check
+  -userAgent string
+      [health] User-Agent used (default "Golang alcotest")
 ```

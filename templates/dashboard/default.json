@@ -23,6 +23,11 @@
         "2018/06/23 21:16:20 Starting HTTP server on port :1080",
         "2018/06/23 21:16:20 Listening with TLS ✅",
         "2018/06/23 21:16:20 Self-signed certificate generated"
+      ],
+      "healthLogs": [
+        "2018/06/23 21:16:20 Starting HTTP server on port :1080",
+        "2018/06/23 21:16:20 Listening with TLS ✅",
+        "2018/06/23 21:16:20 Error"
       ]
     },
     {

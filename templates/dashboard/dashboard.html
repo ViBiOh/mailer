@@ -14,12 +14,21 @@
             <br />
             Image:&nbsp;<span style="font-family: 'Courier new';">{{- $service.imageName -}}</span>
 
-            <h3>Logs</h3>
+            <h3 style="margin-top: 10px, margin-bottom: 10px;">Logs</h3>
             <div style="padding: 2px; background-color: #3a3a3a; color: #f8f8f8; font-size: 10px; font-family: 'Courier new';">
-              {{- range $log := .logs -}}
+              {{- range $log := $service.logs -}}
                 <div>{{- $log -}}</div>
               {{- end -}}
             </div>
+
+            {{- if $service.healthLogs }}
+              <h3 style="margin-top: 10px, margin-bottom: 10px;">Healthcheck logs</h3>
+              <div style="padding: 2px; background-color: #3a3a3a; color: #f8f8f8; font-size: 10px; font-family: 'Courier new';">
+                {{- range $log := $service.healthLogs -}}
+                  <div>{{- $log -}}</div>
+                {{- end -}}
+              </div>
+            {{- end -}}
         </mj-accordion-text>
       </mj-accordion-element>
     {{- end -}}
