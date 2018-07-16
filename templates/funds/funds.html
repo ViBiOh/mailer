@@ -19,40 +19,37 @@
 {{- end -}}
 
 <mjml>
-  <mj-body>
-    <mj-container background-color="#e1e1e8">
-      <mj-section background-color="#3a3a3a">
-        <mj-column>
-          <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">Funds</mj-text>
-        </mj-column>
-      </mj-section>
+  <mj-body background-color="#e1e1e8">
+    <mj-section background-color="#3a3a3a">
+      <mj-column>
+        <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">Funds</mj-text>
+      </mj-column>
+    </mj-section>
 
-      <mj-section background-color="#ffffff">
-        <mj-column>
-          <mj-text>Bonjour,</mj-text>
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <mj-text>Bonjour,</mj-text>
 
-          {{- if len .aboveFunds -}}
-            <mj-text color="#4cae4c">Les fonds suivants viennent de dépasser le score de <strong>{{- .score -}}</strong>.</mj-text>
-            {{- template "funds" .aboveFunds -}}
-          {{- end -}}
+        {{- if len .aboveFunds -}}
+          <mj-text color="#4cae4c">Les fonds suivants viennent de dépasser le score de <strong>{{- .score -}}</strong>.</mj-text>
+          {{- template "funds" .aboveFunds -}}
+        {{- end -}}
 
-          {{- if len .belowFunds -}}
-            <mj-text color="#d43f3a">Les fonds suivants viennent de repasser sous leur seuil initial d'alerte.</mj-text>
-            {{ template "funds" .belowFunds -}}
-          {{- end -}}
+        {{- if len .belowFunds -}}
+          <mj-text color="#d43f3a">Les fonds suivants viennent de repasser sous leur seuil initial d'alerte.</mj-text>
+          {{ template "funds" .belowFunds -}}
+        {{- end -}}
 
-          <mj-text>Pour plus d'informations, n'hésitez pas à consulter <a href="https://funds.vibioh.fr/?o=score" rel="noopener noreferrer" target="_blank">notre site</a></mj-text>
+        <mj-text>Pour plus d'informations, n'hésitez pas à consulter <a href="https://funds.vibioh.fr/?o=score" rel="noopener noreferrer" target="_blank">notre site</a></mj-text>
 
-          <mj-text>
-              Bonne journée,
-              <br />
-              A bientôt,
-          </mj-text>
-        </mj-column>
-      </mj-section>
+        <mj-text>
+            Bonne journée,
+            <br />
+            A bientôt,
+        </mj-text>
+      </mj-column>
+    </mj-section>
 
-      {{- template "footer" -}}
-
-    </mj-container>
+    {{- template "footer" -}}
   </mj-body>
 </mjml>

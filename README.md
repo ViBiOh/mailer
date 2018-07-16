@@ -19,7 +19,7 @@ In order to use the Mailjet sender, you need to register to [Mailjet](https://ww
 
 ## MJML
 
-In order to use the MJML converter, you need to register to [MJML API](https://mjml.io/api) for having credentials.
+In order to use the MJML converter, you need to register to [MJML API](https://mjml.io/api) for having credentials or provided a compliant API like [mjml-api](https://github.com/ViBiOh/mjml-api).
 
 # Build
 
@@ -53,10 +53,12 @@ Usage of mailer:
       Mailjet Private Key
   -mailjetPublicKey string
       Mailjet Public Key
-  -mjmlApplicationID string
-      [mjml] Application ID
-  -mjmlSecretKey string
-      [mjml] Secret Key
+  -mjmlPass string
+      [mjml] Secret Key or Basic Auth pass
+  -mjmlURL string
+      [mjml] MJML API Converter URL (default "https://api.mjml.io/v1/render")
+  -mjmlUser string
+      [mjml] Application ID or Basic Auth user
   -port int
       Listen port (default 1080)
   -tls

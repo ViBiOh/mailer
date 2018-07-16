@@ -36,38 +36,35 @@
 {{- end -}}
 
 <mjml>
-  <mj-body>
-    <mj-container background-color="#e1e1e8">
-      <mj-section background-color="#3a3a3a">
-        <mj-column>
-          <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">Dashboard</mj-text>
-        </mj-column>
-      </mj-section>
+  <mj-body background-color="#e1e1e8">
+    <mj-section background-color="#3a3a3a">
+      <mj-column>
+        <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">Dashboard</mj-text>
+      </mj-column>
+    </mj-section>
 
-      <mj-section background-color="#ffffff">
-        <mj-column>
-          <mj-text align="center">
-            <h1>
-              {{- if .success -}}
-                <span style="color: #4cae4c;">Successful</span>
-              {{- else -}}
-                <span style="color: #ff6347;">Failed</span>
-              {{- end -}}
-              &nbsp;deploy of <a href="{{- .url -}}/?filter={{- .app -}}" rel="noreferrer noopener" target="_blank">
-              <strong>{{- .app -}}</strong>
-            </h1>
-          </mj-text>
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <mj-text align="center">
+          <h1>
+            {{- if .success -}}
+              <span style="color: #4cae4c;">Successful</span>
+            {{- else -}}
+              <span style="color: #ff6347;">Failed</span>
+            {{- end -}}
+            &nbsp;deploy of <a href="{{- .url -}}/?filter={{- .app -}}" rel="noreferrer noopener" target="_blank">
+            <strong>{{- .app -}}</strong>
+          </h1>
+        </mj-text>
 
-          <mj-text>
-              <h2>Deployed services</h2>
-          </mj-text>
+        <mj-text>
+            <h2>Deployed services</h2>
+        </mj-text>
 
-          {{- template "services" .services -}}
-        </mj-column>
-      </mj-section>
+        {{- template "services" .services -}}
+      </mj-column>
+    </mj-section>
 
-      {{- template "footer" -}}
-
-    </mj-container>
+    {{- template "footer" -}}
   </mj-body>
 </mjml>

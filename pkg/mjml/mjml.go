@@ -7,13 +7,10 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/tools"
-)
-
-const (
-	renderURL = `https://api.mjml.io/v1/render`
 )
 
 var (
@@ -31,25 +28,37 @@ type mjmlResponse struct {
 
 // App stores informations
 type App struct {
+	url     string
 	headers http.Header
 }
 
 // NewApp creates new App from Flags' config
 func NewApp(config map[string]*string) *App {
-	if *config[`applicationID`] == `` {
-		return nil
+	converter := strings.TrimSpace(*config[`url`])
+	user := strings.TrimSpace(*config[`user`])
+	pass := strings.TrimSpace(*config[`pass`])
+
+	if converter == `` {
+		return &App{}
 	}
 
-	return &App{
-		headers: http.Header{`Authorization`: []string{request.GetBasicAuth(*config[`applicationID`], *config[`secretKey`])}},
+	app := App{
+		url: converter,
 	}
+
+	if user != `` && pass != `` {
+		app.headers = http.Header{`Authorization`: []string{request.GetBasicAuth(user, pass)}}
+	}
+
+	return &app
 }
 
 // Flags adds flags for given prefix
 func Flags(prefix string) map[string]*string {
 	return map[string]*string{
-		`applicationID`: flag.String(tools.ToCamel(fmt.Sprintf(`%sApplicationID`, prefix)), ``, `[mjml] Application ID`),
-		`secretKey`:     flag.String(tools.ToCamel(fmt.Sprintf(`%sSecretKey`, prefix)), ``, `[mjml] Secret Key`),
+		`url`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://api.mjml.io/v1/render`, `[mjml] MJML API Converter URL`),
+		`user`: flag.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mjml] Application ID or Basic Auth user`),
+		`pass`: flag.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mjml] Secret Key or Basic Auth pass`),
 	}
 }
 
@@ -58,9 +67,17 @@ func IsMJML(content []byte) bool {
 	return bytes.HasPrefix(content, prefix)
 }
 
+func (a App) isReady() bool {
+	return a.url != ``
+}
+
 // Render MJML template
 func (a App) Render(ctx context.Context, template string) (string, error) {
-	content, err := request.DoJSON(ctx, renderURL, mjmlRequest{template}, a.headers, http.MethodPost)
+	if !a.isReady() {
+		return template, nil
+	}
+
+	content, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
 		return ``, fmt.Errorf(`Error while sending data: %s: %s`, err, content)
 	}
