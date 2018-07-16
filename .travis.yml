@@ -26,8 +26,9 @@ jobs:
         -e "s|\${BASIC_USERS}|${BASIC_USERS}|g" \
         -e "s|\${MAILJET_APIKEY_PUBLIC}|${MAILJET_APIKEY_PUBLIC}|g" \
         -e "s|\${MAILJET_APIKEY_PRIVATE}|${MAILJET_APIKEY_PRIVATE}|g" \
-        -e "s|\${MJML_APPLICATION_ID}|${MJML_APPLICATION_ID}|g" \
-        -e "s|\${MJML_SECRET_KEY}|${MJML_SECRET_KEY}|g" \
+        -e "s|\${MJML_URL}|${MJML_URL}|g" \
+        -e "s|\${MJML_USER}|${MJML_USER}|g" \
+        -e "s|\${MJML_PASS}|${MJML_PASS}|g" \
         docker-compose.yml > docker-compose-env.yml
     deploy:
     - provider: script
