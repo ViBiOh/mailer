@@ -59,14 +59,14 @@ docker-delete:
 	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)/tags/$(VERSION)/"
 
 start-deps:
-	go get -u github.com/ViBiOh/auth/cmd/bcrypt
+	go get github.com/ViBiOh/auth/cmd/bcrypt
 
-start-api:
+start-api: start-deps
 	go run cmd/$(APP_NAME).go \
 		-tls=false \
 		-authUsers "admin:admin" \
 		-basicUsers "1:admin:`bcrypt admin`" \
-		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' i.imgur.com" \
+		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com" \
     -mjmlURL $(MJML_URL) \
     -mjmlUser $(MJML_USER) \
     -mjmlPass $(MJML_PASS)

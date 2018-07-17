@@ -9,27 +9,34 @@
             🔴
           {{- end -}} {{- $service.name -}}
         </mj-accordion-title>
+
         <mj-accordion-text background-color="#f5f5f5">
-            ID:&nbsp;<span style="font-family: 'Courier new';">{{- $service.containerId -}}</span>
+            ID: <span style="font-family: 'Courier new';">{{- $service.containerId -}}</span>
             <br />
-            Image:&nbsp;<span style="font-family: 'Courier new';">{{- $service.imageName -}}</span>
-
-            <h3>Logs</h3>
-            <div style="padding: 2px; background-color: #3a3a3a; color: #f8f8f8; font-size: 10px; font-family: 'Courier new';">
-              {{- range $log := $service.logs -}}
-                <div>{{- $log -}}</div>
-              {{- end -}}
-            </div>
-
-            {{- if $service.healthLogs }}
-              <h3>Healthcheck logs</h3>
-              <div style="padding: 2px; background-color: #3a3a3a; color: #f8f8f8; font-size: 10px; font-family: 'Courier new';">
-                {{- range $log := $service.healthLogs -}}
-                  <div>{{- $log -}}</div>
-                {{- end -}}
-              </div>
-            {{- end -}}
+            Image: <span style="font-family: 'Courier new';">{{- $service.imageName -}}</span>
         </mj-accordion-text>
+
+        <mj-accordion-text background-color="#f5f5f5" padding="0px 0px 8px 16px">
+          <strong>Logs</strong>
+        </mj-accordion-text>
+
+        <mj-accordion-text background-color="#3a3a3a" color="#f8f8f8" font-size="10px" font-family="Courier new">
+          {{- range $log := $service.logs -}}
+            {{- $log -}}</br>
+          {{- end -}}
+        </mj-accordion-text>
+
+        {{- if $service.healthLogs }}
+          <mj-accordion-text background-color="#f5f5f5" padding="8px 0px 8px 16px">
+            <strong>Healthcheck logs</strong>
+          </mj-accordion-text>
+
+          <mj-accordion-text background-color="#3a3a3a" color="#f8f8f8" font-size="10px" font-family="Courier new">
+            {{- range $log := $service.healthLogs -}}
+              {{- $log -}}</br>
+            {{- end -}}
+          </mj-accordion-text>
+        {{- end -}}
       </mj-accordion-element>
     {{- end -}}
   </mj-accordion>
@@ -37,6 +44,8 @@
 
 <mjml>
   <mj-body background-color="#e1e1e8">
+    <mj-spacer height="40px"></mj-spacer>
+
     <mj-section background-color="#3a3a3a">
       <mj-column>
         <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">Dashboard</mj-text>
@@ -57,14 +66,12 @@
           </h1>
         </mj-text>
 
-        <mj-text>
-            <h2>Deployed services</h2>
-        </mj-text>
-
         {{- template "services" .services -}}
       </mj-column>
     </mj-section>
 
     {{- template "footer" -}}
+
+    <mj-spacer height="40px"></mj-spacer>
   </mj-body>
 </mjml>
