@@ -18,6 +18,7 @@ import (
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/opentracing"
 	"github.com/ViBiOh/httputils/pkg/owasp"
+	"github.com/ViBiOh/httputils/pkg/rollbar"
 	"github.com/ViBiOh/httputils/pkg/server"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	mailerHealthcheck "github.com/ViBiOh/mailer/pkg/healthcheck"
@@ -49,6 +50,7 @@ func main() {
 	opentracingConfig := opentracing.Flags(`tracing`)
 	owaspConfig := owasp.Flags(``)
 	corsConfig := cors.Flags(`cors`)
+	rollbarConfig := rollbar.Flags(`rollbar`)
 
 	mailjetConfig := mailjet.Flags(`mailjet`)
 	mjmlConfig := mjml.Flags(`mjml`)
@@ -64,6 +66,7 @@ func main() {
 	opentracingApp := opentracing.NewApp(opentracingConfig)
 	owaspApp := owasp.NewApp(owaspConfig)
 	corsApp := cors.NewApp(corsConfig)
+	rollbarApp := rollbar.NewApp(rollbarConfig)
 	gzipApp := gzip.NewApp()
 
 	mjmlApp := mjml.NewApp(mjmlConfig)
@@ -89,7 +92,7 @@ func main() {
 		}
 	}, handleAnonymousRequest)
 
-	handler := server.ChainMiddlewares(authHandler, opentracingApp, gzipApp, owaspApp, corsApp)
+	handler := server.ChainMiddlewares(authHandler, opentracingApp, rollbarApp, gzipApp, owaspApp, corsApp)
 
 	serverApp.ListenAndServe(handler, nil, healthcheckApp)
 }

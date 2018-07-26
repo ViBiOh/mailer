@@ -22,6 +22,12 @@ services:
     - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com
     - -tracingName
     - mailer
+    - -rollbarToken
+    - ${ROLLBAR_TOKEN}
+    - -rollbarServerRoot
+    - github.com/ViBiOh/mailer
+    - -rollbarEnv
+    - prod
     labels:
       traefik.frontend.passHostHeader: 'true'
       traefik.frontend.rule: 'Host: mailer.vibioh.fr'
