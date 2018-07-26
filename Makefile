@@ -1,4 +1,5 @@
 VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
+AUTHOR ?= $(shell git log --pretty=format:'%an' -n 1)
 APP_NAME := mailer
 
 default: api
@@ -12,11 +13,14 @@ docker: docker-build docker-push
 version:
 	@echo -n $(VERSION)
 
+author:
+	@echo -n $(AUTHOR)
+
 deps:
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/golang/lint/golint
-	go get -u github.com/kisielk/errcheck
-	go get -u golang.org/x/tools/cmd/goimports
+	go get github.com/golang/dep/cmd/dep
+	go get github.com/golang/lint/golint
+	go get github.com/kisielk/errcheck
+	go get golang.org/x/tools/cmd/goimports
 	dep ensure
 
 format:
@@ -71,4 +75,4 @@ start-api: start-deps
     -mjmlUser $(MJML_USER) \
     -mjmlPass $(MJML_PASS)
 
-.PHONY: api go docker version deps format lint tst bench build docker-deps docker-login docker-build docker-push docker-pull docker-promote docker-delete start-deps start-api
+.PHONY: api go docker version author deps format lint tst bench build docker-deps docker-login docker-build docker-push docker-pull docker-promote docker-delete start-deps start-api
