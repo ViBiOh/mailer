@@ -14,7 +14,7 @@ version:
 	@echo -n $(VERSION)
 
 author:
-	@echo -n $(AUTHOR)
+	@perl -MURI::Escape -e 'print uri_escape($$ARGV[0]);' "$(AUTHOR)"
 
 deps:
 	go get github.com/golang/dep/cmd/dep
