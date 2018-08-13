@@ -1,14 +1,16 @@
+APP_NAME := mailer
 VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
 AUTHOR ?= $(shell git log --pretty=format:'%an' -n 1)
-APP_NAME := mailer
 
-default: api
+default:
+	docker build -t vibioh/$(APP_NAME):$(VERSION) .
 
-api: deps go docker
+$(APP_NAME): deps go
 
 go: format lint tst bench build
 
-docker: docker-build docker-push
+name:
+	@echo -n $(APP_NAME)
 
 version:
 	@echo -n $(VERSION)
@@ -39,33 +41,12 @@ bench:
 	go test ./... -bench . -benchmem -run Benchmark.*
 
 build:
-	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/$(APP_NAME) cmd/$(APP_NAME).go
-
-docker-deps:
-	curl -s -o cacert.pem https://curl.haxx.se/ca/cacert.pem
-
-docker-login:
-	echo $(DOCKER_PASS) | docker login -u $(DOCKER_USER) --password-stdin
-
-docker-build: docker-deps
-	docker build -t $(DOCKER_USER)/$(APP_NAME):$(VERSION) .
-
-docker-push: docker-login
-	docker push $(DOCKER_USER)/$(APP_NAME):$(VERSION)
-
-docker-pull:
-	docker pull $(DOCKER_USER)/$(APP_NAME):$(VERSION)
-
-docker-promote: docker-pull
-	docker tag $(DOCKER_USER)/$(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):latest
-
-docker-delete:
-	curl -X DELETE -u "$(DOCKER_USER):$(DOCKER_CLOUD_TOKEN)" "https://cloud.docker.com/v2/repositories/$(DOCKER_USER)/$(APP_NAME)/tags/$(VERSION)/"
+	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o bin/$(APP_NAME) cmd/mailer.go
 
 start-deps:
 	go get github.com/ViBiOh/auth/cmd/bcrypt
 
-start-api: start-deps
+start:
 	go run cmd/$(APP_NAME).go \
 		-tls=false \
 		-authUsers "admin:admin" \
@@ -75,4 +56,4 @@ start-api: start-deps
     -mjmlUser $(MJML_USER) \
     -mjmlPass $(MJML_PASS)
 
-.PHONY: api go docker version author deps format lint tst bench build docker-deps docker-login docker-build docker-push docker-pull docker-promote docker-delete start-deps start-api
+.PHONY: $(APP_NAME) go name version author deps format lint tst bench build start-deps start
