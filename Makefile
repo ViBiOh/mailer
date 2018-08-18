@@ -56,4 +56,4 @@ start:
     -mjmlUser $(MJML_USER) \
     -mjmlPass $(MJML_PASS)
 
-.PHONY: $(APP_NAME) go name version author deps format lint tst bench build start-deps start
+.PHONY: docker $(APP_NAME) go name version author deps format lint tst bench build start-deps start
