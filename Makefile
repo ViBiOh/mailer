@@ -2,9 +2,6 @@ APP_NAME := mailer
 VERSION ?= $(shell git log --pretty=format:'%h' -n 1)
 AUTHOR ?= $(shell git log --pretty=format:'%an' -n 1)
 
-docker:
-	docker build -t vibioh/$(APP_NAME):$(VERSION) .
-
 $(APP_NAME): deps go
 
 go: format lint tst bench build
@@ -52,8 +49,8 @@ start:
 		-authUsers "admin:admin" \
 		-basicUsers "1:admin:`bcrypt admin`" \
 		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com" \
-    -mjmlURL $(MJML_URL) \
-    -mjmlUser $(MJML_USER) \
-    -mjmlPass $(MJML_PASS)
+		-mjmlURL $(MJML_URL) \
+		-mjmlUser $(MJML_USER) \
+		-mjmlPass $(MJML_PASS)
 
-.PHONY: docker $(APP_NAME) go name version author deps format lint tst bench build start-deps start
+.PHONY: $(APP_NAME) go name version author deps format lint tst bench build start-deps start
