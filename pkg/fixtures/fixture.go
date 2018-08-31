@@ -65,7 +65,7 @@ func listHandler(w http.ResponseWriter, r *http.Request, templateName string) {
 		fixtureList[index] = strings.TrimSuffix(file.Name(), jsonExtension)
 	}
 
-	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, fixtureList, httpjson.IsPretty(r.URL.RawQuery)); err != nil {
+	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, fixtureList, httpjson.IsPretty(r)); err != nil {
 		httperror.InternalServerError(w, err)
 	}
 }
@@ -101,7 +101,7 @@ func getHandler(w http.ResponseWriter, r *http.Request, templateName, fixtureNam
 		} else {
 			httperror.InternalServerError(w, err)
 		}
-	} else if err := httpjson.ResponseJSON(w, http.StatusOK, content, httpjson.IsPretty(r.URL.RawQuery)); err != nil {
+	} else if err := httpjson.ResponseJSON(w, http.StatusOK, content, httpjson.IsPretty(r)); err != nil {
 		httperror.InternalServerError(w, err)
 	}
 }
