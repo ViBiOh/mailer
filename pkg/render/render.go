@@ -71,7 +71,7 @@ func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 }
 
 func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
-	rawContent, err := request.ReadBody(r.Body)
+	rawContent, err := request.ReadBodyRequest(r)
 	if err != nil {
 		return nil, fmt.Errorf(`Error while reading body's content: %v`, err)
 	}

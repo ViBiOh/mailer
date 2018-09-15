@@ -23,7 +23,7 @@
     "pkg/service",
   ]
   pruneopts = "UT"
-  revision = "150db9542dd44578993615afdd8b6eb9cc49722b"
+  revision = "4b3e81b3ef2f00c7288165f3becbb0d76795a4c9"
 
 [[projects]]
   branch = "master"
@@ -31,11 +31,11 @@
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "49498d081c76f51e5ef4a5f3a9473403ff364212"
+  revision = "38d4d96e692fdc5f0bf99aace892612b40166cd8"
 
 [[projects]]
   branch = "master"
-  digest = "1:11cc6be409aebfe850e3a583f1633f872abc126f7177278dc78eefa467a4b637"
+  digest = "1:b1b79d1a03abab5c7322b8d8ecd0f4e0a0e74cd6e5fe240739a29354cff3ab48"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -60,7 +60,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "f3ea8ad8f900dc62836623435ef0daadf32a887a"
+  revision = "fb865f36bf80f309c5083b2c635ffdeb70a7f07f"
 
 [[projects]]
   branch = "master"
@@ -246,7 +246,7 @@
     "blowfish",
   ]
   pruneopts = "UT"
-  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
+  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [[projects]]
   branch = "master"
@@ -257,7 +257,7 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
+  revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
 
 [[projects]]
   branch = "master"

@@ -62,7 +62,7 @@ func NewApp(config map[string]*string) *App {
 	}
 
 	return &App{
-		headers: http.Header{`Authorization`: []string{request.GetBasicAuth(*config[`publicKey`], *config[`privateKey`])}},
+		headers: http.Header{`Authorization`: []string{request.GenerateBasicAuth(*config[`publicKey`], *config[`privateKey`])}},
 	}
 }
 
@@ -137,7 +137,7 @@ func (a App) Handler() http.Handler {
 			return
 		}
 
-		content, err := request.ReadBody(r.Body)
+		content, err := request.ReadBodyRequest(r)
 		if err != nil {
 			httperror.InternalServerError(w, fmt.Errorf(`Error while reading request body: %v`, err))
 			return

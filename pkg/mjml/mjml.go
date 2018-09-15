@@ -47,7 +47,7 @@ func NewApp(config map[string]*string) *App {
 	}
 
 	if user != `` && pass != `` {
-		app.headers = http.Header{`Authorization`: []string{request.GetBasicAuth(user, pass)}}
+		app.headers = http.Header{`Authorization`: []string{request.GenerateBasicAuth(user, pass)}}
 	}
 
 	return &app

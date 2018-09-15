@@ -30,7 +30,7 @@ func NewApp(config map[string]*string) *App {
 	return &App{
 		url: strings.TrimSpace(*config[`url`]),
 		header: http.Header{
-			`Authorization`: []string{request.GetBasicAuth(user, pass)},
+			`Authorization`: []string{request.GenerateBasicAuth(user, pass)},
 		},
 	}
 }
