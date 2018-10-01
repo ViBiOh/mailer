@@ -11,7 +11,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:017300dd6192cc23ced99b26683d99df5b917a6cec49ef5d9c798e8691598102"
+  digest = "1:918b57182e422790b6b1c923db1431296dbb72bc0f6347d91521bab179d2b02c"
   name = "github.com/ViBiOh/auth"
   packages = [
     "pkg/auth",
@@ -23,19 +23,19 @@
     "pkg/service",
   ]
   pruneopts = "UT"
-  revision = "4b3e81b3ef2f00c7288165f3becbb0d76795a4c9"
+  revision = "244aa3e4c507736ad814a10b7dff1240a213f727"
 
 [[projects]]
   branch = "master"
-  digest = "1:bd51ef0a8a281c037708d53900c58adbb4e3009e5bc1cdd1701867bc02a62345"
+  digest = "1:b68a161c85941341cd6164cec1ff367f50d9e0441dff574e6c18332e2c2aeb1e"
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "38d4d96e692fdc5f0bf99aace892612b40166cd8"
+  revision = "88271826eb60943b71036660f311f247c56fbe6f"
 
 [[projects]]
   branch = "master"
-  digest = "1:b1b79d1a03abab5c7322b8d8ecd0f4e0a0e74cd6e5fe240739a29354cff3ab48"
+  digest = "1:d817518427bc1056cb7d6f8f06c8098ab6505741a51492393d9046916691b75d"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -60,7 +60,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "fb865f36bf80f309c5083b2c635ffdeb70a7f07f"
+  revision = "b6d3cd35d8be695407c488c7142e582a1e626ebc"
 
 [[projects]]
   branch = "master"
@@ -155,7 +155,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8c49953a1414305f2ff5465147ee576dd705487c35b15918fcd4efdc0cb7a290"
+  digest = "1:ef1dd9945e58ee9b635273d28c0ef3fa3742a7dedc038ebe207fd63e6ce000ef"
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
@@ -164,7 +164,7 @@
     "xfs",
   ]
   pruneopts = "UT"
-  revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
+  revision = "418d78d0b9a7b7de3a6bbc8a23def624cc977bb2"
 
 [[projects]]
   digest = "1:8b6db3b490230af0836cd57f2da94e092ac0c2837fe24e762458006531749b53"
@@ -246,7 +246,7 @@
     "blowfish",
   ]
   pruneopts = "UT"
-  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
+  revision = "5295e8364332db77d75fce11f1d19c053919a9c9"
 
 [[projects]]
   branch = "master"
@@ -257,7 +257,7 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
+  revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
 
 [[projects]]
   branch = "master"
@@ -272,7 +272,7 @@
   revision = "d2e6202438beef2727060aa7cabdd924d92ebfd9"
 
 [[projects]]
-  digest = "1:328b5e4f197d928c444a51a75385f4b978915c0e75521f0ad6a3db976c97a7d3"
+  digest = "1:6247f76e55a1e1a5c19a81e2d4b4dff6730461eeb5bbb0a16dd4a8ec8637ee93"
   name = "google.golang.org/appengine"
   packages = [
     "internal",
@@ -284,8 +284,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
-  version = "v1.1.0"
+  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
+  version = "v1.2.0"
 
 [solve-meta]
   analyzer-name = "dep"

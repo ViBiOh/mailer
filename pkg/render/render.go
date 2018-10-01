@@ -46,7 +46,7 @@ func listFilesByExt(dir, ext string) ([]string, error) {
 
 		return nil
 	}); err != nil {
-		return nil, fmt.Errorf(`Error while listing files: %v`, err)
+		return nil, fmt.Errorf(`error while listing files: %v`, err)
 	}
 
 	return output, nil
@@ -73,12 +73,12 @@ func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 	rawContent, err := request.ReadBodyRequest(r)
 	if err != nil {
-		return nil, fmt.Errorf(`Error while reading body's content: %v`, err)
+		return nil, fmt.Errorf(`error while reading body's content: %v`, err)
 	}
 
 	var content map[string]interface{}
 	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, fmt.Errorf(`Error while unmarshalling body's content: %v`, err)
+		return nil, fmt.Errorf(`error while unmarshalling body's content: %v`, err)
 	}
 
 	return content, nil
@@ -109,12 +109,12 @@ func (a App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 
 	output, err := a.mjmlApp.Render(ctx, string(payload))
 	if err != nil {
-		return fmt.Errorf(`Error while converting MJML template: %v`, err)
+		return fmt.Errorf(`error while converting MJML template: %v`, err)
 	}
 
 	content.Reset()
 	if _, err := content.WriteString(output); err != nil {
-		return fmt.Errorf(`Error while replacing MJML content: %v`, err)
+		return fmt.Errorf(`error while replacing MJML content: %v`, err)
 	}
 
 	return nil
@@ -176,7 +176,7 @@ func (a App) Handler() http.Handler {
 			if err == fixtures.ErrNoTemplate {
 				httperror.NotFound(w)
 			} else {
-				httperror.InternalServerError(w, fmt.Errorf(`Error while getting content: %v`, err))
+				httperror.InternalServerError(w, fmt.Errorf(`error while getting content: %v`, err))
 			}
 			return
 		}
@@ -184,18 +184,18 @@ func (a App) Handler() http.Handler {
 		output := writer.Create()
 
 		if err := templates.WriteHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`Error while writing template: %v`, err))
+			httperror.InternalServerError(w, fmt.Errorf(`error while writing template: %v`, err))
 			return
 		}
 
 		if err := a.handleMjml(ctx, output.Content()); err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`Error while handling MJML: %v`, err))
+			httperror.InternalServerError(w, fmt.Errorf(`error while handling MJML: %v`, err))
 			return
 		}
 
 		if r.Method == http.MethodGet {
 			if _, err := output.WriteResponse(w); err != nil {
-				httperror.InternalServerError(w, fmt.Errorf(`Error while writing output to response: %v`, err))
+				httperror.InternalServerError(w, fmt.Errorf(`error while writing output to response: %v`, err))
 			}
 			return
 		}

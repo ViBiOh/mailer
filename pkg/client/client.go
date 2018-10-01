@@ -55,17 +55,17 @@ func (a App) SendEmail(ctx context.Context, template, from, sender, subject stri
 	}
 
 	if len(recipients) == 0 {
-		return fmt.Errorf(`No recipient provided`)
+		return fmt.Errorf(`no recipient provided`)
 	}
 
 	strRecipients := strings.Join(recipients, `,`)
 	if strRecipients == `` {
-		return fmt.Errorf(`Empty recipients provided`)
+		return fmt.Errorf(`empty recipients provided`)
 	}
 
 	output, err := request.DoJSON(ctx, fmt.Sprintf(`%s/render/%s?from=%s&sender=%s&to=%s&subject=%s`, a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
 	if err != nil {
-		return fmt.Errorf(`Error while sending email: %v: %s`, err, output)
+		return fmt.Errorf(`error while sending email: %v: %s`, err, output)
 	}
 
 	return nil

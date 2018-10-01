@@ -19,7 +19,7 @@ const (
 
 var (
 	// ErrNoConfiguration occurs when configuration is missing
-	ErrNoConfiguration = errors.New(`No configuration for mailjet`)
+	ErrNoConfiguration = errors.New(`no configuration for mailjet`)
 
 	// ErrEmptyFrom occurs when from parameter is empty
 	ErrEmptyFrom = errors.New(`"from" parameter is empty`)
@@ -123,7 +123,7 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 
 	mail.HTML = html
 	if payload, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
-		return fmt.Errorf(`Error while sending data: %v %s`, err, payload)
+		return fmt.Errorf(`error while sending data: %v %s`, err, payload)
 	}
 
 	return nil
@@ -139,7 +139,7 @@ func (a App) Handler() http.Handler {
 
 		content, err := request.ReadBodyRequest(r)
 		if err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`Error while reading request body: %v`, err))
+			httperror.InternalServerError(w, fmt.Errorf(`error while reading request body: %v`, err))
 			return
 		}
 
