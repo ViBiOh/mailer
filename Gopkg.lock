@@ -11,19 +11,16 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:918b57182e422790b6b1c923db1431296dbb72bc0f6347d91521bab179d2b02c"
+  digest = "1:70f31571111f5cfa386f9b4361807f9b876296b22acce7132be5238ce23789ca"
   name = "github.com/ViBiOh/auth"
   packages = [
     "pkg/auth",
     "pkg/cookie",
     "pkg/model",
     "pkg/provider",
-    "pkg/provider/basic",
-    "pkg/provider/github",
-    "pkg/service",
   ]
   pruneopts = "UT"
-  revision = "244aa3e4c507736ad814a10b7dff1240a213f727"
+  revision = "f16025365ea385458f04ee7c56d243ed1e98b21b"
 
 [[projects]]
   branch = "master"
@@ -31,16 +28,15 @@
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "88271826eb60943b71036660f311f247c56fbe6f"
+  revision = "70a076b259337825a2be0e8e853a9db93d9857c1"
 
 [[projects]]
   branch = "master"
-  digest = "1:d817518427bc1056cb7d6f8f06c8098ab6505741a51492393d9046916691b75d"
+  digest = "1:207cf1f90ea728be32d94d22b44b1fbb7bec70b61e2045246cf5914f63559a4a"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
     "pkg/alcotest",
-    "pkg/cache",
     "pkg/cert",
     "pkg/cors",
     "pkg/gzip",
@@ -56,11 +52,10 @@
     "pkg/server",
     "pkg/templates",
     "pkg/tools",
-    "pkg/uuid",
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "b6d3cd35d8be695407c488c7142e582a1e626ebc"
+  revision = "fd50c443407db1c331917bcaa769fa78261d71bc"
 
 [[projects]]
   branch = "master"
@@ -155,7 +150,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ef1dd9945e58ee9b635273d28c0ef3fa3742a7dedc038ebe207fd63e6ce000ef"
+  digest = "1:ef74914912f99c79434d9c09658274678bc85080ebe3ab32bec3940ebce5e1fc"
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
@@ -164,7 +159,7 @@
     "xfs",
   ]
   pruneopts = "UT"
-  revision = "418d78d0b9a7b7de3a6bbc8a23def624cc977bb2"
+  revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
   digest = "1:8b6db3b490230af0836cd57f2da94e092ac0c2837fe24e762458006531749b53"
@@ -205,7 +200,7 @@
   version = "v2.3.3"
 
 [[projects]]
-  digest = "1:104a2d7446f4628e4663d7c029b18da1aad4313735de775f37b6e7720b1d0aa7"
+  digest = "1:ac6f26e917fd2fb3194a7ebe2baf6fb32de2f2fbfed130c18aac0e758a6e1d22"
   name = "github.com/uber/jaeger-client-go"
   packages = [
     ".",
@@ -223,11 +218,12 @@
     "thrift-gen/jaeger",
     "thrift-gen/sampling",
     "thrift-gen/zipkincore",
+    "transport",
     "utils",
   ]
   pruneopts = "UT"
-  revision = "b043381d944715b469fd6b37addfd30145ca1758"
-  version = "v2.14.0"
+  revision = "1a782e2da844727691fef1757c72eb190c2909f0"
+  version = "v2.15.0"
 
 [[projects]]
   digest = "1:0f09db8429e19d57c8346ad76fbbc679341fa86073d3b8fb5ac919f0357d8f4c"
@@ -239,63 +235,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1ecf2a49df33be51e757d0033d5d51d5f784f35f68e5a38f797b2d3f03357d71"
-  name = "golang.org/x/crypto"
-  packages = [
-    "bcrypt",
-    "blowfish",
-  ]
-  pruneopts = "UT"
-  revision = "5295e8364332db77d75fce11f1d19c053919a9c9"
-
-[[projects]]
-  branch = "master"
-  digest = "1:d6b719875cf8091fbab38527d81d34e71f4521b9ee9ccfbd4a32cff2ac5af96e"
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
-  packages = [
-    "context",
-    "context/ctxhttp",
-  ]
+  packages = ["context"]
   pruneopts = "UT"
-  revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
-
-[[projects]]
-  branch = "master"
-  digest = "1:ada838e8c6151b19b06f90199f5da9771b50fbfd74838d461ad58b96cbf98015"
-  name = "golang.org/x/oauth2"
-  packages = [
-    ".",
-    "github",
-    "internal",
-  ]
-  pruneopts = "UT"
-  revision = "d2e6202438beef2727060aa7cabdd924d92ebfd9"
-
-[[projects]]
-  digest = "1:6247f76e55a1e1a5c19a81e2d4b4dff6730461eeb5bbb0a16dd4a8ec8637ee93"
-  name = "google.golang.org/appengine"
-  packages = [
-    "internal",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "urlfetch",
-  ]
-  pruneopts = "UT"
-  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
-  version = "v1.2.0"
+  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/ViBiOh/auth/pkg/auth",
-    "github.com/ViBiOh/auth/pkg/model",
     "github.com/ViBiOh/auth/pkg/provider",
-    "github.com/ViBiOh/auth/pkg/provider/basic",
-    "github.com/ViBiOh/auth/pkg/service",
     "github.com/ViBiOh/fibr/pkg/utils",
     "github.com/ViBiOh/httputils/pkg",
     "github.com/ViBiOh/httputils/pkg/alcotest",

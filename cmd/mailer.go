@@ -6,10 +6,7 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/auth/pkg/auth"
-	"github.com/ViBiOh/auth/pkg/model"
 	authProvider "github.com/ViBiOh/auth/pkg/provider"
-	"github.com/ViBiOh/auth/pkg/provider/basic"
-	authService "github.com/ViBiOh/auth/pkg/service"
 	"github.com/ViBiOh/httputils/pkg"
 	"github.com/ViBiOh/httputils/pkg/alcotest"
 	"github.com/ViBiOh/httputils/pkg/cors"
@@ -54,8 +51,6 @@ func main() {
 
 	mailjetConfig := mailjet.Flags(`mailjet`)
 	mjmlConfig := mjml.Flags(`mjml`)
-	authConfig := auth.Flags(`auth`)
-	basicConfig := basic.Flags(`basic`)
 
 	flag.Parse()
 
@@ -79,20 +74,26 @@ func main() {
 	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
 	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
 
-	authApp := auth.NewApp(authConfig, authService.NewBasicApp(basicConfig))
-	authHandler := authApp.HandlerWithFail(func(w http.ResponseWriter, r *http.Request, _ *model.User) {
+	mailerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, renderPath) {
 			renderHandler.ServeHTTP(w, r)
-		} else if strings.HasPrefix(r.URL.Path, sendPath) {
-			mailjetHandler.ServeHTTP(w, r)
-		} else if strings.HasPrefix(r.URL.Path, fixturesPath) {
-			fixtureHandler.ServeHTTP(w, r)
-		} else {
-			httperror.NotFound(w)
+			return
 		}
-	}, handleAnonymousRequest)
 
-	handler := server.ChainMiddlewares(authHandler, opentracingApp, rollbarApp, gzipApp, owaspApp, corsApp)
+		if strings.HasPrefix(r.URL.Path, sendPath) {
+			mailjetHandler.ServeHTTP(w, r)
+			return
+		}
+
+		if strings.HasPrefix(r.URL.Path, fixturesPath) {
+			fixtureHandler.ServeHTTP(w, r)
+			return
+		}
+
+		httperror.NotFound(w)
+	})
+
+	handler := server.ChainMiddlewares(mailerHandler, opentracingApp, rollbarApp, gzipApp, owaspApp, corsApp)
 
 	serverApp.ListenAndServe(handler, nil, healthcheckApp)
 }

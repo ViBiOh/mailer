@@ -27,12 +27,6 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 
 ```bash
 Usage of mailer:
-  -authUrl string
-      [auth] Auth URL, if remote
-  -authUsers string
-      [auth] List of allowed users and profiles (e.g. user:profile1|profile2,user2:profile3)
-  -basicUsers string
-      [Basic] Users in the form "id:username:password,id2:username2:password2"
   -corsCredentials
       [cors] Access-Control-Allow-Credentials
   -corsExpose string
