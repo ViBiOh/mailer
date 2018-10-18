@@ -11,7 +11,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:70f31571111f5cfa386f9b4361807f9b876296b22acce7132be5238ce23789ca"
+  digest = "1:f0e96e6b79ea3f6194178fde4b9980819d43c33a158d3d1e0199a56a250985f6"
   name = "github.com/ViBiOh/auth"
   packages = [
     "pkg/auth",
@@ -20,7 +20,7 @@
     "pkg/provider",
   ]
   pruneopts = "UT"
-  revision = "f16025365ea385458f04ee7c56d243ed1e98b21b"
+  revision = "2da2e43de425b914b71081505210604481714322"
 
 [[projects]]
   branch = "master"
@@ -28,11 +28,11 @@
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "70a076b259337825a2be0e8e853a9db93d9857c1"
+  revision = "f44765039643e8a31e6decf4b6130507aa5edb11"
 
 [[projects]]
   branch = "master"
-  digest = "1:207cf1f90ea728be32d94d22b44b1fbb7bec70b61e2045246cf5914f63559a4a"
+  digest = "1:9485f12f4231be4de0e5fd3045a3d5b2926e86d38bd91c7cff761d43a2ee5b04"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -43,9 +43,11 @@
     "pkg/healthcheck",
     "pkg/httperror",
     "pkg/httpjson",
+    "pkg/logger",
     "pkg/model",
     "pkg/opentracing",
     "pkg/owasp",
+    "pkg/prometheus",
     "pkg/query",
     "pkg/request",
     "pkg/rollbar",
@@ -55,7 +57,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "fd50c443407db1c331917bcaa769fa78261d71bc"
+  revision = "2fa55f3c04629fa0b3a5be6a2efba29137fddaaa"
 
 [[projects]]
   branch = "master"
@@ -138,7 +140,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:63b68062b8968092eb86bedc4e68894bd096ea6b24920faca8b9dcf451f54bb5"
+  digest = "1:c0d39a0cad193ac49b6e24516e0f994b241d7c27142e5a58e8bd13defb2d9ac8"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
@@ -146,7 +148,7 @@
     "model",
   ]
   pruneopts = "UT"
-  revision = "c7de2306084e37d54b8be01f3541a8464345e9a5"
+  revision = "bcb74de08d37a417cb6789eec1d6c810040f0470"
 
 [[projects]]
   branch = "master"
@@ -239,7 +241,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
+  revision = "04a2e542c03f1d053ab3e4d6e5abcd4b66e2be8e"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -255,8 +257,10 @@
     "github.com/ViBiOh/httputils/pkg/healthcheck",
     "github.com/ViBiOh/httputils/pkg/httperror",
     "github.com/ViBiOh/httputils/pkg/httpjson",
+    "github.com/ViBiOh/httputils/pkg/logger",
     "github.com/ViBiOh/httputils/pkg/opentracing",
     "github.com/ViBiOh/httputils/pkg/owasp",
+    "github.com/ViBiOh/httputils/pkg/prometheus",
     "github.com/ViBiOh/httputils/pkg/request",
     "github.com/ViBiOh/httputils/pkg/rollbar",
     "github.com/ViBiOh/httputils/pkg/server",

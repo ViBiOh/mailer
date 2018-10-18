@@ -15,6 +15,7 @@ import (
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/opentracing"
 	"github.com/ViBiOh/httputils/pkg/owasp"
+	"github.com/ViBiOh/httputils/pkg/prometheus"
 	"github.com/ViBiOh/httputils/pkg/rollbar"
 	"github.com/ViBiOh/httputils/pkg/server"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
@@ -47,6 +48,7 @@ func main() {
 	opentracingConfig := opentracing.Flags(`tracing`)
 	owaspConfig := owasp.Flags(``)
 	corsConfig := cors.Flags(`cors`)
+	prometheusConfig := prometheus.Flags(`prometheus`)
 	rollbarConfig := rollbar.Flags(`rollbar`)
 
 	mailjetConfig := mailjet.Flags(`mailjet`)
@@ -61,6 +63,7 @@ func main() {
 	opentracingApp := opentracing.NewApp(opentracingConfig)
 	owaspApp := owasp.NewApp(owaspConfig)
 	corsApp := cors.NewApp(corsConfig)
+	prometheusApp := prometheus.NewApp(prometheusConfig)
 	rollbarApp := rollbar.NewApp(rollbarConfig)
 	gzipApp := gzip.NewApp()
 
@@ -93,7 +96,7 @@ func main() {
 		httperror.NotFound(w)
 	})
 
-	handler := server.ChainMiddlewares(mailerHandler, opentracingApp, rollbarApp, gzipApp, owaspApp, corsApp)
+	handler := server.ChainMiddlewares(mailerHandler, prometheusApp, opentracingApp, rollbarApp, gzipApp, owaspApp, corsApp)
 
 	serverApp.ListenAndServe(handler, nil, healthcheckApp)
 }

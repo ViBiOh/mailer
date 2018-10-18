@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -16,6 +15,7 @@ import (
 	"github.com/ViBiOh/fibr/pkg/utils"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/httpjson"
+	"github.com/ViBiOh/httputils/pkg/logger"
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/templates"
 	"github.com/ViBiOh/httputils/pkg/writer"
@@ -56,7 +56,7 @@ func listFilesByExt(dir, ext string) ([]string, error) {
 func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	templates, err := utils.ListFilesByExt(templatesDir, templateSuffix)
 	if err != nil {
-		log.Fatalf(`Error while getting templates: %v`, err)
+		logger.Error(`Error while getting templates: %v`, err)
 	}
 
 	return &App{
