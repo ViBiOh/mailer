@@ -2,13 +2,14 @@ package fixtures
 
 import (
 	"encoding/json"
-	"errors"
+	native_errors "errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/ViBiOh/httputils/pkg/errors"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/httpjson"
 )
@@ -19,7 +20,7 @@ const (
 )
 
 // ErrNoTemplate error occurs when template is not found
-var ErrNoTemplate = errors.New(`no template found`)
+var ErrNoTemplate = native_errors.New(`no template found`)
 
 func getTemplatePath(templateName string) string {
 	return fmt.Sprintf(`%s/%s/`, templatesDir, templateName)
@@ -56,7 +57,7 @@ func listHandler(w http.ResponseWriter, r *http.Request, templateName string) {
 
 	files, err := ioutil.ReadDir(templatePath)
 	if err != nil {
-		httperror.InternalServerError(w, fmt.Errorf(`error while reading directory content: %v`, err))
+		httperror.InternalServerError(w, errors.WithStack(err))
 		return
 	}
 
@@ -83,12 +84,12 @@ func Get(templateName, fixtureName string) (map[string]interface{}, error) {
 
 	rawContent, err := ioutil.ReadFile(fixturePath)
 	if err != nil {
-		return nil, fmt.Errorf(`error while reading %s fixture: %v`, fixtureName, err)
+		return nil, errors.WithStack(err)
 	}
 
 	var content map[string]interface{}
 	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, fmt.Errorf(`error while unmarshalling %s fixture: %v`, fixtureName, err)
+		return nil, errors.WithStack(err)
 	}
 
 	return content, nil

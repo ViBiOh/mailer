@@ -7,12 +7,10 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/ViBiOh/fibr/pkg/utils"
+	"github.com/ViBiOh/httputils/pkg/errors"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/httpjson"
 	"github.com/ViBiOh/httputils/pkg/logger"
@@ -36,27 +34,11 @@ type App struct {
 	tpl        *template.Template
 }
 
-func listFilesByExt(dir, ext string) ([]string, error) {
-	output := make([]string, 0)
-
-	if err := filepath.Walk(dir, func(walkedPath string, info os.FileInfo, _ error) error {
-		if path.Ext(info.Name()) == ext {
-			output = append(output, walkedPath)
-		}
-
-		return nil
-	}); err != nil {
-		return nil, fmt.Errorf(`error while listing files: %v`, err)
-	}
-
-	return output, nil
-}
-
 // NewApp creates new App from Flags' config
 func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	templates, err := utils.ListFilesByExt(templatesDir, templateSuffix)
 	if err != nil {
-		logger.Error(`Error while getting templates: %v`, err)
+		logger.Error(`%+v`, err)
 	}
 
 	return &App{
@@ -73,12 +55,12 @@ func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 	rawContent, err := request.ReadBodyRequest(r)
 	if err != nil {
-		return nil, fmt.Errorf(`error while reading body's content: %v`, err)
+		return nil, err
 	}
 
 	var content map[string]interface{}
 	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, fmt.Errorf(`error while unmarshalling body's content: %v`, err)
+		return nil, errors.WithStack(err)
 	}
 
 	return content, nil
@@ -109,12 +91,12 @@ func (a App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 
 	output, err := a.mjmlApp.Render(ctx, string(payload))
 	if err != nil {
-		return fmt.Errorf(`error while converting MJML template: %v`, err)
+		return err
 	}
 
 	content.Reset()
 	if _, err := content.WriteString(output); err != nil {
-		return fmt.Errorf(`error while replacing MJML content: %v`, err)
+		return errors.WithStack(err)
 	}
 
 	return nil
@@ -176,7 +158,7 @@ func (a App) Handler() http.Handler {
 			if err == fixtures.ErrNoTemplate {
 				httperror.NotFound(w)
 			} else {
-				httperror.InternalServerError(w, fmt.Errorf(`error while getting content: %v`, err))
+				httperror.InternalServerError(w, err)
 			}
 			return
 		}
@@ -184,18 +166,18 @@ func (a App) Handler() http.Handler {
 		output := writer.Create()
 
 		if err := templates.WriteHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`error while writing template: %v`, err))
+			httperror.InternalServerError(w, err)
 			return
 		}
 
 		if err := a.handleMjml(ctx, output.Content()); err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`error while handling MJML: %v`, err))
+			httperror.InternalServerError(w, err)
 			return
 		}
 
 		if r.Method == http.MethodGet {
 			if _, err := output.WriteResponse(w); err != nil {
-				httperror.InternalServerError(w, fmt.Errorf(`error while writing output to response: %v`, err))
+				httperror.InternalServerError(w, errors.WithStack(err))
 			}
 			return
 		}

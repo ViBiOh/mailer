@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ViBiOh/httputils/pkg/errors"
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/tools"
 )
@@ -55,17 +56,17 @@ func (a App) SendEmail(ctx context.Context, template, from, sender, subject stri
 	}
 
 	if len(recipients) == 0 {
-		return fmt.Errorf(`no recipient provided`)
+		return errors.New(`recipients are required`)
 	}
 
 	strRecipients := strings.Join(recipients, `,`)
 	if strRecipients == `` {
-		return fmt.Errorf(`empty recipients provided`)
+		return errors.New(`no recipient found`)
 	}
 
-	output, err := request.DoJSON(ctx, fmt.Sprintf(`%s/render/%s?from=%s&sender=%s&to=%s&subject=%s`, a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
+	_, err := request.DoJSON(ctx, fmt.Sprintf(`%s/render/%s?from=%s&sender=%s&to=%s&subject=%s`, a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
 	if err != nil {
-		return fmt.Errorf(`error while sending email: %v: %s`, err, output)
+		return err
 	}
 
 	return nil

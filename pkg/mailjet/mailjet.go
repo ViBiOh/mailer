@@ -122,8 +122,8 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 	}
 
 	mail.HTML = html
-	if payload, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
-		return fmt.Errorf(`error while sending data: %v %s`, err, payload)
+	if _, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
+		return err
 	}
 
 	return nil
@@ -139,7 +139,7 @@ func (a App) Handler() http.Handler {
 
 		content, err := request.ReadBodyRequest(r)
 		if err != nil {
-			httperror.InternalServerError(w, fmt.Errorf(`error while reading request body: %v`, err))
+			httperror.InternalServerError(w, err)
 			return
 		}
 

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ViBiOh/httputils/pkg/errors"
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/tools"
 )
@@ -79,12 +80,12 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 
 	content, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
-		return ``, fmt.Errorf(`error while sending data: %s: %s`, err, content)
+		return ``, err
 	}
 
 	var response mjmlResponse
 	if err := json.Unmarshal(content, &response); err != nil {
-		return ``, fmt.Errorf(`error while unmarshalling data: %v: %s`, err, content)
+		return ``, errors.WithStack(err)
 	}
 
 	return response.HTML, nil
