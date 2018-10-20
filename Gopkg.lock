@@ -11,7 +11,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f0e96e6b79ea3f6194178fde4b9980819d43c33a158d3d1e0199a56a250985f6"
+  digest = "1:3d7bcd1a70ff03e90156c481d8f01268f78b1d9406bce632f5956429c5490f66"
   name = "github.com/ViBiOh/auth"
   packages = [
     "pkg/auth",
@@ -20,19 +20,19 @@
     "pkg/provider",
   ]
   pruneopts = "UT"
-  revision = "2da2e43de425b914b71081505210604481714322"
+  revision = "412eb84033e2c783ba9fe22c540c4f31279ffc66"
 
 [[projects]]
   branch = "master"
-  digest = "1:b68a161c85941341cd6164cec1ff367f50d9e0441dff574e6c18332e2c2aeb1e"
+  digest = "1:338b89e6204f226be765f9e09e7a4ea138635f3719fb4e53f8e9dca7e35ec3e2"
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "f44765039643e8a31e6decf4b6130507aa5edb11"
+  revision = "bc754d0269e36fa378029755976994a3309b067c"
 
 [[projects]]
   branch = "master"
-  digest = "1:fdac190cd19fee753528aa40e74c3c05af3f516aa7391d5c76dd9865f3730ecc"
+  digest = "1:c42df066b44505be273c8279d005f0044aba1bf46660cfbbb2883f2ecb82d62d"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -51,7 +51,6 @@
     "pkg/prometheus",
     "pkg/query",
     "pkg/request",
-    "pkg/rollbar",
     "pkg/server",
     "pkg/templates",
     "pkg/tools",
@@ -165,14 +164,6 @@
   revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
-  digest = "1:8b6db3b490230af0836cd57f2da94e092ac0c2837fe24e762458006531749b53"
-  name = "github.com/rollbar/rollbar-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "5f41889d7c6a59e4add07998cf776b1d335d287f"
-  version = "v1.0.1"
-
-[[projects]]
   digest = "1:22d0b8854d1df1d03e806e3d172dac199ae539f46c0b9f55b9f6a9be592de0bc"
   name = "github.com/tdewolff/minify"
   packages = [
@@ -264,7 +255,6 @@
     "github.com/ViBiOh/httputils/pkg/owasp",
     "github.com/ViBiOh/httputils/pkg/prometheus",
     "github.com/ViBiOh/httputils/pkg/request",
-    "github.com/ViBiOh/httputils/pkg/rollbar",
     "github.com/ViBiOh/httputils/pkg/server",
     "github.com/ViBiOh/httputils/pkg/templates",
     "github.com/ViBiOh/httputils/pkg/tools",

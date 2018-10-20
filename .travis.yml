@@ -33,12 +33,11 @@ jobs:
         -e "s|\${MJML_URL}|${MJML_URL}|g" \
         -e "s|\${MJML_USER}|${MJML_USER}|g" \
         -e "s|\${MJML_PASS}|${MJML_PASS}|g" \
-        -e "s|\${ROLLBAR_TOKEN}|${ROLLBAR_TOKEN}|g" \
         docker-compose.yml > docker-compose-env.yml
     deploy:
     - provider: script
       skip_cleanup: true
-      script: 'curl -H "Authorization: GitHub ${GITHUB_OAUTH_TOKEN}" -X POST "https://dashboard-api.vibioh.fr/deploy/mailer/?rollbar_token=${ROLLBAR_TOKEN}&user=`make author`&revision=`make version`&environment=prod" --data-binary @docker-compose-env.yml'
+      script: 'curl -H "Authorization: GitHub ${GITHUB_OAUTH_TOKEN}" -X POST "https://dashboard-api.vibioh.fr/deploy/mailer/" --data-binary @docker-compose-env.yml'
 
 stages:
   - Build

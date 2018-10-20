@@ -31,7 +31,7 @@ const (
 )
 
 func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
-	if auth.IsForbiddenErr(err) {
+	if auth.ErrNotAllowed == err {
 		httperror.Forbidden(w)
 	} else if err == authProvider.ErrMalformedAuth || err == authProvider.ErrUnknownAuthType {
 		httperror.BadRequest(w, err)
