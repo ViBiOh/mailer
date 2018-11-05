@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/auth/pkg/auth"
-	authProvider "github.com/ViBiOh/auth/pkg/provider"
 	"github.com/ViBiOh/httputils/pkg"
 	"github.com/ViBiOh/httputils/pkg/alcotest"
 	"github.com/ViBiOh/httputils/pkg/cors"
@@ -29,17 +27,6 @@ const (
 	renderPath   = `/render`
 	sendPath     = `/send`
 )
-
-func handleAnonymousRequest(w http.ResponseWriter, r *http.Request, err error) {
-	if auth.ErrNotAllowed == err {
-		httperror.Forbidden(w)
-	} else if err == authProvider.ErrMalformedAuth || err == authProvider.ErrUnknownAuthType {
-		httperror.BadRequest(w, err)
-	} else {
-		w.Header().Add(`WWW-Authenticate`, `Basic charset="UTF-8"`)
-		httperror.Unauthorized(w, err)
-	}
-}
 
 func main() {
 	serverConfig := httputils.Flags(``)

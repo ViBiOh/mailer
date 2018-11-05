@@ -122,7 +122,7 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 	}
 
 	mail.HTML = html
-	if _, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
+	if _, _, _, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
 		return err
 	}
 

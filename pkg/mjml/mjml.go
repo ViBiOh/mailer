@@ -78,7 +78,7 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
-	content, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
+	content, _, _, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
 		return ``, err
 	}

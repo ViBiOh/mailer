@@ -64,7 +64,7 @@ func (a App) SendEmail(ctx context.Context, template, from, sender, subject stri
 		return errors.New(`no recipient found`)
 	}
 
-	_, err := request.DoJSON(ctx, fmt.Sprintf(`%s/render/%s?from=%s&sender=%s&to=%s&subject=%s`, a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
+	_, _, _, err := request.DoJSON(ctx, fmt.Sprintf(`%s/render/%s?from=%s&sender=%s&to=%s&subject=%s`, a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
 	if err != nil {
 		return err
 	}

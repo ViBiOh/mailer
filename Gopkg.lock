@@ -11,28 +11,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3d7bcd1a70ff03e90156c481d8f01268f78b1d9406bce632f5956429c5490f66"
-  name = "github.com/ViBiOh/auth"
-  packages = [
-    "pkg/auth",
-    "pkg/cookie",
-    "pkg/model",
-    "pkg/provider",
-  ]
-  pruneopts = "UT"
-  revision = "412eb84033e2c783ba9fe22c540c4f31279ffc66"
-
-[[projects]]
-  branch = "master"
   digest = "1:338b89e6204f226be765f9e09e7a4ea138635f3719fb4e53f8e9dca7e35ec3e2"
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "bc754d0269e36fa378029755976994a3309b067c"
+  revision = "4bf687b0703638d49a9d65f98dbb61b23dab81e4"
 
 [[projects]]
   branch = "master"
-  digest = "1:c42df066b44505be273c8279d005f0044aba1bf46660cfbbb2883f2ecb82d62d"
+  digest = "1:2fec01462bbee5b03b7b87a2f59f6a6adc3b0e7dfe2314334f079030c57125d3"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -57,7 +44,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "a147310fb9a8c422292a2d6f7fe4781eda74919d"
+  revision = "08cb8f858a20d8b33b15504d05bff2b97b35883f"
 
 [[projects]]
   branch = "master"
@@ -93,11 +80,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:264f2848854a41b03a6525ea6c1e858762caa34964a63dde898dc4bba339e50f"
+  digest = "1:51fb21c0dd1b64d5ae74c34f544e312ee73edd2a258db6347369014b5949f44a"
   name = "github.com/opentracing-contrib/go-stdlib"
   packages = ["nethttp"]
   pruneopts = "UT"
-  revision = "07a764486eb10927e8cf38337918a40d430524ee"
+  revision = "c9628a4f0148d7e441a4af66dc0b1653cd941c20"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
@@ -140,7 +127,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1261069fb38fbe59aba55117ee39c59814f211c027d66d59ed1c60e5c11b377c"
+  digest = "1:db712fde5d12d6cdbdf14b777f0c230f4ff5ab0be8e35b239fc319953ed577a4"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
@@ -148,7 +135,7 @@
     "model",
   ]
   pruneopts = "UT"
-  revision = "16b4535ad14a9ef20a9d9fd8055143c5faa15224"
+  revision = "7e9e6cabbd393fc208072eedef99188d0ce788b6"
 
 [[projects]]
   branch = "master"
@@ -164,7 +151,7 @@
   revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
-  digest = "1:22d0b8854d1df1d03e806e3d172dac199ae539f46c0b9f55b9f6a9be592de0bc"
+  digest = "1:e20363f1f1df376a0affd098bc38daa13397f5aadc13dd7a212dddcf3b11ae00"
   name = "github.com/tdewolff/minify"
   packages = [
     ".",
@@ -174,11 +161,11 @@
     "xml",
   ]
   pruneopts = "UT"
-  revision = "8d72a4127ae33b755e95bffede9b92e396267ce2"
-  version = "v2.3.5"
+  revision = "52ac3a2c39ee917703c04ba67bc59250b34e8fe8"
+  version = "v2.3.7"
 
 [[projects]]
-  digest = "1:f86520dc9ce94fe3fab66ecee0c658c47a34860ffd6a60803f40f9476a32ad5a"
+  digest = "1:948e6ddd6f64a519f36879ec28bc392d1e8268ebc0591200db3c98dd587afed9"
   name = "github.com/tdewolff/parse"
   packages = [
     ".",
@@ -190,8 +177,8 @@
     "xml",
   ]
   pruneopts = "UT"
-  revision = "d739d6fccb0971177e06352fea02d3552625efb1"
-  version = "v2.3.3"
+  revision = "fced451e0bedc5b641b8dcae76b07859e3b4adfd"
+  version = "v2.3.4"
 
 [[projects]]
   digest = "1:ac6f26e917fd2fb3194a7ebe2baf6fb32de2f2fbfed130c18aac0e758a6e1d22"
@@ -233,14 +220,12 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "04a2e542c03f1d053ab3e4d6e5abcd4b66e2be8e"
+  revision = "c10e9556a7bc0e7c942242b606f0acf024ad5d6a"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/ViBiOh/auth/pkg/auth",
-    "github.com/ViBiOh/auth/pkg/provider",
     "github.com/ViBiOh/fibr/pkg/utils",
     "github.com/ViBiOh/httputils/pkg",
     "github.com/ViBiOh/httputils/pkg/alcotest",
