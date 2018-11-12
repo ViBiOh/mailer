@@ -15,11 +15,11 @@
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "4bf687b0703638d49a9d65f98dbb61b23dab81e4"
+  revision = "0a508298b21c53be4c4c88327084d21c58a783b2"
 
 [[projects]]
   branch = "master"
-  digest = "1:2fec01462bbee5b03b7b87a2f59f6a6adc3b0e7dfe2314334f079030c57125d3"
+  digest = "1:e7521d18ed541e11ea97e221c40f932a06c350fdd54c72240c07a2043d816e7a"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -44,7 +44,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "08cb8f858a20d8b33b15504d05bff2b97b35883f"
+  revision = "9ff165f27876dc806981d470f4c31c68e1b035c5"
 
 [[projects]]
   branch = "master"
@@ -135,7 +135,7 @@
     "model",
   ]
   pruneopts = "UT"
-  revision = "7e9e6cabbd393fc208072eedef99188d0ce788b6"
+  revision = "0b1957f9d949dfa3084171a6ec5642b38055276a"
 
 [[projects]]
   branch = "master"
@@ -151,7 +151,7 @@
   revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
-  digest = "1:e20363f1f1df376a0affd098bc38daa13397f5aadc13dd7a212dddcf3b11ae00"
+  digest = "1:48c8c8d1fb550f059bcb5696a6f333693e19e3bad4db00d5c9b19f3846629511"
   name = "github.com/tdewolff/minify"
   packages = [
     ".",
@@ -161,11 +161,11 @@
     "xml",
   ]
   pruneopts = "UT"
-  revision = "52ac3a2c39ee917703c04ba67bc59250b34e8fe8"
-  version = "v2.3.7"
+  revision = "c86dd764169e70ab04e3b0d5fd5e478657a6c83d"
+  version = "v2.3.6"
 
 [[projects]]
-  digest = "1:948e6ddd6f64a519f36879ec28bc392d1e8268ebc0591200db3c98dd587afed9"
+  digest = "1:a8b339430c8019600d19196b9882506ada70af7f4a505080a5843ab5488bb5c0"
   name = "github.com/tdewolff/parse"
   packages = [
     ".",
@@ -177,7 +177,7 @@
     "xml",
   ]
   pruneopts = "UT"
-  revision = "fced451e0bedc5b641b8dcae76b07859e3b4adfd"
+  revision = "1b0354dccc7aceb4528eb638fbfec60d20338a29"
   version = "v2.3.4"
 
 [[projects]]
@@ -220,7 +220,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "c10e9556a7bc0e7c942242b606f0acf024ad5d6a"
+  revision = "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe"
 
 [solve-meta]
   analyzer-name = "dep"
