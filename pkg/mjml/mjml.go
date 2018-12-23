@@ -43,9 +43,9 @@ type App struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  flag.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://api.mjml.io/v1/render`, `[mjml] MJML API Converter URL`),
-		user: flag.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mjml] Application ID or Basic Auth user`),
-		pass: flag.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mjml] Secret Key or Basic Auth pass`),
+		url:  fs.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://api.mjml.io/v1/render`, `[mjml] MJML API Converter URL`),
+		user: fs.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mjml] Application ID or Basic Auth user`),
+		pass: fs.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mjml] Secret Key or Basic Auth pass`),
 	}
 }
 
