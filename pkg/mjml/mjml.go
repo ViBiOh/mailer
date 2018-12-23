@@ -27,17 +27,33 @@ type mjmlResponse struct {
 	Mjml string `json:"mjml"`
 }
 
-// App stores informations
+// Config of package
+type Config struct {
+	url  *string
+	user *string
+	pass *string
+}
+
+// App of package
 type App struct {
 	url     string
 	headers http.Header
 }
 
-// NewApp creates new App from Flags' config
-func NewApp(config map[string]*string) *App {
-	converter := strings.TrimSpace(*config[`url`])
-	user := strings.TrimSpace(*config[`user`])
-	pass := strings.TrimSpace(*config[`pass`])
+// Flags adds flags for configuring package
+func Flags(fs *flag.FlagSet, prefix string) Config {
+	return Config{
+		url:  flag.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://api.mjml.io/v1/render`, `[mjml] MJML API Converter URL`),
+		user: flag.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mjml] Application ID or Basic Auth user`),
+		pass: flag.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mjml] Secret Key or Basic Auth pass`),
+	}
+}
+
+// New creates new App from Config
+func New(config Config) *App {
+	converter := strings.TrimSpace(*config.url)
+	user := strings.TrimSpace(*config.user)
+	pass := strings.TrimSpace(*config.pass)
 
 	if converter == `` {
 		return &App{}
@@ -52,15 +68,6 @@ func NewApp(config map[string]*string) *App {
 	}
 
 	return &app
-}
-
-// Flags adds flags for given prefix
-func Flags(prefix string) map[string]*string {
-	return map[string]*string{
-		`url`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://api.mjml.io/v1/render`, `[mjml] MJML API Converter URL`),
-		`user`: flag.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mjml] Application ID or Basic Auth user`),
-		`pass`: flag.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mjml] Secret Key or Basic Auth pass`),
-	}
 }
 
 // IsMJML determines if provided content is a MJML template or not

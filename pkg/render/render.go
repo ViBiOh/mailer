@@ -27,15 +27,15 @@ const (
 	templateSuffix = `.html`
 )
 
-// App stores informations
+// App of package
 type App struct {
 	mjmlApp    *mjml.App
 	mailjetApp *mailjet.App
 	tpl        *template.Template
 }
 
-// NewApp creates new App from Flags' config
-func NewApp(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
+// New creates new App
+func New(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	templates, err := utils.ListFilesByExt(templatesDir, templateSuffix)
 	if err != nil {
 		logger.Error(`%+v`, err)

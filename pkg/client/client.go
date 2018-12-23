@@ -13,35 +13,42 @@ import (
 	"github.com/ViBiOh/httputils/pkg/tools"
 )
 
-// App stores informations
+// Config of package
+type Config struct {
+	url  *string
+	user *string
+	pass *string
+}
+
+// App of package
 type App struct {
 	url    string
 	header http.Header
 }
 
-// NewApp creates new App from Flags' config
-func NewApp(config map[string]*string) *App {
-	user := strings.TrimSpace(*config[`user`])
-	pass := strings.TrimSpace(*config[`pass`])
+// Flags adds flags for configuring package
+func Flags(fs *flag.FlagSet, prefix string) Config {
+	return Config{
+		url:  fs.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://mailer.vibioh.fr`, `[mailer] Mailer URL`),
+		user: fs.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mailer] Mailer User`),
+		pass: fs.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mailer] Mailer Pass`),
+	}
+}
+
+// New creates new App from Config
+func New(config Config) *App {
+	user := strings.TrimSpace(*config.user)
+	pass := strings.TrimSpace(*config.pass)
 
 	if user == `` || pass == `` {
 		return &App{}
 	}
 
 	return &App{
-		url: strings.TrimSpace(*config[`url`]),
+		url: strings.TrimSpace(*config.url),
 		header: http.Header{
 			`Authorization`: []string{request.GenerateBasicAuth(user, pass)},
 		},
-	}
-}
-
-// Flags adds flags for given prefix
-func Flags(prefix string) map[string]*string {
-	return map[string]*string{
-		`url`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://mailer.vibioh.fr`, `[mailer] Mailer URL`),
-		`user`: flag.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mailer] Mailer User`),
-		`pass`: flag.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mailer] Mailer Pass`),
 	}
 }
 

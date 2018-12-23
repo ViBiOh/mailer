@@ -6,13 +6,13 @@ import (
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 )
 
-// App stores informations
+// App of package
 type App struct {
 	mailjetApp *mailjet.App
 }
 
-// NewApp creates new App from Flags' config
-func NewApp(mailjetAppDep *mailjet.App) *App {
+// New creates new App
+func New(mailjetAppDep *mailjet.App) *App {
 	return &App{
 		mailjetApp: mailjetAppDep,
 	}

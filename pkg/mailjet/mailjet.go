@@ -50,27 +50,36 @@ type Response struct {
 	Sent []Recipient `json:"Sent"`
 }
 
-// App stores informations
+// Config of package
+type Config struct {
+	publicKey  *string
+	privateKey *string
+}
+
+// App of package
 type App struct {
 	headers http.Header
 }
 
-// NewApp creates new App from Flags' config
-func NewApp(config map[string]*string) *App {
-	if *config[`publicKey`] == `` || *config[`privateKey`] == `` {
+// Flags adds flags for configuring package
+func Flags(fs *flag.FlagSet, prefix string) Config {
+	return Config{
+		publicKey:  fs.String(tools.ToCamel(fmt.Sprintf(`%sPublicKey`, prefix)), ``, `[mailjet] Public Key`),
+		privateKey: fs.String(tools.ToCamel(fmt.Sprintf(`%sPrivateKey`, prefix)), ``, `[mailjet] Private Key`),
+	}
+}
+
+// New creates new App from Config
+func New(config Config) *App {
+	publicKey := strings.TrimSpace(*config.publicKey)
+	privateKey := strings.TrimSpace(*config.privateKey)
+
+	if publicKey == `` || privateKey == `` {
 		return &App{}
 	}
 
 	return &App{
-		headers: http.Header{`Authorization`: []string{request.GenerateBasicAuth(*config[`publicKey`], *config[`privateKey`])}},
-	}
-}
-
-// Flags adds flags for given prefix
-func Flags(prefix string) map[string]*string {
-	return map[string]*string{
-		`publicKey`:  flag.String(tools.ToCamel(fmt.Sprintf(`%sPublicKey`, prefix)), ``, `Mailjet Public Key`),
-		`privateKey`: flag.String(tools.ToCamel(fmt.Sprintf(`%sPrivateKey`, prefix)), ``, `Mailjet Private Key`),
+		headers: http.Header{`Authorization`: []string{request.GenerateBasicAuth(publicKey, privateKey)}},
 	}
 }
 

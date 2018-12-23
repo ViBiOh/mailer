@@ -19,7 +19,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:464f4f6b712d017898419f55c1c6c68dea10df0d21055873463fdd30d0398c71"
+  digest = "1:77a5327d2a87fc9155a42953fdbbbd03520449c86fbf9fa33d8851cd56f12870"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -44,7 +44,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "c63a4d292c81848acc76c431f66e5140190df87e"
+  revision = "2fff2dd86693cb2230add917d8660d112cb7294a"
 
 [[projects]]
   branch = "master"
@@ -80,11 +80,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5d7236b6cedaadd901d2f1533113f11c955bb676df646b676c94d13c43dfedbe"
+  digest = "1:bfc0c5e306ac24c94aaa10bcd8f22ef1436005582da9241c0742a1a26fd93174"
   name = "github.com/opentracing-contrib/go-stdlib"
   packages = ["nethttp"]
   pruneopts = "UT"
-  revision = "09659152d0aa5b83bb7683a9c33c79f8ee57038c"
+  revision = "77df8e8e70b403c6b13c0fffaa4867c9044ff4e9"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
@@ -127,7 +127,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:db712fde5d12d6cdbdf14b777f0c230f4ff5ab0be8e35b239fc319953ed577a4"
+  digest = "1:33c81bf709f084827a560e14415b1d7001a6d1d6fa4bec2cc2e60b84ecbc0e0a"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
@@ -135,7 +135,7 @@
     "model",
   ]
   pruneopts = "UT"
-  revision = "4724e9255275ce38f7179b2478abeae4e28c904f"
+  revision = "67670fe90761d7ff18ec1d640135e53b9198328f"
 
 [[projects]]
   branch = "master"
@@ -220,7 +220,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "891ebc4b82d6e74f468c533b06f983c7be918a96"
+  revision = "927f97764cc334a6575f4b7a1584a147864d5723"
 
 [solve-meta]
   analyzer-name = "dep"

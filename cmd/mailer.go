@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"net/http"
+	"os"
 	"strings"
 
 	httputils "github.com/ViBiOh/httputils/pkg"
@@ -11,6 +12,7 @@ import (
 	"github.com/ViBiOh/httputils/pkg/gzip"
 	"github.com/ViBiOh/httputils/pkg/healthcheck"
 	"github.com/ViBiOh/httputils/pkg/httperror"
+	"github.com/ViBiOh/httputils/pkg/logger"
 	"github.com/ViBiOh/httputils/pkg/opentracing"
 	"github.com/ViBiOh/httputils/pkg/owasp"
 	"github.com/ViBiOh/httputils/pkg/prometheus"
@@ -29,33 +31,37 @@ const (
 )
 
 func main() {
-	serverConfig := httputils.Flags(``)
-	alcotestConfig := alcotest.Flags(``)
-	prometheusConfig := prometheus.Flags(`prometheus`)
-	opentracingConfig := opentracing.Flags(`tracing`)
-	owaspConfig := owasp.Flags(``)
-	corsConfig := cors.Flags(`cors`)
+	fs := flag.NewFlagSet(`mailer`, flag.ExitOnError)
 
-	mailjetConfig := mailjet.Flags(`mailjet`)
-	mjmlConfig := mjml.Flags(`mjml`)
+	serverConfig := httputils.Flags(fs, ``)
+	alcotestConfig := alcotest.Flags(fs, ``)
+	prometheusConfig := prometheus.Flags(fs, `prometheus`)
+	opentracingConfig := opentracing.Flags(fs, `tracing`)
+	owaspConfig := owasp.Flags(fs, ``)
+	corsConfig := cors.Flags(fs, `cors`)
 
-	flag.Parse()
+	mailjetConfig := mailjet.Flags(fs, `mailjet`)
+	mjmlConfig := mjml.Flags(fs, `mjml`)
+
+	if err := fs.Parse(os.Args[1:]); err != nil {
+		logger.Fatal(`%+v`, err)
+	}
 
 	alcotest.DoAndExit(alcotestConfig)
 
-	serverApp := httputils.NewApp(serverConfig)
-	healthcheckApp := healthcheck.NewApp()
-	prometheusApp := prometheus.NewApp(prometheusConfig)
-	opentracingApp := opentracing.NewApp(opentracingConfig)
-	gzipApp := gzip.NewApp()
-	owaspApp := owasp.NewApp(owaspConfig)
-	corsApp := cors.NewApp(corsConfig)
+	serverApp := httputils.New(serverConfig)
+	healthcheckApp := healthcheck.New()
+	prometheusApp := prometheus.New(prometheusConfig)
+	opentracingApp := opentracing.New(opentracingConfig)
+	gzipApp := gzip.New()
+	owaspApp := owasp.New(owaspConfig)
+	corsApp := cors.New(corsConfig)
 
-	mjmlApp := mjml.NewApp(mjmlConfig)
-	mailjetApp := mailjet.NewApp(mailjetConfig)
-	renderApp := render.NewApp(mjmlApp, mailjetApp)
+	mjmlApp := mjml.New(mjmlConfig)
+	mailjetApp := mailjet.New(mailjetConfig)
+	renderApp := render.New(mjmlApp, mailjetApp)
 
-	healthcheckApp.NextHealthcheck(mailerHealthcheck.NewApp(mailjetApp).Handler())
+	healthcheckApp.NextHealthcheck(mailerHealthcheck.New(mailjetApp).Handler())
 
 	mailjetHandler := mailjetApp.Handler()
 	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
