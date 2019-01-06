@@ -15,7 +15,7 @@
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "abf481fa0e8a1c8cf8e91717655b3aeddc583ed6"
+  revision = "3d2ffd2b95a36bd5cfc0762abdad40119a6e5c78"
 
 [[projects]]
   branch = "master"
@@ -43,7 +43,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "2fff2dd86693cb2230add917d8660d112cb7294a"
+  revision = "b569bdfdbf9036f8f2026fc7203db165decc61ec"
 
 [[projects]]
   branch = "master"
@@ -74,12 +74,12 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:48c8c8d1fb550f059bcb5696a6f333693e19e3bad4db00d5c9b19f3846629511"
