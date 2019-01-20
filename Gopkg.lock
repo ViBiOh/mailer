@@ -11,15 +11,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:338b89e6204f226be765f9e09e7a4ea138635f3719fb4e53f8e9dca7e35ec3e2"
+  digest = "1:810965ef2b31dd948587c09c0696117540f11e54b49641a03b1c7dda0ec57446"
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "3d2ffd2b95a36bd5cfc0762abdad40119a6e5c78"
+  revision = "32c3330c31d84bfe73778c61ba32b28dfe7ad842"
 
 [[projects]]
   branch = "master"
-  digest = "1:442ecbae895c45f259549b6eb5db2c66f3b0778450812e7ecc6015cf966573b8"
+  digest = "1:6734f214e87a0609b346ab90c752020da7aca90e3612b7a946c2742250a95677"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -43,7 +43,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "b569bdfdbf9036f8f2026fc7203db165decc61ec"
+  revision = "f34a4b0c6f552c687db14b15c1a88111f8c40419"
 
 [[projects]]
   branch = "master"
@@ -151,7 +151,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "927f97764cc334a6575f4b7a1584a147864d5723"
+  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
 
 [solve-meta]
   analyzer-name = "dep"
