@@ -15,7 +15,7 @@
   name = "github.com/ViBiOh/fibr"
   packages = ["pkg/utils"]
   pruneopts = "UT"
-  revision = "32c3330c31d84bfe73778c61ba32b28dfe7ad842"
+  revision = "cf5dec16f4e1a75747d40e64992092459bb9e040"
 
 [[projects]]
   branch = "master"
@@ -43,7 +43,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "f34a4b0c6f552c687db14b15c1a88111f8c40419"
+  revision = "44a35421da3fef11fef81a0d1b19640c1cafb21e"
 
 [[projects]]
   branch = "master"
@@ -151,7 +151,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [solve-meta]
   analyzer-name = "dep"
