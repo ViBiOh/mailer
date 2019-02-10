@@ -27,7 +27,7 @@ jobs:
 
     script: |
       sed \
-        -e "s|\${BASIC_USERS}|${BASIC_USERS}|g" \
+        -e "s|\${HTTP_PASSWORD}|${HTTP_PASSWORD}|g" \
         -e "s|\${MAILJET_APIKEY_PUBLIC}|${MAILJET_APIKEY_PUBLIC}|g" \
         -e "s|\${MAILJET_APIKEY_PRIVATE}|${MAILJET_APIKEY_PRIVATE}|g" \
         -e "s|\${MJML_URL}|${MJML_URL}|g" \
