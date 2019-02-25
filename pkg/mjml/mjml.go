@@ -85,7 +85,12 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
-	content, _, _, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
+	body, _, _, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
+	if err != nil {
+		return ``, err
+	}
+
+	content, err := request.ReadBody(body)
 	if err != nil {
 		return ``, err
 	}
