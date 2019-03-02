@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/fibr/pkg/utils"
 	"github.com/ViBiOh/httputils/pkg/errors"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/httpjson"
@@ -36,7 +35,7 @@ type App struct {
 
 // New creates new App
 func New(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
-	templates, err := utils.ListFilesByExt(templatesDir, templateSuffix)
+	templates, err := templates.GetTemplates(templatesDir, templateSuffix)
 	if err != nil {
 		logger.Error(`%+v`, err)
 	}
