@@ -33,6 +33,7 @@ jobs:
         -e "s|\${MJML_URL}|${MJML_URL}|g" \
         -e "s|\${MJML_USER}|${MJML_USER}|g" \
         -e "s|\${MJML_PASS}|${MJML_PASS}|g" \
+        -e "s|\\\$|\$\$|g" \
         docker-compose.yml > docker-compose-env.yml
     deploy:
     - provider: script
