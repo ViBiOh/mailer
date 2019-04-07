@@ -37,7 +37,7 @@ jobs:
     deploy:
     - provider: script
       skip_cleanup: true
-      script: 'curl -H "Authorization: GitHub ${GITHUB_OAUTH_TOKEN}" -X POST "https://dashboard-api.vibioh.fr/deploy/mailer/" --data-binary @docker-compose-env.yml'
+      script: 'curl -X POST -u "${DEPLOY_CREDENTIALS}" "https://deploy.vibioh.fr/?project=$(make name)&version=$(make version)" --data-binary @docker-compose-env.yml'
 
 stages:
   - Build
