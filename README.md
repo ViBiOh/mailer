@@ -28,51 +28,51 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 ```bash
 Usage of mailer:
   -corsCredentials
-      [cors] Access-Control-Allow-Credentials
+        [cors] Access-Control-Allow-Credentials
   -corsExpose string
-      [cors] Access-Control-Expose-Headers
+        [cors] Access-Control-Expose-Headers
   -corsHeaders string
-      [cors] Access-Control-Allow-Headers (default "Content-Type")
+        [cors] Access-Control-Allow-Headers (default "Content-Type")
   -corsMethods string
-      [cors] Access-Control-Allow-Methods (default "GET")
+        [cors] Access-Control-Allow-Methods (default "GET")
   -corsOrigin string
-      [cors] Access-Control-Allow-Origin (default "*")
+        [cors] Access-Control-Allow-Origin (default "*")
   -csp string
-      [owasp] Content-Security-Policy (default "default-src 'self'; base-uri 'self'")
+        [owasp] Content-Security-Policy (default "default-src 'self'; base-uri 'self'")
   -frameOptions string
-      [owasp] X-Frame-Options (default "deny")
+        [owasp] X-Frame-Options (default "deny")
   -hsts
-      [owasp] Indicate Strict Transport Security (default true)
+        [owasp] Indicate Strict Transport Security (default true)
   -mailjetPrivateKey string
-      [mailjet] Private Key
+        [mailjet] Private Key
   -mailjetPublicKey string
-      [mailjet] Public Key
+        [mailjet] Public Key
   -mjmlPass string
-      [mjml] Secret Key or Basic Auth pass
+        [mjml] Secret Key or Basic Auth pass
   -mjmlURL string
-      [mjml] MJML API Converter URL (default "https://api.mjml.io/v1/render")
+        [mjml] MJML API Converter URL (default "https://api.mjml.io/v1/render")
   -mjmlUser string
-      [mjml] Application ID or Basic Auth user
+        [mjml] Application ID or Basic Auth user
   -port int
-      Listen port (default 1080)
+        Listen port (default 1080)
   -prometheusPath string
-      [prometheus] Path for exposing metrics (default "/metrics")
+        [prometheus] Path for exposing metrics (default "/metrics")
   -tls
-      Serve TLS content (default true)
+        Serve TLS content (default true)
   -tlsCert string
-      [tls] PEM Certificate file
+        [tls] PEM Certificate file
   -tlsHosts string
-      [tls] Self-signed certificate hosts, comma separated (default "localhost")
+        [tls] Self-signed certificate hosts, comma separated (default "localhost")
   -tlsKey string
-      [tls] PEM Key file
+        [tls] PEM Key file
   -tlsOrganization string
-      [tls] Self-signed certificate organization (default "ViBiOh")
+        [tls] Self-signed certificate organization (default "ViBiOh")
   -tracingAgent string
-      [opentracing] Jaeger Agent (e.g. host:port) (default "jaeger:6831")
+        [opentracing] Jaeger Agent (e.g. host:port) (default "jaeger:6831")
   -tracingName string
-      [opentracing] Service name
+        [opentracing] Service name
   -url string
-      [health] URL to check
+        [health] URL to check
   -userAgent string
-      [health] User-Agent for check (default "Golang alcotest")
+        [health] User-Agent for check (default "Golang alcotest")
 ```

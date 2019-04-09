@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "app": "dashboard",
+  "output": [
+    "Starting services for deploy",
+    "Pulling api       ... ",
+    "Pulling portainer ... ",
+    "deploy_api is up-to-date",
+    "Creating deploy6ec1787_portainer_1_ada65f9d245b ... ",
+    "Removing old containers from deploy",
+    "Renaming containers from deploy6ec1787 to deploy",
+    "Deploy successful! ",
+    "Cleaning docker system"
+  ]
+}

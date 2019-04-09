@@ -1,0 +1,43 @@
+<mjml>
+  <mj-body background-color="#e1e1e8">
+    <mj-spacer height="40px"></mj-spacer>
+
+    <mj-section background-color="#3a3a3a">
+      <mj-column padding="0">
+        <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">deploy</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0">
+      <mj-column>
+        <mj-text align="center">
+          <h1>
+            deploy of <strong>{{- .app -}}</strong>
+          </h1>
+
+          <h2>
+            {{- if .success -}}
+              <span style="color: #4cae4c;">Successful</span>
+            {{- else -}}
+              <span style="color: #ff6347;">Failed</span>
+            {{- end -}}
+          </h2>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#3a3a3a" padding="10">
+      <mj-column>
+        <mj-text color="#f8f8f8" font-size="10px" font-family="Courier new">
+          {{- range $line := .output -}}
+            {{- $line -}}</br>
+          {{- end -}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    {{- template "footer" -}}
+
+    <mj-spacer height="40px"></mj-spacer>
+  </mj-body>
+</mjml>

@@ -10,6 +10,12 @@ APP_PACKAGES = $(shell go list -e $(PACKAGES) | grep -v vendor | grep -v node_mo
 GOBIN=bin
 BINARY_PATH=$(GOBIN)/$(APP_NAME)
 
+SERVER_SOURCE = cmd/$(APP_NAME).go
+SERVER_RUNNER = go run $(SERVER_SOURCE)
+ifeq ($(DEBUG), true)
+	SERVER_RUNNER = dlv debug $(SERVER_SOURCE) --
+endif
+
 .PHONY: help
 help: Makefile
 	@sed -n 's|^##||p' $< | column -t -s ':' | sed -e 's|^| |'
@@ -76,19 +82,13 @@ bench:
 ## build: Build binary of app
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o $(BINARY_PATH) cmd/mailer.go
-
-.PHONY: start-deps
-start-deps:
-	go get github.com/ViBiOh/auth/cmd/bcrypt
+	CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix nocgo -o $(BINARY_PATH) $(SERVER_SOURCE)
 
 ## start: Start app
 .PHONY: start
 start:
-	go run cmd/$(APP_NAME).go \
+	$(SERVER_RUNNER) \
 		-tls=false \
-		-authUsers "admin:admin" \
-		-basicUsers "1:admin:$(bcrypt admin)" \
 		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com" \
 		-mjmlURL $(MJML_URL) \
 		-mjmlUser $(MJML_USER) \
