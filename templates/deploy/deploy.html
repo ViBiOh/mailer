@@ -28,11 +28,11 @@
 
     <mj-section background-color="#3a3a3a" padding="10">
       <mj-column>
-        <mj-text color="#f8f8f8" font-size="10px" font-family="Courier new">
-          {{- range $line := .output -}}
-            {{- $line -}}</br>
-          {{- end -}}
-        </mj-text>
+        {{- range $line := .output -}}
+          <mj-text color="{{- if $line.color -}}{{- $line.color -}}{{- else -}}#f8f8f8{{- end -}}" font-size="10px" font-family="Courier new">
+            {{- $line.value -}}</br>
+          </mj-text>
+        {{- end -}}
       </mj-column>
     </mj-section>
 
