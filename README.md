@@ -6,7 +6,6 @@
 
 Mailer is a service for rendering and sending email based on Golang Template with the help of MJML and Mailjet.
 
-
 # Getting Started
 
 ## Docker
