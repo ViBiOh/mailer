@@ -29,9 +29,9 @@ type App struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  fs.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://mailer.vibioh.fr`, `[mailer] Mailer URL`),
-		user: fs.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mailer] Mailer User`),
-		pass: fs.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mailer] Mailer Pass`),
+		url:  fs.String(tools.ToCamel(fmt.Sprintf("%sURL", prefix)), "https://mailer.vibioh.fr", "[mailer] Mailer URL"),
+		user: fs.String(tools.ToCamel(fmt.Sprintf("%sUser", prefix)), "", "[mailer] Mailer User"),
+		pass: fs.String(tools.ToCamel(fmt.Sprintf("%sPass", prefix)), "", "[mailer] Mailer Pass"),
 	}
 }
 
@@ -40,20 +40,20 @@ func New(config Config) *App {
 	user := strings.TrimSpace(*config.user)
 	pass := strings.TrimSpace(*config.pass)
 
-	if user == `` || pass == `` {
+	if user == "" || pass == "" {
 		return &App{}
 	}
 
 	return &App{
 		url: strings.TrimSpace(*config.url),
 		header: http.Header{
-			`Authorization`: []string{request.GenerateBasicAuth(user, pass)},
+			"Authorization": []string{request.GenerateBasicAuth(user, pass)},
 		},
 	}
 }
 
 func (a App) isEnabled() bool {
-	return a.url != ``
+	return a.url != ""
 }
 
 // SendEmail sends emails with Mailer for defined parameters
@@ -63,15 +63,15 @@ func (a App) SendEmail(ctx context.Context, template, from, sender, subject stri
 	}
 
 	if len(recipients) == 0 {
-		return errors.New(`recipients are required`)
+		return errors.New("recipients are required")
 	}
 
-	strRecipients := strings.Join(recipients, `,`)
-	if strRecipients == `` {
-		return errors.New(`no recipient found`)
+	strRecipients := strings.Join(recipients, ",")
+	if strRecipients == "" {
+		return errors.New("no recipient found")
 	}
 
-	_, _, _, err := request.DoJSON(ctx, fmt.Sprintf(`%s/render/%s?from=%s&sender=%s&to=%s&subject=%s`, a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
+	_, _, _, err := request.DoJSON(ctx, fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
 	if err != nil {
 		return err
 	}

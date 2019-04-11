@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	templatesDir   = `./templates/`
-	templateSuffix = `.html`
+	templatesDir   = "./templates/"
+	templateSuffix = ".html"
 )
 
 // App of package
@@ -37,14 +37,14 @@ type App struct {
 func New(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	templates, err := templates.GetTemplates(templatesDir, templateSuffix)
 	if err != nil {
-		logger.Error(`%+v`, err)
+		logger.Error("%+v", err)
 	}
 
 	return &App{
 		mjmlApp:    mjmlApp,
 		mailjetApp: mailjetApp,
-		tpl: template.Must(template.New(`mailer`).Funcs(template.FuncMap{
-			`odd`: func(i int) bool {
+		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
+			"odd": func(i int) bool {
 				return i%2 == 0
 			},
 		}).ParseFiles(templates...)),
@@ -67,9 +67,9 @@ func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 
 func (a App) getContent(templateName string, r *http.Request) (map[string]interface{}, error) {
 	if r.Method == http.MethodGet {
-		fixtureName := r.URL.Query().Get(`fixture`)
-		if fixtureName == `` {
-			fixtureName = `default`
+		fixtureName := r.URL.Query().Get("fixture")
+		if fixtureName == "" {
+			fixtureName = "default"
 		}
 
 		return fixtures.Get(templateName, fixtureName)
@@ -125,7 +125,7 @@ func (a App) Handler() http.Handler {
 
 		ctx := r.Context()
 
-		if r.URL.Path == `` || r.URL.Path == `/` {
+		if r.URL.Path == "" || r.URL.Path == "/" {
 			if r.Method == http.MethodPost {
 				w.WriteHeader(http.StatusMethodNotAllowed)
 			} else {
@@ -144,8 +144,8 @@ func (a App) Handler() http.Handler {
 			}
 		}
 
-		templateName := strings.Trim(r.URL.Path, `/`)
-		tpl := a.tpl.Lookup(fmt.Sprintf(`%s%s`, templateName, templateSuffix))
+		templateName := strings.Trim(r.URL.Path, "/")
+		tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", templateName, templateSuffix))
 
 		if tpl == nil {
 			httperror.NotFound(w)

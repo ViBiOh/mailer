@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	prefix = []byte(`<mjml>`)
+	prefix = []byte("<mjml>")
 )
 
 type mjmlRequest struct {
@@ -43,9 +43,9 @@ type App struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  fs.String(tools.ToCamel(fmt.Sprintf(`%sURL`, prefix)), `https://api.mjml.io/v1/render`, `[mjml] MJML API Converter URL`),
-		user: fs.String(tools.ToCamel(fmt.Sprintf(`%sUser`, prefix)), ``, `[mjml] Application ID or Basic Auth user`),
-		pass: fs.String(tools.ToCamel(fmt.Sprintf(`%sPass`, prefix)), ``, `[mjml] Secret Key or Basic Auth pass`),
+		url:  fs.String(tools.ToCamel(fmt.Sprintf("%sURL", prefix)), "https://api.mjml.io/v1/render", "[mjml] MJML API Converter URL"),
+		user: fs.String(tools.ToCamel(fmt.Sprintf("%sUser", prefix)), "", "[mjml] Application ID or Basic Auth user"),
+		pass: fs.String(tools.ToCamel(fmt.Sprintf("%sPass", prefix)), "", "[mjml] Secret Key or Basic Auth pass"),
 	}
 }
 
@@ -55,7 +55,7 @@ func New(config Config) *App {
 	user := strings.TrimSpace(*config.user)
 	pass := strings.TrimSpace(*config.pass)
 
-	if converter == `` {
+	if converter == "" {
 		return &App{}
 	}
 
@@ -63,8 +63,8 @@ func New(config Config) *App {
 		url: converter,
 	}
 
-	if user != `` && pass != `` {
-		app.headers = http.Header{`Authorization`: []string{request.GenerateBasicAuth(user, pass)}}
+	if user != "" && pass != "" {
+		app.headers = http.Header{"Authorization": []string{request.GenerateBasicAuth(user, pass)}}
 	}
 
 	return &app
@@ -76,7 +76,7 @@ func IsMJML(content []byte) bool {
 }
 
 func (a App) isReady() bool {
-	return a.url != ``
+	return a.url != ""
 }
 
 // Render MJML template
@@ -87,17 +87,17 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 
 	body, _, _, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
 	if err != nil {
-		return ``, err
+		return "", err
 	}
 
 	content, err := request.ReadBody(body)
 	if err != nil {
-		return ``, err
+		return "", err
 	}
 
 	var response mjmlResponse
 	if err := json.Unmarshal(content, &response); err != nil {
-		return ``, errors.WithStack(err)
+		return "", errors.WithStack(err)
 	}
 
 	return response.HTML, nil

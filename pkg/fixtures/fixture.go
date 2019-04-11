@@ -15,24 +15,24 @@ import (
 )
 
 const (
-	templatesDir  = `./templates/`
-	jsonExtension = `.json`
+	templatesDir  = "./templates/"
+	jsonExtension = ".json"
 )
 
 // ErrNoTemplate error occurs when template is not found
-var ErrNoTemplate = native_errors.New(`no template found`)
+var ErrNoTemplate = native_errors.New("no template found")
 
 func getTemplatePath(templateName string) string {
-	return fmt.Sprintf(`%s/%s/`, templatesDir, templateName)
+	return fmt.Sprintf("%s/%s/", templatesDir, templateName)
 }
 
 func getFixturePath(templateName, fixtureName string) string {
-	return fmt.Sprintf(`%s/%s/%s%s`, templatesDir, templateName, fixtureName, jsonExtension)
+	return fmt.Sprintf("%s/%s/%s%s", templatesDir, templateName, fixtureName, jsonExtension)
 }
 
 func checkExist(path string, directory bool) error {
 	if info, err := os.Stat(path); err != nil {
-		if strings.Contains(err.Error(), `no such file or directory`) {
+		if strings.Contains(err.Error(), "no such file or directory") {
 			return ErrNoTemplate
 		}
 		return err
@@ -110,13 +110,13 @@ func getHandler(w http.ResponseWriter, r *http.Request, templateName, fixtureNam
 // Handler for fixture request. Should be use with net/http
 func Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		query := strings.Trim(r.URL.Path, `/`)
-		if query == `` {
+		query := strings.Trim(r.URL.Path, "/")
+		if query == "" {
 			httperror.NotFound(w)
 			return
 		}
 
-		urlParts := strings.Split(query, `/`)
+		urlParts := strings.Split(query, "/")
 
 		if len(urlParts) == 1 {
 			listHandler(w, r, urlParts[0])

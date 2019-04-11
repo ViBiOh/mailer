@@ -14,21 +14,21 @@ import (
 )
 
 const (
-	sendURL = `https://api.mailjet.com/v3/send`
+	sendURL = "https://api.mailjet.com/v3/send"
 )
 
 var (
 	// ErrNoConfiguration occurs when configuration is missing
-	ErrNoConfiguration = errors.New(`no configuration for mailjet`)
+	ErrNoConfiguration = errors.New("no configuration for mailjet")
 
 	// ErrEmptyFrom occurs when from parameter is empty
-	ErrEmptyFrom = errors.New(`"from" parameter is empty`)
+	ErrEmptyFrom = errors.New("\"from\" parameter is empty")
 
 	// ErrEmptyTo occurs when to parameter is empty
-	ErrEmptyTo = errors.New(`"to" parameter is empty`)
+	ErrEmptyTo = errors.New("\"to\" parameter is empty")
 
 	// ErrBlankTo occurs when a to recipient is blank
-	ErrBlankTo = errors.New(`"to" item is blank`)
+	ErrBlankTo = errors.New("\"to\" item is blank")
 )
 
 // Recipient of an email
@@ -64,8 +64,8 @@ type App struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		publicKey:  fs.String(tools.ToCamel(fmt.Sprintf(`%sPublicKey`, prefix)), ``, `[mailjet] Public Key`),
-		privateKey: fs.String(tools.ToCamel(fmt.Sprintf(`%sPrivateKey`, prefix)), ``, `[mailjet] Private Key`),
+		publicKey:  fs.String(tools.ToCamel(fmt.Sprintf("%sPublicKey", prefix)), "", "[mailjet] Public Key"),
+		privateKey: fs.String(tools.ToCamel(fmt.Sprintf("%sPrivateKey", prefix)), "", "[mailjet] Private Key"),
 	}
 }
 
@@ -74,12 +74,12 @@ func New(config Config) *App {
 	publicKey := strings.TrimSpace(*config.publicKey)
 	privateKey := strings.TrimSpace(*config.privateKey)
 
-	if publicKey == `` || privateKey == `` {
+	if publicKey == "" || privateKey == "" {
 		return &App{}
 	}
 
 	return &App{
-		headers: http.Header{`Authorization`: []string{request.GenerateBasicAuth(publicKey, privateKey)}},
+		headers: http.Header{"Authorization": []string{request.GenerateBasicAuth(publicKey, privateKey)}},
 	}
 }
 
@@ -89,7 +89,7 @@ func (a App) CheckParameters(mail *Mail) error {
 		return ErrNoConfiguration
 	}
 
-	if strings.TrimSpace(mail.From) == `` {
+	if strings.TrimSpace(mail.From) == "" {
 		return ErrEmptyFrom
 	}
 
@@ -98,7 +98,7 @@ func (a App) CheckParameters(mail *Mail) error {
 	}
 
 	for _, to := range mail.To {
-		if strings.TrimSpace(to.Email) == `` {
+		if strings.TrimSpace(to.Email) == "" {
 			return ErrBlankTo
 		}
 	}
@@ -109,14 +109,14 @@ func (a App) CheckParameters(mail *Mail) error {
 // GetParameters retrieves mail descriptor from Query
 func (a App) GetParameters(r *http.Request) *Mail {
 	mail := &Mail{
-		From:    strings.TrimSpace(r.URL.Query().Get(`from`)),
-		Sender:  strings.TrimSpace(r.URL.Query().Get(`sender`)),
-		Subject: strings.TrimSpace(r.URL.Query().Get(`subject`)),
+		From:    strings.TrimSpace(r.URL.Query().Get("from")),
+		Sender:  strings.TrimSpace(r.URL.Query().Get("sender")),
+		Subject: strings.TrimSpace(r.URL.Query().Get("subject")),
 		To:      []Recipient{},
 	}
 
-	for _, rawTo := range strings.Split(r.URL.Query().Get(`to`), `,`) {
-		if cleanTo := strings.TrimSpace(rawTo); cleanTo != `` {
+	for _, rawTo := range strings.Split(r.URL.Query().Get("to"), ",") {
+		if cleanTo := strings.TrimSpace(rawTo); cleanTo != "" {
 			mail.To = append(mail.To, Recipient{Email: cleanTo})
 		}
 	}

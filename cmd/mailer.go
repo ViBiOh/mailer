@@ -25,26 +25,26 @@ import (
 )
 
 const (
-	fixturesPath = `/fixtures`
-	renderPath   = `/render`
-	sendPath     = `/send`
+	fixturesPath = "/fixtures"
+	renderPath   = "/render"
+	sendPath     = "/send"
 )
 
 func main() {
-	fs := flag.NewFlagSet(`mailer`, flag.ExitOnError)
+	fs := flag.NewFlagSet("mailer", flag.ExitOnError)
 
-	serverConfig := httputils.Flags(fs, ``)
-	alcotestConfig := alcotest.Flags(fs, ``)
-	prometheusConfig := prometheus.Flags(fs, `prometheus`)
-	opentracingConfig := opentracing.Flags(fs, `tracing`)
-	owaspConfig := owasp.Flags(fs, ``)
-	corsConfig := cors.Flags(fs, `cors`)
+	serverConfig := httputils.Flags(fs, "")
+	alcotestConfig := alcotest.Flags(fs, "")
+	prometheusConfig := prometheus.Flags(fs, "prometheus")
+	opentracingConfig := opentracing.Flags(fs, "tracing")
+	owaspConfig := owasp.Flags(fs, "")
+	corsConfig := cors.Flags(fs, "cors")
 
-	mailjetConfig := mailjet.Flags(fs, `mailjet`)
-	mjmlConfig := mjml.Flags(fs, `mjml`)
+	mailjetConfig := mailjet.Flags(fs, "mailjet")
+	mjmlConfig := mjml.Flags(fs, "mjml")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
-		logger.Fatal(`%+v`, err)
+		logger.Fatal("%+v", err)
 	}
 
 	alcotest.DoAndExit(alcotestConfig)
