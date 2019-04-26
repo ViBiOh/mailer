@@ -30,10 +30,6 @@ services:
       traefik.frontend.rateLimit.rateSet.first.average: '100'
       traefik.frontend.rateLimit.rateSet.first.burst: '200'
       traefik.frontend.auth.basic.users: '${HTTP_PASSWORD}'
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
     restart: on-failure:5
     read_only: true
     cpu_shares: 128
