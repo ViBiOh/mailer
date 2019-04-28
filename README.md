@@ -26,6 +26,8 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 
 ```bash
 Usage of mailer:
+  -cert string
+        [http] Certificate file
   -corsCredentials
         [cors] Access-Control-Allow-Credentials
   -corsExpose string
@@ -42,6 +44,8 @@ Usage of mailer:
         [owasp] X-Frame-Options (default "deny")
   -hsts
         [owasp] Indicate Strict Transport Security (default true)
+  -key string
+        [http] Key file
   -mailjetPrivateKey string
         [mailjet] Private Key
   -mailjetPublicKey string
@@ -53,25 +57,15 @@ Usage of mailer:
   -mjmlUser string
         [mjml] Application ID or Basic Auth user
   -port int
-        Listen port (default 1080)
+        [http] Listen port (default 1080)
   -prometheusPath string
         [prometheus] Path for exposing metrics (default "/metrics")
-  -tls
-        Serve TLS content (default true)
-  -tlsCert string
-        [tls] PEM Certificate file
-  -tlsHosts string
-        [tls] Self-signed certificate hosts, comma separated (default "localhost")
-  -tlsKey string
-        [tls] PEM Key file
-  -tlsOrganization string
-        [tls] Self-signed certificate organization (default "ViBiOh")
   -tracingAgent string
-        [opentracing] Jaeger Agent (e.g. host:port) (default "jaeger:6831")
+        [tracing] Jaeger Agent (e.g. host:port) (default "jaeger:6831")
   -tracingName string
-        [opentracing] Service name
+        [tracing] Service name
   -url string
-        [health] URL to check
+        [alcotest] URL to check
   -userAgent string
-        [health] User-Agent for check (default "Golang alcotest")
+        [alcotest] User-Agent for check (default "Golang alcotest")
 ```
