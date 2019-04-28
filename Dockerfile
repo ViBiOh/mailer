@@ -14,7 +14,7 @@ RUN make ${APP_NAME} \
 FROM scratch
 
 ENV APP_NAME mailer
-HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "https://localhost:1080/health" ]
+HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://localhost:1080/health" ]
 
 ENTRYPOINT [ "/mailer" ]
 EXPOSE 1080
