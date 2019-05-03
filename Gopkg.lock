@@ -11,7 +11,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3e08c087c3955451913a23213059a4e0e10e45173f82f860461b8d938186562d"
+  digest = "1:fbafa5198609aa02d2ee883560f54dce973f8c7774b5315b66cc0064cb6e2cb0"
   name = "github.com/ViBiOh/httputils"
   packages = [
     "pkg",
@@ -35,7 +35,7 @@
     "pkg/writer",
   ]
   pruneopts = "UT"
-  revision = "7f155d4514001316eedafe5a74a3a52659a2fb5c"
+  revision = "205ac7f9dd32f4060cefa8744aaf349126e6ad67"
 
 [[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
@@ -123,11 +123,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2ea45e71e0198d6b989ed6302cc4f72a83be1e7d6469d08a59e56a2c447aea55"
+  digest = "1:08f5524b0ca33fab03c05bd0015337c1d5658c3cf580d4772d789cbe42344db3"
   name = "github.com/prometheus/procfs"
-  packages = ["."]
+  packages = [
+    ".",
+    "internal/fs",
+  ]
   pruneopts = "UT"
-  revision = "87a4384529e0652f5035fb5cc8095faf73ea9b0b"
+  revision = "740c0778500738e56e1877d52904c431a3fdc573"
 
 [[projects]]
   digest = "1:48c8c8d1fb550f059bcb5696a6f333693e19e3bad4db00d5c9b19f3846629511"
