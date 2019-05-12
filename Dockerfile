@@ -1,21 +1,24 @@
 FROM golang:1.12 as builder
 
-ENV APP_NAME mailer
-
 WORKDIR /app
 COPY . .
 
-RUN make ${APP_NAME} \
+RUN make mailer \
  && curl -s -o /app/cacert.pem https://curl.haxx.se/ca/cacert.pem
+
+ARG CODECOV_TOKEN
+RUN curl -s https://codecov.io/bash | bash
 
 FROM scratch
 
-ENV APP_NAME mailer
-HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://localhost:1080/health" ]
-
-ENTRYPOINT [ "/mailer" ]
 EXPOSE 1080
+
+HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://localhost:1080/health" ]
+ENTRYPOINT [ "/mailer" ]
+
+ARG APP_VERSION
+ENV VERSION=${APP_VERSION}
 
 COPY templates/ /templates
 COPY --from=builder /app/cacert.pem /etc/ssl/certs/ca-certificates.crt
-COPY --from=builder /app/bin/${APP_NAME} /mailer
+COPY --from=builder /app/bin/mailer /mailer
