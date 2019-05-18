@@ -12,13 +12,16 @@ ifeq ($(DEBUG), true)
 	SERVER_RUNNER = dlv debug $(SERVER_SOURCE) --
 endif
 
+.DEFAULT_GOAL := app
+
+## help: Display list of commands
 .PHONY: help
 help: Makefile
 	@sed -n 's|^##||p' $< | column -t -s ':' | sed -e 's|^| |'
 
-## $(APP_NAME): Build app with dependencies download
-.PHONY: $(APP_NAME)
-$(APP_NAME): deps go
+## app: Build app with dependencies download
+.PHONY: app
+app: deps go
 
 .PHONY: go
 go: format lint test bench build

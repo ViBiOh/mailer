@@ -3,7 +3,7 @@ FROM golang:1.12 as builder
 WORKDIR /app
 COPY . .
 
-RUN make mailer \
+RUN make \
  && curl -s -o /app/cacert.pem https://curl.haxx.se/ca/cacert.pem
 
 ARG CODECOV_TOKEN
