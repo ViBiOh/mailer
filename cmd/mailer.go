@@ -27,7 +27,6 @@ import (
 const (
 	fixturesPath = "/fixtures"
 	renderPath   = "/render"
-	sendPath     = "/send"
 )
 
 func main() {
@@ -67,18 +66,12 @@ func main() {
 
 	healthcheckApp.NextHealthcheck(mailerHealthcheck.New(mailjetApp).Handler())
 
-	mailjetHandler := mailjetApp.Handler()
 	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
 	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
 
 	mailerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, renderPath) {
 			renderHandler.ServeHTTP(w, r)
-			return
-		}
-
-		if strings.HasPrefix(r.URL.Path, sendPath) {
-			mailjetHandler.ServeHTTP(w, r)
 			return
 		}
 

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/tools"
 )
@@ -127,7 +126,7 @@ func (a App) GetParameters(r *http.Request) *Mail {
 // SendMail send mailjet mail
 func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 	if err := a.CheckParameters(mail); err != nil {
-		return nil
+		return err
 	}
 
 	mail.HTML = html
@@ -136,31 +135,4 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 	}
 
 	return nil
-}
-
-// Handler for Render request. Should be use with net/http
-func (a App) Handler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-
-		content, err := request.ReadBodyRequest(r)
-		if err != nil {
-			httperror.InternalServerError(w, err)
-			return
-		}
-
-		if err := a.SendMail(r.Context(), a.GetParameters(r), string(content)); err != nil {
-			if err == ErrEmptyFrom || err == ErrEmptyTo || err == ErrBlankTo {
-				httperror.BadRequest(w, err)
-			} else {
-				httperror.InternalServerError(w, err)
-			}
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-	})
 }
