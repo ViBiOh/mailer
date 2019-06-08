@@ -13,6 +13,12 @@ import (
 	"github.com/ViBiOh/httputils/pkg/tools"
 )
 
+// App of package
+type App interface {
+	Enabled() bool
+	SendEmail(context.Context, *Email) error
+}
+
 // Config of package
 type Config struct {
 	url  *string
@@ -20,8 +26,7 @@ type Config struct {
 	pass *string
 }
 
-// App of package
-type App struct {
+type app struct {
 	url    string
 	header http.Header
 }
@@ -36,15 +41,15 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config) *App {
+func New(config Config) App {
 	user := strings.TrimSpace(*config.user)
 	pass := strings.TrimSpace(*config.pass)
 
 	if user == "" || pass == "" {
-		return &App{}
+		return &app{}
 	}
 
-	return &App{
+	return &app{
 		url: strings.TrimSpace(*config.url),
 		header: http.Header{
 			"Authorization": []string{request.GenerateBasicAuth(user, pass)},
@@ -52,26 +57,26 @@ func New(config Config) *App {
 	}
 }
 
-func (a App) isEnabled() bool {
+func (a app) Enabled() bool {
 	return a.url != ""
 }
 
 // SendEmail sends emails with Mailer for defined parameters
-func (a App) SendEmail(ctx context.Context, template, from, sender, subject string, recipients []string, payload interface{}) error {
-	if !a.isEnabled() {
+func (a app) SendEmail(ctx context.Context, email *Email) error {
+	if !a.Enabled() {
 		return nil
 	}
 
-	if len(recipients) == 0 {
+	if len(email.recipients) == 0 {
 		return errors.New("recipients are required")
 	}
 
-	strRecipients := strings.Join(recipients, ",")
+	strRecipients := strings.Join(email.recipients, ",")
 	if strRecipients == "" {
 		return errors.New("no recipient found")
 	}
 
-	_, _, _, err := request.DoJSON(ctx, fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(template), url.QueryEscape(from), url.QueryEscape(sender), url.QueryEscape(strRecipients), url.QueryEscape(subject)), payload, a.header, http.MethodPost)
+	_, _, _, err := request.DoJSON(ctx, fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject)), email.payload, a.header, http.MethodPost)
 	if err != nil {
 		return err
 	}
