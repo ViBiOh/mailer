@@ -49,17 +49,19 @@ func (e *Email) WithSubject(subject string) *Email {
 	return e
 }
 
-// To add recipient to list
-func (e *Email) To(recipient string) {
+// To add recipients to list
+func (e *Email) To(recipients ...string) *Email {
 	if e.recipients == nil {
-		e.recipients = []string{recipient}
+		e.recipients = make([]string, 0)
 	}
 
-	e.recipients = append(e.recipients, recipient)
+	e.recipients = append(e.recipients, recipients...)
+
+	return e
 }
 
 // Data set payload
-func (e *Email) Data(data string) *Email {
+func (e *Email) Data(data interface{}) *Email {
 	e.payload = data
 
 	return e
