@@ -17,7 +17,7 @@ services:
     - -csp
     - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com
     - -tracingAgent
-    - monitoring_jaeger:6831
+    - monitoring_jaeger_1:6831
     - -tracingName
     - mailer
     labels:
