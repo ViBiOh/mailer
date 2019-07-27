@@ -15,7 +15,6 @@ import (
 	"github.com/ViBiOh/httputils/pkg/logger"
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/templates"
-	"github.com/ViBiOh/httputils/pkg/writer"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
@@ -162,7 +161,7 @@ func (a App) Handler() http.Handler {
 			return
 		}
 
-		output := writer.Create()
+		output := CreateWriter()
 
 		if err := templates.WriteHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
 			httperror.InternalServerError(w, err)
