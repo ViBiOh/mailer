@@ -10,15 +10,12 @@ import (
 	"github.com/ViBiOh/httputils/pkg/alcotest"
 	"github.com/ViBiOh/httputils/pkg/cors"
 	"github.com/ViBiOh/httputils/pkg/gzip"
-	"github.com/ViBiOh/httputils/pkg/healthcheck"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/logger"
 	"github.com/ViBiOh/httputils/pkg/opentracing"
 	"github.com/ViBiOh/httputils/pkg/owasp"
 	"github.com/ViBiOh/httputils/pkg/prometheus"
-	"github.com/ViBiOh/httputils/pkg/server"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
-	mailerHealthcheck "github.com/ViBiOh/mailer/pkg/healthcheck"
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/render"
@@ -49,7 +46,6 @@ func main() {
 	serverApp, err := httputils.New(serverConfig)
 	logger.Fatal(err)
 
-	healthcheckApp := healthcheck.New()
 	prometheusApp := prometheus.New(prometheusConfig)
 	opentracingApp := opentracing.New(opentracingConfig)
 	gzipApp := gzip.New()
@@ -59,8 +55,6 @@ func main() {
 	mjmlApp := mjml.New(mjmlConfig)
 	mailjetApp := mailjet.New(mailjetConfig)
 	renderApp := render.New(mjmlApp, mailjetApp)
-
-	healthcheckApp.NextHealthcheck(mailerHealthcheck.New(mailjetApp).Handler())
 
 	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
 	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
@@ -79,7 +73,7 @@ func main() {
 		httperror.NotFound(w)
 	})
 
-	handler := server.ChainMiddlewares(mailerHandler, prometheusApp, opentracingApp, gzipApp, owaspApp, corsApp)
+	handler := httputils.ChainMiddlewares(mailerHandler, prometheusApp, opentracingApp, gzipApp, owaspApp, corsApp)
 
-	serverApp.ListenAndServe(handler, nil, healthcheckApp)
+	serverApp.ListenAndServe(handler, httputils.HealthHandler(nil), nil)
 }
