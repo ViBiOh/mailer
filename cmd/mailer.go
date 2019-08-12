@@ -9,7 +9,6 @@ import (
 	httputils "github.com/ViBiOh/httputils/pkg"
 	"github.com/ViBiOh/httputils/pkg/alcotest"
 	"github.com/ViBiOh/httputils/pkg/cors"
-	"github.com/ViBiOh/httputils/pkg/gzip"
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/logger"
 	"github.com/ViBiOh/httputils/pkg/opentracing"
@@ -48,7 +47,6 @@ func main() {
 
 	prometheusApp := prometheus.New(prometheusConfig)
 	opentracingApp := opentracing.New(opentracingConfig)
-	gzipApp := gzip.New()
 	owaspApp := owasp.New(owaspConfig)
 	corsApp := cors.New(corsConfig)
 
@@ -73,7 +71,7 @@ func main() {
 		httperror.NotFound(w)
 	})
 
-	handler := httputils.ChainMiddlewares(mailerHandler, prometheusApp, opentracingApp, gzipApp, owaspApp, corsApp)
+	handler := httputils.ChainMiddlewares(mailerHandler, prometheusApp, opentracingApp, owaspApp, corsApp)
 
 	serverApp.ListenAndServe(handler, httputils.HealthHandler(nil), nil)
 }
