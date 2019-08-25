@@ -13,6 +13,7 @@ import (
 	"github.com/ViBiOh/httputils/pkg/httperror"
 	"github.com/ViBiOh/httputils/pkg/httpjson"
 	"github.com/ViBiOh/httputils/pkg/logger"
+	"github.com/ViBiOh/httputils/pkg/query"
 	"github.com/ViBiOh/httputils/pkg/request"
 	"github.com/ViBiOh/httputils/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
@@ -54,6 +55,10 @@ func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 	rawContent, err := request.ReadBodyRequest(r)
 	if err != nil {
 		return nil, err
+	}
+
+	if query.GetBool(r, "dump") {
+		logger.Info("Payload for %s: %s", r.URL.Path, rawContent)
 	}
 
 	var content map[string]interface{}
