@@ -1,0 +1,20 @@
+{
+  "version": "4",
+  "groupKey": "docker",
+  "status": "firing",
+  "receiver": "admin@localhost",
+  "groupLabels": {},
+  "commonLabels": {},
+  "commonAnnotations": {},
+  "externalURL": "https://vibioh.fr",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {},
+      "annotations": {},
+      "startsAt": "2008-09-08T22:47:31-07:00",
+      "endsAt": "2008-09-08T22:47:31-07:00",
+      "generatorURL": "https://deploy.vibioh.fr"
+    }
+  ]
+}

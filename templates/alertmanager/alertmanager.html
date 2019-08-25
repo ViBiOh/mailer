@@ -1,0 +1,39 @@
+<mjml>
+  <mj-body background-color="#e1e1e8">
+    <mj-spacer height="40px"></mj-spacer>
+
+    <mj-section background-color="#3a3a3a">
+      <mj-column padding="0">
+        <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">AlertManager</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0">
+      <mj-column>
+        <mj-text align="center">
+          <h1>
+            Infrastructure alert
+          </h1>
+
+          <h2>
+            {{- if eq .status "resolved" -}}
+              <span style="color: #4cae4c;">Resolved</span>
+            {{- else -}}
+              <span style="color: #ff6347;">Firing</span>
+            {{- end -}}
+          </h2>
+        </mj-text>
+
+        <mj-text align="center">
+          For more information, <a href="{{ .externalURL }}" rel="noopener noreferrer" target="_blank">consult dashboard</a>
+        </mj-text>
+
+        <mj-spacer height="20px"></mj-spacer>
+      </mj-column>
+    </mj-section>
+
+    {{- template "footer" -}}
+
+    <mj-spacer height="40px"></mj-spacer>
+  </mj-body>
+</mjml>
