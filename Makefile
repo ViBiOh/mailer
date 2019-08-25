@@ -82,7 +82,7 @@ build:
 .PHONY: start
 start:
 	$(SERVER_RUNNER) \
-		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com" \
+		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com grafana.com" \
 		-mjmlURL $(MJML_URL) \
 		-mjmlUser $(MJML_USER) \
 		-mjmlPass $(MJML_PASS)

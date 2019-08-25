@@ -12,7 +12,7 @@
       <mj-column>
         <mj-text align="center">
           <h1>
-            Infrastructure alert
+            {{ .commonLabels.alertname }}
           </h1>
 
           <h2>
@@ -24,8 +24,12 @@
           </h2>
         </mj-text>
 
+        <mj-text>{{ .commonAnnotations.description }}</mj-text>
+
+        <mj-image width="300px" src="{{ .commonAnnotations.image }}"></mj-image>
+
         <mj-text align="center">
-          For more information, <a href="{{ .externalURL }}" rel="noopener noreferrer" target="_blank">consult dashboard</a>
+          <a href="{{ .externalURL }}" rel="noopener noreferrer" target="_blank">Go to alertmanager for more details</a>
         </mj-text>
 
         <mj-spacer height="20px"></mj-spacer>

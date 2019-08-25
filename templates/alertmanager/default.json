@@ -1,20 +1,48 @@
 {
-  "version": "4",
-  "groupKey": "docker",
+  "receiver": "mailer",
   "status": "firing",
-  "receiver": "admin@localhost",
-  "groupLabels": {},
-  "commonLabels": {},
-  "commonAnnotations": {},
-  "externalURL": "https://vibioh.fr",
   "alerts": [
     {
       "status": "firing",
-      "labels": {},
-      "annotations": {},
-      "startsAt": "2008-09-08T22:47:31-07:00",
-      "endsAt": "2008-09-08T22:47:31-07:00",
-      "generatorURL": "https://deploy.vibioh.fr"
+      "labels": {
+        "alertname": "Test notification",
+        "metric": "High value"
+      },
+      "annotations": {
+        "description": "Someone is testing the alert notification within grafana.\nError: This is only a test",
+        "image": "https://grafana.com/assets/img/blog/mixed_styles.png",
+        "summary": "Test notification"
+      },
+      "startsAt": "2019-08-25T16:23:24Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://localhost:3000/"
+    },
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "Test notification",
+        "metric": "Higher Value"
+      },
+      "annotations": {
+        "description": "Someone is testing the alert notification within grafana.\nError: This is only a test",
+        "image": "https://grafana.com/assets/img/blog/mixed_styles.png",
+        "summary": "Test notification"
+      },
+      "startsAt": "2019-08-25T16:23:24Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://localhost:3000/"
     }
-  ]
+  ],
+  "groupLabels": {},
+  "commonLabels": {
+    "alertname": "Test notification"
+  },
+  "commonAnnotations": {
+    "description": "Someone is testing the alert notification within grafana.\nError: This is only a test",
+    "image": "https://grafana.com/assets/img/blog/mixed_styles.png",
+    "summary": "Test notification"
+  },
+  "externalURL": "https://alertmanager.vibioh.fr",
+  "version": "4",
+  "groupKey": "{}/{severity=~\"^(?:^.*$)$\"}:{}"
 }
