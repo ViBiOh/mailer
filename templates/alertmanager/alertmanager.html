@@ -26,7 +26,9 @@
 
         <mj-text>{{ .commonAnnotations.description }}</mj-text>
 
-        <mj-image width="300px" src="{{ .commonAnnotations.image }}"></mj-image>
+        {{ if .commonAnnotations.image }}
+          <mj-image width="300px" src="{{ .commonAnnotations.image }}"></mj-image>
+        {{ end }}
 
         <mj-text align="center">
           <a href="{{ .externalURL }}" rel="noopener noreferrer" target="_blank">Go to alertmanager for more details</a>
