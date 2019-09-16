@@ -26,6 +26,8 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 
 ```bash
 Usage of mailer:
+  -address string
+        [http] Listen address
   -cert string
         [http] Certificate file
   -corsCredentials
