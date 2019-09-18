@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/pkg/request"
-	"github.com/ViBiOh/httputils/pkg/tools"
+	"github.com/ViBiOh/httputils/v2/pkg/request"
+	"github.com/ViBiOh/httputils/v2/pkg/tools"
 )
 
 const (
@@ -63,8 +62,8 @@ type App struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		publicKey:  fs.String(tools.ToCamel(fmt.Sprintf("%sPublicKey", prefix)), "", "[mailjet] Public Key"),
-		privateKey: fs.String(tools.ToCamel(fmt.Sprintf("%sPrivateKey", prefix)), "", "[mailjet] Private Key"),
+		publicKey:  tools.NewFlag(prefix, "mailjet").Name("PublicKey").Default("").Label("Public Key").ToString(fs),
+		privateKey: tools.NewFlag(prefix, "mailjet").Name("PrivateKey").Default("").Label("Private Key").ToString(fs),
 	}
 }
 

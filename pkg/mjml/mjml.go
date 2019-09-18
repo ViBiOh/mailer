@@ -5,13 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/pkg/errors"
-	"github.com/ViBiOh/httputils/pkg/request"
-	"github.com/ViBiOh/httputils/pkg/tools"
+	"github.com/ViBiOh/httputils/v2/pkg/errors"
+	"github.com/ViBiOh/httputils/v2/pkg/request"
+	"github.com/ViBiOh/httputils/v2/pkg/tools"
 )
 
 var (
@@ -43,9 +42,9 @@ type App struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  fs.String(tools.ToCamel(fmt.Sprintf("%sURL", prefix)), "https://api.mjml.io/v1/render", "[mjml] MJML API Converter URL"),
-		user: fs.String(tools.ToCamel(fmt.Sprintf("%sUser", prefix)), "", "[mjml] Application ID or Basic Auth user"),
-		pass: fs.String(tools.ToCamel(fmt.Sprintf("%sPass", prefix)), "", "[mjml] Secret Key or Basic Auth pass"),
+		url:  tools.NewFlag(prefix, "mjml").Name("URL").Default("https://api.mjml.io/v1/render").Label("MJML API Converter URL").ToString(fs),
+		user: tools.NewFlag(prefix, "mjml").Name("User").Default("").Label("Application ID or Basic Auth user").ToString(fs),
+		pass: tools.NewFlag(prefix, "mjml").Name("Pass").Default("").Label("Secret Key or Basic Auth pass").ToString(fs),
 	}
 }
 

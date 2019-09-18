@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ViBiOh/httputils/pkg/errors"
-	"github.com/ViBiOh/httputils/pkg/request"
-	"github.com/ViBiOh/httputils/pkg/tools"
+	"github.com/ViBiOh/httputils/v2/pkg/errors"
+	"github.com/ViBiOh/httputils/v2/pkg/request"
+	"github.com/ViBiOh/httputils/v2/pkg/tools"
 )
 
 // App of package
@@ -34,9 +34,9 @@ type app struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  fs.String(tools.ToCamel(fmt.Sprintf("%sURL", prefix)), "https://mailer.vibioh.fr", "[mailer] Mailer URL"),
-		user: fs.String(tools.ToCamel(fmt.Sprintf("%sUser", prefix)), "", "[mailer] Mailer User"),
-		pass: fs.String(tools.ToCamel(fmt.Sprintf("%sPass", prefix)), "", "[mailer] Mailer Pass"),
+		url:  tools.NewFlag(prefix, "mailer").Name("URL").Default("https://mailer.vibioh.fr").Label("Mailer URL").ToString(fs),
+		user: tools.NewFlag(prefix, "mailer").Name("User").Default("").Label("Mailer User").ToString(fs),
+		pass: tools.NewFlag(prefix, "mailer").Name("Pass").Default("").Label("Mailer Pass").ToString(fs),
 	}
 }
 

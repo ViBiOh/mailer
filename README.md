@@ -27,47 +27,47 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 ```bash
 Usage of mailer:
   -address string
-        [http] Listen address
+        [http] Listen address {MAILER_ADDRESS}
   -cert string
-        [http] Certificate file
+        [http] Certificate file {MAILER_CERT}
   -corsCredentials
-        [cors] Access-Control-Allow-Credentials
+        [cors] Access-Control-Allow-Credentials {MAILER_CORS_CREDENTIALS}
   -corsExpose string
-        [cors] Access-Control-Expose-Headers
+        [cors] Access-Control-Expose-Headers {MAILER_CORS_EXPOSE}
   -corsHeaders string
-        [cors] Access-Control-Allow-Headers (default "Content-Type")
+        [cors] Access-Control-Allow-Headers {MAILER_CORS_HEADERS} (default "Content-Type")
   -corsMethods string
-        [cors] Access-Control-Allow-Methods (default "GET")
+        [cors] Access-Control-Allow-Methods {MAILER_CORS_METHODS} (default "GET")
   -corsOrigin string
-        [cors] Access-Control-Allow-Origin (default "*")
+        [cors] Access-Control-Allow-Origin {MAILER_CORS_ORIGIN} (default "*")
   -csp string
-        [owasp] Content-Security-Policy (default "default-src 'self'; base-uri 'self'")
+        [owasp] Content-Security-Policy {MAILER_CSP} (default "default-src 'self'; base-uri 'self'")
   -frameOptions string
-        [owasp] X-Frame-Options (default "deny")
+        [owasp] X-Frame-Options {MAILER_FRAME_OPTIONS} (default "deny")
   -hsts
-        [owasp] Indicate Strict Transport Security (default true)
+        [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -key string
-        [http] Key file
+        [http] Key file {MAILER_KEY}
   -mailjetPrivateKey string
-        [mailjet] Private Key
+        [mailjet] Private Key {MAILER_MAILJET_PRIVATE_KEY}
   -mailjetPublicKey string
-        [mailjet] Public Key
+        [mailjet] Public Key {MAILER_MAILJET_PUBLIC_KEY}
   -mjmlPass string
-        [mjml] Secret Key or Basic Auth pass
+        [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
   -mjmlURL string
-        [mjml] MJML API Converter URL (default "https://api.mjml.io/v1/render")
+        [mjml] MJML API Converter URL {MAILER_MJML_URL} (default "https://api.mjml.io/v1/render")
   -mjmlUser string
-        [mjml] Application ID or Basic Auth user
+        [mjml] Application ID or Basic Auth user {MAILER_MJML_USER}
   -port int
-        [http] Listen port (default 1080)
+        [http] Listen port {MAILER_PORT} (default 1080)
   -prometheusPath string
-        [prometheus] Path for exposing metrics (default "/metrics")
+        [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
   -tracingAgent string
-        [tracing] Jaeger Agent (e.g. host:port) (default "jaeger:6831")
+        [tracing] Jaeger Agent (e.g. host:port) {MAILER_TRACING_AGENT} (default "jaeger:6831")
   -tracingName string
-        [tracing] Service name
+        [tracing] Service name {MAILER_TRACING_NAME}
   -url string
-        [alcotest] URL to check
+        [alcotest] URL to check {MAILER_URL}
   -userAgent string
-        [alcotest] User-Agent for check (default "Golang alcotest")
+        [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Golang alcotest")
 ```
