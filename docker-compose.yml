@@ -17,15 +17,19 @@ services:
     - -csp
     - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com
     labels:
-      traefik.frontend.passHostHeader: 'true'
-      traefik.frontend.rule: 'Host: mailer.vibioh.fr'
-      traefik.protocol: 'http'
-      traefik.port: '1080'
-      traefik.frontend.rateLimit.extractorFunc: 'client.ip'
-      traefik.frontend.rateLimit.rateSet.first.period: '60s'
-      traefik.frontend.rateLimit.rateSet.first.average: '100'
-      traefik.frontend.rateLimit.rateSet.first.burst: '200'
-      traefik.frontend.auth.basic.users: '${HTTP_PASSWORD}'
+      traefik.http.routers.mailer-http.rule: Host(`mailer.vibioh.fr`)
+      traefik.http.routers.mailer-http.entrypoints: http
+      traefik.http.routers.mailer-http.middlewares: redirect@file
+      traefik.http.routers.mailer-https.rule: Host(`mailer.vibioh.fr`)
+      traefik.http.routers.mailer-https.entrypoints: https
+      traefik.http.routers.mailer-https.middlewares: compress@file, mailer-auth
+      traefik.http.routers.mailer-https.tls: true
+      traefik.http.routers.mailer-https.tls.certResolver: default
+      traefik.http.services.mailer-service.loadbalancer.passhostheader: true
+      traefik.http.services.mailer-service.loadbalancer.server.port: '1080'
+      traefik.http.middlewares.mailer-rate-limit.ratelimit.average: '10'
+      traefik.http.middlewares.mailer-rate-limit.ratelimit.burst: '50'
+      traefik.http.middlewares.mailer-auth.basicAuth.users: '${HTTP_PASSWORD}'
     restart: on-failure:5
     read_only: true
     cpu_shares: 128
