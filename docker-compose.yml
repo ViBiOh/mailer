@@ -3,19 +3,6 @@ version: '2'
 services:
   api:
     image: vibioh/mailer
-    command:
-    - -mailjetPublicKey
-    - ${MAILJET_APIKEY_PUBLIC}
-    - -mailjetPrivateKey
-    - ${MAILJET_APIKEY_PRIVATE}
-    - -mjmlURL
-    - ${MJML_URL}
-    - -mjmlUser
-    - ${MJML_USER}
-    - -mjmlPass
-    - ${MJML_PASS}
-    - -csp
-    - default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com
     labels:
       traefik.http.routers.mailer-http.rule: Host(`mailer.vibioh.fr`)
       traefik.http.routers.mailer-http.entrypoints: http
@@ -27,7 +14,15 @@ services:
       traefik.http.routers.mailer-https.tls.certResolver: default
       traefik.http.services.mailer-service.loadbalancer.passhostheader: true
       traefik.http.services.mailer-service.loadbalancer.server.port: '1080'
+      traefik.http.middlewares.mailer-auth.basicAuth.removeHeader: true
       traefik.http.middlewares.mailer-auth.basicAuth.users: '${HTTP_PASSWORD}'
+    environment:
+      MAILER_MAILJET_PUBLIC_KEY: ${MAILJET_APIKEY_PUBLIC}
+      MAILER_MAILJET_PRIVATE_KEY: ${MAILJET_APIKEY_PRIVATE}
+      MAILER_MJML_URL: ${MJML_URL}
+      MAILER_MJML_USER: ${MJML_USER}
+      MAILER_MJML_PASS: ${MJML_PASS}
+      MAILER_CSP: default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com
     restart: on-failure:5
     read_only: true
     cpu_shares: 128
