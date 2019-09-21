@@ -12,7 +12,6 @@ services:
       traefik.http.routers.mailer-https.middlewares: compress@file, web-limit@file, mailer-auth
       traefik.http.routers.mailer-https.tls: true
       traefik.http.routers.mailer-https.tls.certresolver: default
-      traefik.http.services.mailer-service.loadbalancer.passhostheader: true
       traefik.http.services.mailer-service.loadbalancer.server.port: '1080'
       traefik.http.middlewares.mailer-auth.basicauth.removeheader: true
       traefik.http.middlewares.mailer-auth.basicauth.users: '${HTTP_PASSWORD}'
