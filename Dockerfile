@@ -20,5 +20,6 @@ ARG APP_VERSION
 ENV VERSION=${APP_VERSION}
 
 COPY templates/ /templates
+COPY doc /doc
 COPY --from=builder /app/cacert.pem /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /app/bin/mailer /mailer

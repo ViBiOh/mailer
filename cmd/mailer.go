@@ -4,12 +4,12 @@ import (
 	"flag"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	httputils "github.com/ViBiOh/httputils/v2/pkg"
 	"github.com/ViBiOh/httputils/v2/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v2/pkg/cors"
-	"github.com/ViBiOh/httputils/v2/pkg/httperror"
 	"github.com/ViBiOh/httputils/v2/pkg/logger"
 	"github.com/ViBiOh/httputils/v2/pkg/opentracing"
 	"github.com/ViBiOh/httputils/v2/pkg/owasp"
@@ -23,6 +23,8 @@ import (
 const (
 	fixturesPath = "/fixtures"
 	renderPath   = "/render"
+
+	docPath = "doc/"
 )
 
 func main() {
@@ -65,7 +67,8 @@ func main() {
 			return
 		}
 
-		httperror.NotFound(w)
+		w.Header().Set("Cache-Control", "no-cache")
+		http.ServeFile(w, r, path.Join(docPath, r.URL.Path))
 	})
 
 	handler := httputils.ChainMiddlewares(mailerHandler, prometheusApp, opentracingApp, owaspApp, corsApp)

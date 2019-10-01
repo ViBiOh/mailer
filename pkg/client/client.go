@@ -34,18 +34,19 @@ type app struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  tools.NewFlag(prefix, "mailer").Name("URL").Default("https://mailer.vibioh.fr").Label("Mailer URL").ToString(fs),
-		user: tools.NewFlag(prefix, "mailer").Name("User").Default("").Label("Mailer User").ToString(fs),
-		pass: tools.NewFlag(prefix, "mailer").Name("Pass").Default("").Label("Mailer Pass").ToString(fs),
+		url:  tools.NewFlag(prefix, "mailer").Name("URL").Default("").Label("URL (an instance of github.com/ViBiOh/mailer)").ToString(fs),
+		user: tools.NewFlag(prefix, "mailer").Name("User").Default("").Label("User").ToString(fs),
+		pass: tools.NewFlag(prefix, "mailer").Name("Pass").Default("").Label("Pass").ToString(fs),
 	}
 }
 
 // New creates new App from Config
 func New(config Config) App {
+	url := strings.TrimSpace(*config.url)
 	user := strings.TrimSpace(*config.user)
 	pass := strings.TrimSpace(*config.pass)
 
-	if user == "" || pass == "" {
+	if url == "" {
 		return &app{}
 	}
 

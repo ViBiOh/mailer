@@ -35,6 +35,11 @@ name:
 version:
 	@echo -n $(shell git rev-parse --short HEAD)
 
+## config: Confiure dev environment
+.PHONY: config
+config:
+	./script/install_hooks
+
 ## app: Build app with dependencies download
 .PHONY: app
 app: deps go
@@ -82,7 +87,7 @@ build:
 .PHONY: start
 start:
 	$(SERVER_RUNNER) \
-		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' http://i.imgur.com grafana.com" \
+		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' unpkg.com/swagger-ui-dist@3/; style-src 'self' 'unsafe-inline' unpkg.com/swagger-ui-dist@3/ fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com" \
 		-mjmlURL $(MJML_URL) \
 		-mjmlUser $(MJML_USER) \
 		-mjmlPass $(MJML_PASS)

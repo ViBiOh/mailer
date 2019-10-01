@@ -20,9 +20,7 @@ In order to use the Mailjet sender, you need to register to [Mailjet](https://ww
 
 In order to use the MJML converter, you need to register to [MJML API](https://mjml.io/api) for having credentials or provided a compliant API like [mjml-api](https://github.com/ViBiOh/mjml-api).
 
-# Build
-
-## Usage
+## CLI Usage
 
 ```bash
 Usage of mailer:
