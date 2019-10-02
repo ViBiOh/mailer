@@ -61,9 +61,11 @@ func listHandler(w http.ResponseWriter, r *http.Request, templateName string) {
 		return
 	}
 
-	fixtureList := make([]string, len(files))
-	for index, file := range files {
-		fixtureList[index] = strings.TrimSuffix(file.Name(), jsonExtension)
+	fixtureList := make([]string, 0)
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), jsonExtension) {
+			fixtureList = append(fixtureList, strings.TrimSuffix(file.Name(), jsonExtension))
+		}
 	}
 
 	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, fixtureList, httpjson.IsPretty(r)); err != nil {

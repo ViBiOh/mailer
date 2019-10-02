@@ -25,6 +25,59 @@ paths:
               schema:
                 type: string
 
+  /fixtures/{template}:
+    parameters:
+    - name: template
+      in: path
+      description: Template's name
+      required: true
+      schema:
+        type: string
+
+    get:
+      description: List fixtures
+
+      responses:
+        '200':
+          description: List of availables fixtures
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    description: Fixtures' name
+                    items:
+                      type: string
+
+  /fixtures/{template}/{fixture}:
+    parameters:
+    - name: template
+      in: path
+      description: Template's name
+      required: true
+      schema:
+        type: string
+    parameters:
+    - name: fixture
+      in: path
+      description: Fixture's name
+      required: true
+      schema:
+        type: string
+
+    get:
+      description: Retrieve fixture values for template
+
+      responses:
+        '200':
+          description: Fixture values
+          content:
+            application/json:
+              schema:
+                type: object
+
   /render/:
     get:
       description: List templates
