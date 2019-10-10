@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 
 services:
   api:
@@ -12,15 +12,15 @@ services:
       traefik.http.routers.mailer-https.middlewares: compress@file, web-limit@file, mailer-auth
       traefik.http.routers.mailer-https.tls: true
       traefik.http.routers.mailer-https.tls.certresolver: default
-      traefik.http.services.mailer-service.loadbalancer.server.port: '1080'
+      traefik.http.services.mailer-service.loadbalancer.server.port: "1080"
       traefik.http.middlewares.mailer-auth.basicauth.removeheader: true
-      traefik.http.middlewares.mailer-auth.basicauth.users: '${HTTP_PASSWORD}'
+      traefik.http.middlewares.mailer-auth.basicauth.users: "${HTTP_PASSWORD}"
     environment:
-      MAILER_MAILJET_PUBLIC_KEY: ${MAILJET_APIKEY_PUBLIC}
-      MAILER_MAILJET_PRIVATE_KEY: ${MAILJET_APIKEY_PRIVATE}
-      MAILER_MJML_URL: ${MJML_URL}
-      MAILER_MJML_USER: ${MJML_USER}
-      MAILER_MJML_PASS: ${MJML_PASS}
+      MAILER_MAILJET_PUBLIC_KEY: "${MAILJET_APIKEY_PUBLIC}"
+      MAILER_MAILJET_PRIVATE_KEY: "${MAILJET_APIKEY_PRIVATE}"
+      MAILER_MJML_URL: "${MJML_URL}"
+      MAILER_MJML_USER: "${MJML_USER}"
+      MAILER_MJML_PASS: "${MJML_PASS}"
       MAILER_CSP: "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' unpkg.com/swagger-ui-dist@3/; style-src 'self' 'unsafe-inline' unpkg.com/swagger-ui-dist@3/ fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com"
     restart: on-failure:5
     read_only: true
