@@ -61,10 +61,6 @@ Usage of mailer:
         [http] Listen port {MAILER_PORT} (default 1080)
   -prometheusPath string
         [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
-  -tracingAgent string
-        [tracing] Jaeger Agent (e.g. host:port) {MAILER_TRACING_AGENT} (default "jaeger:6831")
-  -tracingName string
-        [tracing] Service name {MAILER_TRACING_NAME}
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
