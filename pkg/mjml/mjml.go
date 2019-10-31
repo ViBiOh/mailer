@@ -8,9 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v2/pkg/errors"
-	"github.com/ViBiOh/httputils/v2/pkg/request"
-	"github.com/ViBiOh/httputils/v2/pkg/tools"
+	"github.com/ViBiOh/httputils/v3/pkg/flags"
+	"github.com/ViBiOh/httputils/v3/pkg/request"
 )
 
 var (
@@ -35,35 +34,32 @@ type Config struct {
 
 // App of package
 type App struct {
-	url     string
-	headers http.Header
+	url  string
+	user string
+	pass string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  tools.NewFlag(prefix, "mjml").Name("URL").Default("https://api.mjml.io/v1/render").Label("MJML API Converter URL").ToString(fs),
-		user: tools.NewFlag(prefix, "mjml").Name("User").Default("").Label("Application ID or Basic Auth user").ToString(fs),
-		pass: tools.NewFlag(prefix, "mjml").Name("Pass").Default("").Label("Secret Key or Basic Auth pass").ToString(fs),
+		url:  flags.New(prefix, "mjml").Name("URL").Default("https://api.mjml.io/v1/render").Label("MJML API Converter URL").ToString(fs),
+		user: flags.New(prefix, "mjml").Name("User").Default("").Label("Application ID or Basic Auth user").ToString(fs),
+		pass: flags.New(prefix, "mjml").Name("Pass").Default("").Label("Secret Key or Basic Auth pass").ToString(fs),
 	}
 }
 
 // New creates new App from Config
 func New(config Config) *App {
 	converter := strings.TrimSpace(*config.url)
-	user := strings.TrimSpace(*config.user)
-	pass := strings.TrimSpace(*config.pass)
 
 	if converter == "" {
 		return &App{}
 	}
 
 	app := App{
-		url: converter,
-	}
-
-	if user != "" && pass != "" {
-		app.headers = http.Header{"Authorization": []string{request.GenerateBasicAuth(user, pass)}}
+		url:  converter,
+		user: strings.TrimSpace(*config.user),
+		pass: strings.TrimSpace(*config.pass),
 	}
 
 	return &app
@@ -84,19 +80,26 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
-	body, _, _, err := request.DoJSON(ctx, a.url, mjmlRequest{template}, a.headers, http.MethodPost)
+	req, err := request.JSON(ctx, http.MethodPost, a.url, mjmlRequest{template}, nil)
 	if err != nil {
 		return "", err
 	}
 
-	content, err := request.ReadBody(body)
+	req.SetBasicAuth(a.user, a.pass)
+
+	body, _, _, err := request.Do(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	content, err := request.ReadContent(body)
 	if err != nil {
 		return "", err
 	}
 
 	var response mjmlResponse
 	if err := json.Unmarshal(content, &response); err != nil {
-		return "", errors.WithStack(err)
+		return "", err
 	}
 
 	return response.HTML, nil

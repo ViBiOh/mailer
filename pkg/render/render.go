@@ -9,13 +9,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v2/pkg/errors"
-	"github.com/ViBiOh/httputils/v2/pkg/httperror"
-	"github.com/ViBiOh/httputils/v2/pkg/httpjson"
-	"github.com/ViBiOh/httputils/v2/pkg/logger"
-	"github.com/ViBiOh/httputils/v2/pkg/query"
-	"github.com/ViBiOh/httputils/v2/pkg/request"
-	"github.com/ViBiOh/httputils/v2/pkg/templates"
+	"github.com/ViBiOh/httputils/v3/pkg/httperror"
+	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
+	"github.com/ViBiOh/httputils/v3/pkg/logger"
+	"github.com/ViBiOh/httputils/v3/pkg/query"
+	"github.com/ViBiOh/httputils/v3/pkg/request"
+	"github.com/ViBiOh/httputils/v3/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
@@ -63,7 +62,7 @@ func (a App) getBodyContent(r *http.Request) (map[string]interface{}, error) {
 
 	var content map[string]interface{}
 	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return content, nil
@@ -99,7 +98,7 @@ func (a App) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 
 	content.Reset()
 	if _, err := content.WriteString(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -180,7 +179,7 @@ func (a App) Handler() http.Handler {
 
 		if r.Method == http.MethodGet {
 			if _, err := output.WriteResponse(w); err != nil {
-				httperror.InternalServerError(w, errors.WithStack(err))
+				httperror.InternalServerError(w, err)
 			}
 			return
 		}

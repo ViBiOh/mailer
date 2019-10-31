@@ -2,15 +2,15 @@ package client
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v2/pkg/errors"
-	"github.com/ViBiOh/httputils/v2/pkg/request"
-	"github.com/ViBiOh/httputils/v2/pkg/tools"
+	"github.com/ViBiOh/httputils/v3/pkg/flags"
+	"github.com/ViBiOh/httputils/v3/pkg/request"
 )
 
 // App of package
@@ -27,24 +27,23 @@ type Config struct {
 }
 
 type app struct {
-	url    string
-	header http.Header
+	url  string
+	user string
+	pass string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  tools.NewFlag(prefix, "mailer").Name("URL").Default("").Label("URL (an instance of github.com/ViBiOh/mailer)").ToString(fs),
-		user: tools.NewFlag(prefix, "mailer").Name("User").Default("").Label("User").ToString(fs),
-		pass: tools.NewFlag(prefix, "mailer").Name("Pass").Default("").Label("Pass").ToString(fs),
+		url:  flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (an instance of github.com/ViBiOh/mailer)").ToString(fs),
+		user: flags.New(prefix, "mailer").Name("User").Default("").Label("User").ToString(fs),
+		pass: flags.New(prefix, "mailer").Name("Pass").Default("").Label("Pass").ToString(fs),
 	}
 }
 
 // New creates new App from Config
 func New(config Config) App {
 	url := strings.TrimSpace(*config.url)
-	user := strings.TrimSpace(*config.user)
-	pass := strings.TrimSpace(*config.pass)
 
 	if url == "" {
 		return &app{}
@@ -52,9 +51,9 @@ func New(config Config) App {
 
 	return &app{
 		url: strings.TrimSpace(*config.url),
-		header: http.Header{
-			"Authorization": []string{request.GenerateBasicAuth(user, pass)},
-		},
+
+		user: strings.TrimSpace(*config.user),
+		pass: strings.TrimSpace(*config.pass),
 	}
 }
 
@@ -77,8 +76,14 @@ func (a app) SendEmail(ctx context.Context, email *Email) error {
 		return errors.New("no recipient found")
 	}
 
-	_, _, _, err := request.DoJSON(ctx, fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject)), email.payload, a.header, http.MethodPost)
+	req, err := request.JSON(ctx, http.MethodPost, fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject)), email.payload, nil)
 	if err != nil {
+		return err
+	}
+
+	req.SetBasicAuth(a.user, a.pass)
+
+	if _, _, _, err := request.Do(ctx, req); err != nil {
 		return err
 	}
 

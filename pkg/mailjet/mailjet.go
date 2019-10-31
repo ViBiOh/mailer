@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v2/pkg/request"
-	"github.com/ViBiOh/httputils/v2/pkg/tools"
+	"github.com/ViBiOh/httputils/v3/pkg/flags"
+	"github.com/ViBiOh/httputils/v3/pkg/request"
 )
 
 const (
@@ -56,34 +56,30 @@ type Config struct {
 
 // App of package
 type App struct {
-	headers http.Header
+	publicKey  string
+	privateKey string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		publicKey:  tools.NewFlag(prefix, "mailjet").Name("PublicKey").Default("").Label("Public Key").ToString(fs),
-		privateKey: tools.NewFlag(prefix, "mailjet").Name("PrivateKey").Default("").Label("Private Key").ToString(fs),
+		publicKey:  flags.New(prefix, "mailjet").Name("PublicKey").Default("").Label("Public Key").ToString(fs),
+		privateKey: flags.New(prefix, "mailjet").Name("PrivateKey").Default("").Label("Private Key").ToString(fs),
 	}
 }
 
 // New creates new App from Config
 func New(config Config) *App {
-	publicKey := strings.TrimSpace(*config.publicKey)
-	privateKey := strings.TrimSpace(*config.privateKey)
-
-	if publicKey == "" || privateKey == "" {
-		return &App{}
-	}
 
 	return &App{
-		headers: http.Header{"Authorization": []string{request.GenerateBasicAuth(publicKey, privateKey)}},
+		publicKey:  strings.TrimSpace(*config.publicKey),
+		privateKey: strings.TrimSpace(*config.privateKey),
 	}
 }
 
 // CheckParameters checks mail descriptor
 func (a App) CheckParameters(mail *Mail) error {
-	if len(a.headers) == 0 {
+	if a.publicKey == "" {
 		return ErrNoConfiguration
 	}
 
@@ -128,8 +124,15 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 		return err
 	}
 
+	req, err := request.JSON(ctx, http.MethodPost, sendURL, mail, nil)
+	if err != nil {
+		return err
+	}
+
+	req.SetBasicAuth(a.publicKey, a.privateKey)
+
 	mail.HTML = html
-	if _, _, _, err := request.DoJSON(ctx, sendURL, mail, a.headers, http.MethodPost); err != nil {
+	if _, _, _, err := request.Do(ctx, req); err != nil {
 		return err
 	}
 
