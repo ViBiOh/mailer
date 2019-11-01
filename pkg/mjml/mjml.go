@@ -87,12 +87,12 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 
 	req.SetBasicAuth(a.user, a.pass)
 
-	body, _, _, err := request.Do(ctx, req)
+	resp, err := request.Do(ctx, req)
 	if err != nil {
 		return "", err
 	}
 
-	content, err := request.ReadContent(body)
+	content, err := request.ReadBodyResponse(resp)
 	if err != nil {
 		return "", err
 	}

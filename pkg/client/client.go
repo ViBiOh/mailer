@@ -83,9 +83,6 @@ func (a app) SendEmail(ctx context.Context, email *Email) error {
 
 	req.SetBasicAuth(a.user, a.pass)
 
-	if _, _, _, err := request.Do(ctx, req); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = request.Do(ctx, req)
+	return err
 }

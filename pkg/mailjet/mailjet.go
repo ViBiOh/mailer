@@ -124,6 +124,8 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 		return err
 	}
 
+	mail.HTML = html
+
 	req, err := request.JSON(ctx, http.MethodPost, sendURL, mail, nil)
 	if err != nil {
 		return err
@@ -131,10 +133,6 @@ func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
 
 	req.SetBasicAuth(a.publicKey, a.privateKey)
 
-	mail.HTML = html
-	if _, _, _, err := request.Do(ctx, req); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = request.Do(ctx, req)
+	return err
 }
