@@ -36,7 +36,7 @@ type App struct {
 func New(mjmlApp *mjml.App, mailjetApp *mailjet.App) *App {
 	templates, err := templates.GetTemplates(templatesDir, templateSuffix)
 	if err != nil {
-		logger.Error("%#v", err)
+		logger.Error("%s", err)
 	}
 
 	return &App{
