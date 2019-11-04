@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -76,13 +75,6 @@ func (a app) SendEmail(ctx context.Context, email *Email) error {
 		return errors.New("no recipient found")
 	}
 
-	req, err := request.JSON(ctx, http.MethodPost, fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject)), email.payload, nil)
-	if err != nil {
-		return err
-	}
-
-	req.SetBasicAuth(a.user, a.pass)
-
-	_, err = request.Do(ctx, req)
+	_, err := request.New().Post(fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject))).BasicAuth(a.user, a.pass).JSON(ctx, email.payload)
 	return err
 }

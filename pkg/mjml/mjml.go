@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"net/http"
 	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/flags"
@@ -80,14 +79,7 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
-	req, err := request.JSON(ctx, http.MethodPost, a.url, mjmlRequest{template}, nil)
-	if err != nil {
-		return "", err
-	}
-
-	req.SetBasicAuth(a.user, a.pass)
-
-	resp, err := request.Do(ctx, req)
+	resp, err := request.New().Post(a.url).BasicAuth(a.user, a.pass).JSON(ctx, mjmlRequest{template})
 	if err != nil {
 		return "", err
 	}
