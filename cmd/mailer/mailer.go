@@ -68,5 +68,5 @@ func main() {
 	server.Middleware(prometheus.New(prometheusConfig))
 	server.Middleware(owasp.New(owaspConfig))
 	server.Middleware(cors.New(corsConfig))
-	server.ListenAndServe(mailerHandler)
+	server.ListenServeWait(mailerHandler)
 }
