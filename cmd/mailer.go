@@ -7,9 +7,9 @@ import (
 	"path"
 	"strings"
 
-	httputils "github.com/ViBiOh/httputils/v3/pkg"
 	"github.com/ViBiOh/httputils/v3/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v3/pkg/cors"
+	"github.com/ViBiOh/httputils/v3/pkg/httputils"
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/owasp"
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
@@ -42,10 +42,6 @@ func main() {
 
 	alcotest.DoAndExit(alcotestConfig)
 
-	prometheusApp := prometheus.New(prometheusConfig)
-	owaspApp := owasp.New(owaspConfig)
-	corsApp := cors.New(corsConfig)
-
 	mjmlApp := mjml.New(mjmlConfig)
 	mailjetApp := mailjet.New(mailjetConfig)
 	renderApp := render.New(mjmlApp, mailjetApp)
@@ -68,7 +64,9 @@ func main() {
 		http.ServeFile(w, r, path.Join(docPath, r.URL.Path))
 	})
 
-	handler := httputils.ChainMiddlewares(mailerHandler, prometheusApp, owaspApp, corsApp)
-
-	httputils.New(serverConfig).ListenAndServe(handler, httputils.HealthHandler(nil), nil)
+	server := httputils.New(serverConfig)
+	server.Middleware(prometheus.New(prometheusConfig))
+	server.Middleware(owasp.New(owaspConfig))
+	server.Middleware(cors.New(corsConfig))
+	server.ListenAndServe(mailerHandler)
 }

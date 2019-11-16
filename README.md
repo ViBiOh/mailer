@@ -64,5 +64,5 @@ Usage of mailer:
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
-        [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Golang alcotest")
+        [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Alcotest")
 ```
