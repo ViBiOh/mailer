@@ -27,18 +27,10 @@ jobs:
   - stage: Deploy
 
     language: minimal
-    script: |
-      sed \
-        -e "s|\${HTTP_PASSWORD}|${HTTP_PASSWORD}|g" \
-        -e "s|\${MAILJET_APIKEY_PUBLIC}|${MAILJET_APIKEY_PUBLIC}|g" \
-        -e "s|\${MAILJET_APIKEY_PRIVATE}|${MAILJET_APIKEY_PRIVATE}|g" \
-        -e "s|\${MJML_URL}|${MJML_URL}|g" \
-        -e "s|\${MJML_USER}|${MJML_USER}|g" \
-        -e "s|\${MJML_PASS}|${MJML_PASS}|g" \
-        -e "s|\\\$|\$\$|g" \
-        docker-compose.yml > docker-compose-env.yml
-      curl -q -sSL --max-time 10 "https://raw.githubusercontent.com/ViBiOh/scripts/master/bootstrap" | bash -s "deploy"
-      scripts/deploy "$(make name)" "@docker-compose-env.yml"
+    script:
+    - curl -q -sSL --max-time 10 "https://raw.githubusercontent.com/ViBiOh/scripts/master/bootstrap" | bash -s "deploy" "env_replace"
+    - scripts/env_replace docker-compose.yml HTTP_PASSWORD MAILJET_APIKEY_PUBLIC MAILJET_APIKEY_PRIVATE MJML_URL MJML_USER MJML_PASS | sed "s|\\\$|\$\$|g" > docker-compose-env.yml
+    - scripts/deploy "$(make name)" "@docker-compose-env.yml"
 
 stages:
   - Build
