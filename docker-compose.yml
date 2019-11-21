@@ -1,3 +1,5 @@
+---
+
 version: "2"
 
 services:
@@ -27,4 +29,4 @@ services:
     cpu_shares: 128
     mem_limit: 67108864
     security_opt:
-    - no-new-privileges
+      - no-new-privileges
