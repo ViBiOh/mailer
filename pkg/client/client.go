@@ -75,6 +75,13 @@ func (a app) SendEmail(ctx context.Context, email *Email) error {
 		return errors.New("no recipient found")
 	}
 
-	_, err := request.New().Post(fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject))).BasicAuth(a.user, a.pass).JSON(ctx, email.payload)
+	url := fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject))
+
+	req := request.New().Post(url)
+	if a.pass != "" {
+		req.BasicAuth(a.user, a.pass)
+	}
+
+	_, err := req.JSON(ctx, email.payload)
 	return err
 }
