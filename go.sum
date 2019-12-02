@@ -1,7 +1,10 @@
 github.com/NYTimes/gziphandler v1.1.1 h1:ZUDjpQae29j0ryrS0u/B8HZfJBtBQHjqw2rQ2cqUQ3I=
 github.com/NYTimes/gziphandler v1.1.1/go.mod h1:n/CVRwUEOgIxrgPvAQhUUr9oeUtvrhMomdKFjzJNB0c=
+github.com/ViBiOh/httputils v1.8.2 h1:ulvdhtq8/Ww4QihYJ5uf0WDTG42yPuwojUCbfv/9W2E=
 github.com/ViBiOh/httputils/v3 v3.2.3 h1:Ga4fc4CYaaQzw6kb+P+nBwzBizJBAqZvfugyKwyd1i4=
 github.com/ViBiOh/httputils/v3 v3.2.3/go.mod h1:GQ2Eu+PfaYnDeSx0Mqvb28w0sB7/cUOpfdivtIDL87Q=
+github.com/ViBiOh/httputils/v3 v3.3.0 h1:5ILMB0CozlE3xH/iJj3/nbfP8uw0GpYYu9+8tnien2Q=
+github.com/ViBiOh/httputils/v3 v3.3.0/go.mod h1:L2S1E8HtDtf9LuuAkQkRwwDqwO1zq5vayWB3hQON87Y=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
@@ -90,8 +93,10 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/tdewolff/minify/v2 v2.5.2 h1:If/q1brvT+91oWiWnIMEGuFcwWtpB6AtLTxba78tvMs=
 github.com/tdewolff/minify/v2 v2.5.2/go.mod h1:Q6mWHrmspbdRX0ZuUUoKIT8bDjVVXpIJ73ux7p7HZGg=
+github.com/tdewolff/minify/v2 v2.6.1/go.mod h1:l9hbQnH096st77OkscoRUvKdd23oUM6pDZpYx381sPo=
 github.com/tdewolff/parse/v2 v2.3.9 h1:d8/K6XOLy5JVpLTG9Kx+SxA72rlm5OowFmVSVgtOlmM=
 github.com/tdewolff/parse/v2 v2.3.9/go.mod h1:HansaqmN4I/U7L6/tUp0NcwT2tFO0F4EAWYGSDzkYNk=
+github.com/tdewolff/parse/v2 v2.3.14/go.mod h1:+V2lSZ93xpH2Csfs/vtNY1Fjr8kcFMsZKjyLoSkZbM0=
 github.com/tdewolff/test v1.0.0 h1:jOwzqCXr5ePXEPGJaq2ivoR6HOCi+D5TPfpoyg8yvmU=
 github.com/tdewolff/test v1.0.0/go.mod h1:DiQUlutnqlEvdvhSn2LPGy4TFwRauAaYDsL+683RNX4=
 github.com/tdewolff/test v1.0.4 h1:ih38SXuQJ32Hng5EtSW32xqEsVeMnPp6nNNRPhBBDE8=
