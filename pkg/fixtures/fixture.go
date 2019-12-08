@@ -67,9 +67,7 @@ func listHandler(w http.ResponseWriter, r *http.Request, templateName string) {
 		}
 	}
 
-	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, fixtureList, httpjson.IsPretty(r)); err != nil {
-		httperror.InternalServerError(w, err)
-	}
+	httpjson.ResponseArrayJSON(w, http.StatusOK, fixtureList, httpjson.IsPretty(r))
 }
 
 // Get retrieves fixture content
@@ -103,8 +101,8 @@ func getHandler(w http.ResponseWriter, r *http.Request, templateName, fixtureNam
 		} else {
 			httperror.InternalServerError(w, err)
 		}
-	} else if err := httpjson.ResponseJSON(w, http.StatusOK, content, httpjson.IsPretty(r)); err != nil {
-		httperror.InternalServerError(w, err)
+	} else {
+		httpjson.ResponseJSON(w, http.StatusOK, content, httpjson.IsPretty(r))
 	}
 }
 

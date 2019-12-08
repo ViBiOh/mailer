@@ -113,9 +113,7 @@ func (a App) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := httpjson.ResponseArrayJSON(w, http.StatusOK, templatesList, httpjson.IsPretty(r)); err != nil {
-		httperror.InternalServerError(w, err)
-	}
+	httpjson.ResponseArrayJSON(w, http.StatusOK, templatesList, httpjson.IsPretty(r))
 }
 
 // Handler for Render request. Should be use with net/http
