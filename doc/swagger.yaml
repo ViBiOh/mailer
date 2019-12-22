@@ -1,3 +1,4 @@
+---
 
 openapi: 3.0.0
 info:
@@ -27,12 +28,12 @@ paths:
 
   /fixtures/{template}:
     parameters:
-    - name: template
-      in: path
-      description: Template's name
-      required: true
-      schema:
-        type: string
+      - name: template
+        in: path
+        description: Template's name
+        required: true
+        schema:
+          type: string
 
     get:
       description: List fixtures
@@ -53,19 +54,18 @@ paths:
 
   /fixtures/{template}/{fixture}:
     parameters:
-    - name: template
-      in: path
-      description: Template's name
-      required: true
-      schema:
-        type: string
-    parameters:
-    - name: fixture
-      in: path
-      description: Fixture's name
-      required: true
-      schema:
-        type: string
+      - name: template
+        in: path
+        description: Template's name
+        required: true
+        schema:
+          type: string
+      - name: fixture
+        in: path
+        description: Fixture's name
+        required: true
+        schema:
+          type: string
 
     get:
       description: Retrieve fixture values for template
@@ -98,21 +98,21 @@ paths:
 
   /render/{template}:
     parameters:
-    - name: template
-      in: path
-      description: Template's name
-      required: true
-      schema:
-        type: string
+      - name: template
+        in: path
+        description: Template's name
+        required: true
+        schema:
+          type: string
 
     get:
       description: Render template
       parameters:
-      - name: fixture
-        in: query
-        description: Fixture's name
-        schema:
-          type: string
+        - name: fixture
+          in: query
+          description: Fixture's name
+          schema:
+            type: string
 
       responses:
         '200':
@@ -124,26 +124,26 @@ paths:
     post:
       description: Render and send template
       parameters:
-      - name: from
-        in: query
-        description: From value of email
-        schema:
-          type: string
-      - name: sender
-        in: query
-        description: Sender name of email
-        schema:
-          type: string
-      - name: subject
-        in: query
-        description: Email subject
-        schema:
-          type: string
-      - name: to
-        in: query
-        description: Recipients of email, comma separated
-        schema:
-          type: string
+        - name: from
+          in: query
+          description: From value of email
+          schema:
+            type: string
+        - name: sender
+          in: query
+          description: Sender name of email
+          schema:
+            type: string
+        - name: subject
+          in: query
+          description: Email subject
+          schema:
+            type: string
+        - name: to
+          in: query
+          description: Recipients of email, comma separated
+          schema:
+            type: string
       requestBody:
         description: Payload of content
         required: true
