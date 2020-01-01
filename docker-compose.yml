@@ -4,7 +4,7 @@ version: "2"
 
 services:
   api:
-    image: vibioh/mailer
+    image: ${DOCKER_USER}/mailer
     labels:
       traefik.http.routers.mailer-http.rule: Host(`mailer.vibioh.fr`)
       traefik.http.routers.mailer-http.entrypoints: http
