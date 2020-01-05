@@ -26,8 +26,8 @@ ENTRYPOINT [ "/mailer" ]
 
 ARG APP_VERSION
 ENV VERSION=${APP_VERSION}
+ENV MAILER_SWAGGER_TITLE=Mailer
 
 COPY templates/ /templates
-COPY doc /doc
 COPY --from=fetcher /app/cacert.pem /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /app/bin/mailer /mailer

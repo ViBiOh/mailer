@@ -57,10 +57,16 @@ Usage of mailer:
         [mjml] MJML API Converter URL {MAILER_MJML_URL} (default "https://api.mjml.io/v1/render")
   -mjmlUser string
         [mjml] Application ID or Basic Auth user {MAILER_MJML_USER}
-  -port int
+  -okStatus int
+        [http] Healthy HTTP Status code {MAILER_OK_STATUS} (default 204)
+  -port uint
         [http] Listen port {MAILER_PORT} (default 1080)
   -prometheusPath string
         [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
+  -swaggerTitle string
+        [swagger] API Title {MAILER_SWAGGER_TITLE} (default "API")
+  -swaggerVersion string
+        [swagger] API Version {MAILER_SWAGGER_VERSION} (default "1.0.0")
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string

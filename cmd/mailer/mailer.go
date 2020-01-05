@@ -4,7 +4,6 @@ import (
 	"flag"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/alcotest"
@@ -13,6 +12,7 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/owasp"
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
+	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
@@ -22,8 +22,6 @@ import (
 const (
 	fixturesPath = "/fixtures"
 	renderPath   = "/render"
-
-	docPath = "doc/"
 )
 
 func main() {
@@ -34,6 +32,7 @@ func main() {
 	prometheusConfig := prometheus.Flags(fs, "prometheus")
 	owaspConfig := owasp.Flags(fs, "")
 	corsConfig := cors.Flags(fs, "cors")
+	swaggerConfig := swagger.Flags(fs, "swagger")
 
 	mailjetConfig := mailjet.Flags(fs, "mailjet")
 	mjmlConfig := mjml.Flags(fs, "mjml")
@@ -42,12 +41,18 @@ func main() {
 
 	alcotest.DoAndExit(alcotestConfig)
 
+	server := httputils.New(serverConfig)
 	mjmlApp := mjml.New(mjmlConfig)
 	mailjetApp := mailjet.New(mailjetConfig)
 	renderApp := render.New(mjmlApp, mailjetApp)
+	prometheusApp := prometheus.New(prometheusConfig)
+
+	swaggerApp, err := swagger.New(swaggerConfig, server.Swagger, prometheusApp.Swagger, renderApp.Swagger, fixtures.Swagger)
+	logger.Fatal(err)
 
 	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
 	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
+	swaggerHandler := swaggerApp.Handler()
 
 	mailerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, renderPath) {
@@ -60,12 +65,10 @@ func main() {
 			return
 		}
 
-		w.Header().Set("Cache-Control", "no-cache")
-		http.ServeFile(w, r, path.Join(docPath, r.URL.Path))
+		swaggerHandler.ServeHTTP(w, r)
 	})
 
-	server := httputils.New(serverConfig)
-	server.Middleware(prometheus.New(prometheusConfig).Middleware)
+	server.Middleware(prometheusApp.Middleware)
 	server.Middleware(owasp.New(owaspConfig).Middleware)
 	server.Middleware(cors.New(corsConfig).Middleware)
 	server.ListenServeWait(mailerHandler)

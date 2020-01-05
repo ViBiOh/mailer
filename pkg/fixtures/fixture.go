@@ -11,6 +11,7 @@ import (
 
 	"github.com/ViBiOh/httputils/v3/pkg/httperror"
 	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
+	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 )
 
 const (
@@ -18,8 +19,12 @@ const (
 	jsonExtension = ".json"
 )
 
-// ErrNoTemplate error occurs when template is not found
-var ErrNoTemplate = errors.New("no template found")
+var (
+	_ swagger.Provider = Swagger
+
+	// ErrNoTemplate error occurs when template is not found
+	ErrNoTemplate = errors.New("no template found")
+)
 
 func getTemplatePath(templateName string) string {
 	return fmt.Sprintf("%s/%s/", templatesDir, templateName)
@@ -125,4 +130,61 @@ func Handler() http.Handler {
 			httperror.NotFound(w)
 		}
 	})
+}
+
+// Swagger exposes swagger configuration for API
+func Swagger() (swagger.Configuration, error) {
+	return swagger.Configuration{
+		Paths: `/fixtures/{template}:
+  parameters:
+    - name: template
+      in: path
+      description: Template's name
+      required: true
+      schema:
+        type: string
+
+  get:
+    description: List fixtures
+
+    responses:
+      200:
+        description: List of availables fixtures
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                results:
+                  type: array
+                  description: Fixtures' name
+                  items:
+                    type: string
+
+/fixtures/{template}/{fixture}:
+  parameters:
+    - name: template
+      in: path
+      description: Template's name
+      required: true
+      schema:
+        type: string
+    - name: fixture
+      in: path
+      description: Fixture's name
+      required: true
+      schema:
+        type: string
+
+  get:
+    description: Retrieve fixture values for template
+
+    responses:
+      200:
+        description: Fixture values
+        content:
+          application/json:
+            schema:
+              type: object`,
+	}, nil
 }
