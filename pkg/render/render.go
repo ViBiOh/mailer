@@ -175,7 +175,7 @@ func (a app) Handler() http.Handler {
 
 		output := CreateWriter()
 
-		if err := templates.WriteHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
+		if err := templates.ResponseHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
 			httperror.InternalServerError(w, err)
 			return
 		}
