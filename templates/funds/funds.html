@@ -1,16 +1,16 @@
 {{- define "funds" -}}
   <mj-table>
     <tr>
-      <th width="140px">ISIN</th>
-      <th>Libellé</th>
-      <th width="80px">Score</th>
+      <th scope="col" width="140px">ISIN</th>
+      <th scope="col">Libellé</th>
+      <th scope="col" width="80px">Score</th>
     </tr>
 
     {{- range $index, $fund := . -}}
       <tr {{- if odd $index }} style="background-color: #e1e1e8"{{- end -}}>
-        <td align="center">
+        <th scope="row" align="center">
           <a href="https://funds.vibioh.fr/?isin={{ $fund.isin }}" rel="noopener noreferrer" target="_blank">{{- $fund.isin -}}</a>
-        </td>
+        </th>
         <td>{{- $fund.label -}}</td>
         <td align="center">{{ $fund.score }}</td>
       </tr>
