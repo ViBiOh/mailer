@@ -26,19 +26,9 @@ jobs:
       after_success:
         - curl -q -sSL --max-time 10 -X POST https://goreportcard.com/checks?repo=github.com/${TRAVIS_REPO_SLUG}
 
-    - stage: Deploy
-
-      language: minimal
-      script:
-        - curl -q -sSL --max-time 10 "https://raw.githubusercontent.com/ViBiOh/scripts/master/bootstrap" | bash -s "deploy" "env_replace"
-        - scripts/env_replace docker-compose.yml DOCKER_USER HTTP_PASSWORD MAILJET_APIKEY_PUBLIC MAILJET_APIKEY_PRIVATE MJML_URL MJML_USER MJML_PASS | sed "s|\\\$|\$\$|g" > docker-compose-env.yml
-        - scripts/deploy "$(make name)" "@docker-compose-env.yml"
-
 stages:
   - Build
   - name: Publish
-    if: branch = master && type = push
-  - name: Deploy
     if: branch = master && type = push
 
 notifications:
