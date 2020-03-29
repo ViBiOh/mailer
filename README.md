@@ -44,6 +44,8 @@ Usage of mailer:
         [owasp] Content-Security-Policy {MAILER_CSP} (default "default-src 'self'; base-uri 'self'")
   -frameOptions string
         [owasp] X-Frame-Options {MAILER_FRAME_OPTIONS} (default "deny")
+  -graceDuration string
+        [http] Grace duration when SIGTERM received {MAILER_GRACE_DURATION} (default "15s")
   -hsts
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -key string
