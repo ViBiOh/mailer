@@ -15,7 +15,7 @@ import (
 // App of package
 type App interface {
 	Enabled() bool
-	SendEmail(context.Context, *Email) error
+	SendEmail(context.Context, Email) error
 }
 
 // Config of package
@@ -61,7 +61,7 @@ func (a app) Enabled() bool {
 }
 
 // SendEmail sends emails with Mailer for defined parameters
-func (a app) SendEmail(ctx context.Context, email *Email) error {
+func (a app) SendEmail(ctx context.Context, email Email) error {
 	if !a.Enabled() {
 		return nil
 	}

@@ -146,7 +146,7 @@ func (a app) Handler() http.Handler {
 			return
 		}
 
-		var mail *mailjet.Mail
+		var mail mailjet.Mail
 		if r.Method == http.MethodPost {
 			mail = a.mailjetApp.GetParameters(r)
 			if err := a.mailjetApp.CheckParameters(mail); err != nil {
