@@ -73,5 +73,5 @@ func (e *Email) Send(ctx context.Context) error {
 		return nil
 	}
 
-	return e.mailer.SendEmail(ctx, e)
+	return e.mailer.SendEmail(ctx, *e)
 }

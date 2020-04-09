@@ -78,7 +78,7 @@ func New(config Config) *App {
 }
 
 // CheckParameters checks mail descriptor
-func (a App) CheckParameters(mail *Mail) error {
+func (a App) CheckParameters(mail Mail) error {
 	if a.publicKey == "" {
 		return ErrNoConfiguration
 	}
@@ -101,8 +101,8 @@ func (a App) CheckParameters(mail *Mail) error {
 }
 
 // GetParameters retrieves mail descriptor from Query
-func (a App) GetParameters(r *http.Request) *Mail {
-	mail := &Mail{
+func (a App) GetParameters(r *http.Request) Mail {
+	mail := Mail{
 		From:    strings.TrimSpace(r.URL.Query().Get("from")),
 		Sender:  strings.TrimSpace(r.URL.Query().Get("sender")),
 		Subject: strings.TrimSpace(r.URL.Query().Get("subject")),
@@ -119,7 +119,7 @@ func (a App) GetParameters(r *http.Request) *Mail {
 }
 
 // SendMail send mailjet mail
-func (a App) SendMail(ctx context.Context, mail *Mail, html string) error {
+func (a App) SendMail(ctx context.Context, mail Mail, html string) error {
 	if err := a.CheckParameters(mail); err != nil {
 		return err
 	}
