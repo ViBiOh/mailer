@@ -4,14 +4,16 @@
       <strong>{{ .repository }}</strong>
       new version is
       <strong>
-        <span style="color: #5cb85c">{{ .tag_name }}</span>
+        <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository }}/releases/tag/{{ .tag_name }}">{{ .tag_name }}</a>
       </strong>
     </mj-accordion-title>
 
-    <mj-accordion-text background-color="#3a3a3a" padding="10" color="#f8f8f8" padding="0" font-size="10px" font-family="Courier new">
-      {{- range $line := .body -}}
-        {{ $line }}</br>
-      {{- end -}}
+    <mj-accordion-text background-color="#3a3a3a" color="#f8f8f8">
+      <code>
+        {{- range $index, $line := split .body -}}
+          {{- $line -}}<br>
+        {{- end -}}
+      </code>
     </mj-accordion-text>
   </mj-accordion-element>
 {{- end -}}
@@ -19,23 +21,22 @@
 <mjml>
   <mj-head>
     <mj-attributes>
-      <mj-accordion border="none" padding="1px" />
+      <mj-accordion border="none"></mj-accordion>
+      <mj-accordion-element icon-wrapped-url="https://i.imgur.com/Xvw0vjq.png" icon-unwrapped-url="https://i.imgur.com/KKHenWa.png" icon-height="24px" icon-width="24px"></mj-accordion-element>
     </mj-attributes>
   </mj-head>
 
   <mj-body background-color="#e1e1e8">
-    <mj-section background-color="#3a3a3a">
-      <mj-column>
-        <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">Ketchup</mj-text>
-      </mj-column>
-    </mj-section>
+    {{- template "header" "Ketchup" -}}
 
     <mj-section background-color="#ffffff">
+      <mj-column padding="0">
         <mj-accordion>
           {{- range $index, $target := .targets -}}
             {{ template "target" $target }}
           {{- end -}}
         </mj-accordion>
+      </mj-column>
     </mj-section>
 
     {{- template "footer" -}}

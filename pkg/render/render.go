@@ -56,6 +56,9 @@ func New(mjmlApp *mjml.App, mailjetApp *mailjet.App) App {
 			"odd": func(i int) bool {
 				return i%2 == 0
 			},
+			"split": func(s string) []string {
+				return strings.Split(s, "\n")
+			},
 		}).ParseFiles(templates...)),
 	}
 }
