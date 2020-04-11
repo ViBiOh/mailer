@@ -1,12 +1,6 @@
 <mjml>
   <mj-body background-color="#e1e1e8">
-    <mj-spacer height="40px"></mj-spacer>
-
-    <mj-section background-color="#3a3a3a">
-      <mj-column padding="0">
-        <mj-text align="center" color="#f8f8f8" padding="0" font-size="24px" font-weight="bold">deploy</mj-text>
-      </mj-column>
-    </mj-section>
+    {{- template "header" "deploy" -}}
 
     <mj-section background-color="#ffffff" padding="0">
       <mj-column>
@@ -37,7 +31,5 @@
     </mj-section>
 
     {{- template "footer" -}}
-
-    <mj-spacer height="40px"></mj-spacer>
   </mj-body>
 </mjml>
