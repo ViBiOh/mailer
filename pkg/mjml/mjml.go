@@ -24,6 +24,11 @@ type mjmlResponse struct {
 	Mjml string `json:"mjml"`
 }
 
+// App of package
+type App interface {
+	Render(context.Context, string) (string, error)
+}
+
 // Config of package
 type Config struct {
 	url  *string
@@ -31,8 +36,7 @@ type Config struct {
 	pass *string
 }
 
-// App of package
-type App struct {
+type app struct {
 	url  string
 	user string
 	pass string
@@ -48,20 +52,20 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config) *App {
+func New(config Config) App {
 	converter := strings.TrimSpace(*config.url)
 
 	if converter == "" {
-		return &App{}
+		return app{}
 	}
 
-	app := App{
+	app := app{
 		url:  converter,
 		user: strings.TrimSpace(*config.user),
 		pass: strings.TrimSpace(*config.pass),
 	}
 
-	return &app
+	return app
 }
 
 // IsMJML determines if provided content is a MJML template or not
@@ -69,12 +73,12 @@ func IsMJML(content []byte) bool {
 	return bytes.HasPrefix(content, prefix)
 }
 
-func (a App) isReady() bool {
+func (a app) isReady() bool {
 	return a.url != ""
 }
 
 // Render MJML template
-func (a App) Render(ctx context.Context, template string) (string, error) {
+func (a app) Render(ctx context.Context, template string) (string, error) {
 	if !a.isReady() {
 		return template, nil
 	}

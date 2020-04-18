@@ -14,9 +14,9 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
 	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
-	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/render"
+	"github.com/ViBiOh/mailer/pkg/smtp"
 )
 
 const (
@@ -34,7 +34,7 @@ func main() {
 	corsConfig := cors.Flags(fs, "cors")
 	swaggerConfig := swagger.Flags(fs, "swagger")
 
-	mailjetConfig := mailjet.Flags(fs, "mailjet")
+	smtpConfig := smtp.Flags(fs, "smtp")
 	mjmlConfig := mjml.Flags(fs, "mjml")
 
 	logger.Fatal(fs.Parse(os.Args[1:]))
@@ -43,8 +43,8 @@ func main() {
 
 	server := httputils.New(serverConfig)
 	mjmlApp := mjml.New(mjmlConfig)
-	mailjetApp := mailjet.New(mailjetConfig)
-	renderApp := render.New(mjmlApp, mailjetApp)
+	smtpApp := smtp.New(smtpConfig)
+	renderApp := render.New(mjmlApp, smtpApp)
 	prometheusApp := prometheus.New(prometheusConfig)
 
 	swaggerApp, err := swagger.New(swaggerConfig, server.Swagger, prometheusApp.Swagger, renderApp.Swagger, fixtures.Swagger)

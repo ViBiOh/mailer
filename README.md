@@ -6,17 +6,13 @@
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=ViBiOh/mailer)](https://dependabot.com)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ViBiOh_mailer&metric=alert_status)](https://sonarcloud.io/dashboard?id=ViBiOh_mailer)
 
-Mailer is a service for rendering and sending email based on Golang Template with the help of MJML and Mailjet.
+Mailer is a service for rendering and sending email based on Golang Template with the help of MJML.
 
 # Getting Started
 
 ## Docker
 
 Docker image is available, `vibioh/mailer` and a sample `docker-compose.yml`. Everything is almost configured, you only have to tweak domain's name, mainly configured for being used with [traefik](https://traefik.io), and adjust some secrets.
-
-## Mailjet
-
-In order to use the Mailjet sender, you need to register to [Mailjet](https://www.mailjet.com/) for having credentials.
 
 ## MJML
 
@@ -50,10 +46,6 @@ Usage of mailer:
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -key string
         [http] Key file {MAILER_KEY}
-  -mailjetPrivateKey string
-        [mailjet] Private Key {MAILER_MAILJET_PRIVATE_KEY}
-  -mailjetPublicKey string
-        [mailjet] Public Key {MAILER_MAILJET_PUBLIC_KEY}
   -mjmlPass string
         [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
   -mjmlURL string
@@ -66,6 +58,14 @@ Usage of mailer:
         [http] Listen port {MAILER_PORT} (default 1080)
   -prometheusPath string
         [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
+  -smtpAddress string
+        [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
+  -smtpAuthHost string
+        [smtp] Plain Auth host {MAILER_SMTP_AUTH_HOST}
+  -smtpAuthPassword string
+        [smtp] Plain Auth Password {MAILER_SMTP_AUTH_PASSWORD}
+  -smtpAuthUser string
+        [smtp] Plain Auth User {MAILER_SMTP_AUTH_USER}
   -swaggerTitle string
         [swagger] API Title {MAILER_SWAGGER_TITLE} (default "API")
   -swaggerVersion string
