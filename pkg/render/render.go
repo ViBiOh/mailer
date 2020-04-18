@@ -17,8 +17,8 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/httputils/v3/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
-	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
+	"github.com/ViBiOh/mailer/pkg/smtp"
 )
 
 const (
@@ -37,21 +37,22 @@ type App interface {
 }
 
 type app struct {
-	mjmlApp    *mjml.App
-	mailjetApp *mailjet.App
-	tpl        *template.Template
+	tpl *template.Template
+
+	mjmlApp mjml.App
+	smtpApp smtp.App
 }
 
 // New creates new App
-func New(mjmlApp *mjml.App, mailjetApp *mailjet.App) App {
+func New(mjmlApp mjml.App, smtpApp smtp.App) App {
 	templates, err := templates.GetTemplates(templatesDir, templateSuffix)
 	if err != nil {
 		logger.Error("%s", err)
 	}
 
 	return &app{
-		mjmlApp:    mjmlApp,
-		mailjetApp: mailjetApp,
+		mjmlApp: mjmlApp,
+		smtpApp: smtpApp,
 		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
 			"odd": func(i int) bool {
 				return i%2 == 0
@@ -149,15 +150,6 @@ func (a app) Handler() http.Handler {
 			return
 		}
 
-		var mail mailjet.Mail
-		if r.Method == http.MethodPost {
-			mail = a.mailjetApp.GetParameters(r)
-			if err := a.mailjetApp.CheckParameters(mail); err != nil {
-				httperror.BadRequest(w, err)
-				return
-			}
-		}
-
 		templateName := strings.Trim(r.URL.Path, "/")
 		tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", templateName, templateSuffix))
 
@@ -177,13 +169,7 @@ func (a app) Handler() http.Handler {
 		}
 
 		output := CreateWriter()
-
-		if err := templates.ResponseHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
-			httperror.InternalServerError(w, err)
-			return
-		}
-
-		if err := a.handleMjml(ctx, output.Content()); err != nil {
+		if err := a.getEmailOutput(ctx, output, tpl, content); err != nil {
 			httperror.InternalServerError(w, err)
 			return
 		}
@@ -195,16 +181,35 @@ func (a app) Handler() http.Handler {
 			return
 		}
 
-		if err := a.mailjetApp.SendMail(ctx, mail, output.Content().String()); err != nil {
-			if err == mailjet.ErrEmptyFrom || err == mailjet.ErrEmptyTo || err == mailjet.ErrBlankTo {
-				httperror.BadRequest(w, err)
-			} else {
-				httperror.InternalServerError(w, err)
-			}
+		emailValues := parseEmail(r)
+		if err := checkEmail(emailValues); err != nil {
+			httperror.BadRequest(w, err)
 			return
+		}
+
+		body := bytes.Buffer{}
+		body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", emailValues.sender, emailValues.from))
+		body.WriteString(fmt.Sprintf("Subject: %s\r\n", emailValues.subject))
+		body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
+		body.WriteString(fmt.Sprintf("\r\n%s\r\n", output.content.Bytes()))
+
+		if err := a.smtpApp.Send(emailValues.from, emailValues.to, body.Bytes()); err != nil {
+			httperror.InternalServerError(w, err)
 		}
 		w.WriteHeader(http.StatusOK)
 	})
+}
+
+func (a app) getEmailOutput(ctx context.Context, output *ResponseWriter, tpl *template.Template, content interface{}) error {
+	if err := templates.ResponseHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
+		return err
+	}
+
+	if err := a.handleMjml(ctx, output.Content()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Swagger exposes swagger configuration for API
