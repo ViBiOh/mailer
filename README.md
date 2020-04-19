@@ -8,17 +8,21 @@
 
 Mailer is a service for rendering and sending email based on Golang Template with the help of MJML.
 
-# Getting Started
+## Getting Started
 
-## Docker
+Golang binary is built with static link. You can download it directly from the [Github Release page](https://github.com/ViBiOh/mailer/releases) or build it by yourself by cloning this repo and running `make`.
 
-Docker image is available, `vibioh/mailer` and a sample `docker-compose.yml`. Everything is almost configured, you only have to tweak domain's name, mainly configured for being used with [traefik](https://traefik.io), and adjust some secrets.
+A Docker image is available for `amd64`, `arm` and `arm64` platforms on Docker Hub: [vibioh/mailer](https://hub.docker.com/r/vibioh/mailer/tags).
 
-## MJML
+You can configure app by passing CLI args or environment variables (cf. [Usage](#usage) section). CLI override environment variables.
+
+You'll find a Kubernetes exemple (without secrets) in the [`infra/`](infra/) folder.
+
+### MJML
 
 In order to use the MJML converter, you need to register to [MJML API](https://mjml.io/api) for having credentials or provided a compliant API like [mjml-api](https://github.com/ViBiOh/mjml-api).
 
-## CLI Usage
+## Usage
 
 ```bash
 Usage of mailer:
