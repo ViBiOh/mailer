@@ -3,8 +3,7 @@ package render
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
+	"errors"
 	"html/template"
 	"net/http"
 	"strings"
@@ -13,7 +12,6 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/query"
-	"github.com/ViBiOh/httputils/v3/pkg/request"
 	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/httputils/v3/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
@@ -28,6 +26,8 @@ const (
 
 var (
 	_ swagger.Provider = app{}.Swagger
+
+	errTemplateNotFound = errors.New("template not found")
 )
 
 // App of package
@@ -64,38 +64,7 @@ func New(mjmlApp mjml.App, smtpApp smtp.App) App {
 	}
 }
 
-func (a app) getBodyContent(r *http.Request) (map[string]interface{}, error) {
-	rawContent, err := request.ReadBodyRequest(r)
-	if err != nil {
-		return nil, err
-	}
-
-	if query.GetBool(r, "dump") {
-		logger.Info("Payload for %s: %s", r.URL.Path, rawContent)
-	}
-
-	var content map[string]interface{}
-	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, err
-	}
-
-	return content, nil
-}
-
-func (a app) getContent(templateName string, r *http.Request) (map[string]interface{}, error) {
-	if r.Method == http.MethodGet {
-		fixtureName := r.URL.Query().Get("fixture")
-		if fixtureName == "" {
-			fixtureName = "default"
-		}
-
-		return fixtures.Get(templateName, fixtureName)
-	}
-
-	return a.getBodyContent(r)
-}
-
-func (a app) handleMjml(ctx context.Context, content *bytes.Buffer) error {
+func (a app) convertMjml(ctx context.Context, content *bytes.Buffer) error {
 	if a.mjmlApp == nil {
 		return nil
 	}
@@ -118,6 +87,51 @@ func (a app) handleMjml(ctx context.Context, content *bytes.Buffer) error {
 	return nil
 }
 
+// Handler for Render request. Should be use with net/http
+func (a app) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !checkRequest(r) {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+
+		}
+
+		if query.IsRoot(r) && r.Method == http.MethodGet {
+			a.listTemplatesHandler(w, r)
+			return
+		}
+
+		emailContent, err := a.getEmailOutput(r, strings.Trim(r.URL.Path, "/"))
+		if errors.Is(err, errTemplateNotFound) || errors.Is(err, fixtures.ErrNoTemplate) {
+			httperror.NotFound(w)
+			return
+		} else if err != nil {
+			httperror.InternalServerError(w, err)
+			return
+		}
+
+		if r.Method == http.MethodGet {
+			if _, err := emailContent.WriteResponse(w); err != nil {
+				httperror.InternalServerError(w, err)
+			}
+			return
+		}
+
+		a.sendEmail(w, r, emailContent.content.Bytes())
+	})
+}
+
+func checkRequest(r *http.Request) bool {
+	switch r.Method {
+	case http.MethodPost:
+		return !query.IsRoot(r)
+	case http.MethodGet:
+		return true
+	default:
+		return false
+	}
+}
+
 func (a app) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 	templatesList := make([]string, 0)
 
@@ -128,88 +142,6 @@ func (a app) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httpjson.ResponseArrayJSON(w, http.StatusOK, templatesList, httpjson.IsPretty(r))
-}
-
-// Handler for Render request. Should be use with net/http
-func (a app) Handler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost && r.Method != http.MethodGet {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-
-		ctx := r.Context()
-
-		if r.URL.Path == "" || r.URL.Path == "/" {
-			if r.Method == http.MethodPost {
-				w.WriteHeader(http.StatusMethodNotAllowed)
-			} else {
-				a.listTemplatesHandler(w, r)
-			}
-
-			return
-		}
-
-		templateName := strings.Trim(r.URL.Path, "/")
-		tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", templateName, templateSuffix))
-
-		if tpl == nil {
-			httperror.NotFound(w)
-			return
-		}
-
-		content, err := a.getContent(templateName, r)
-		if err != nil {
-			if err == fixtures.ErrNoTemplate {
-				httperror.NotFound(w)
-			} else {
-				httperror.InternalServerError(w, err)
-			}
-			return
-		}
-
-		output := CreateWriter()
-		if err := a.getEmailOutput(ctx, output, tpl, content); err != nil {
-			httperror.InternalServerError(w, err)
-			return
-		}
-
-		if r.Method == http.MethodGet {
-			if _, err := output.WriteResponse(w); err != nil {
-				httperror.InternalServerError(w, err)
-			}
-			return
-		}
-
-		emailValues := parseEmail(r)
-		if err := checkEmail(emailValues); err != nil {
-			httperror.BadRequest(w, err)
-			return
-		}
-
-		body := bytes.Buffer{}
-		body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", emailValues.sender, emailValues.from))
-		body.WriteString(fmt.Sprintf("Subject: %s\r\n", emailValues.subject))
-		body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
-		body.WriteString(fmt.Sprintf("\r\n%s\r\n", output.content.Bytes()))
-
-		if err := a.smtpApp.Send(emailValues.from, emailValues.to, body.Bytes()); err != nil {
-			httperror.InternalServerError(w, err)
-		}
-		w.WriteHeader(http.StatusOK)
-	})
-}
-
-func (a app) getEmailOutput(ctx context.Context, output *ResponseWriter, tpl *template.Template, content interface{}) error {
-	if err := templates.ResponseHTMLTemplate(tpl, output, content, http.StatusOK); err != nil {
-		return err
-	}
-
-	if err := a.handleMjml(ctx, output.Content()); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Swagger exposes swagger configuration for API
