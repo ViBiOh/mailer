@@ -1,4 +1,4 @@
-{{- define "target" -}}
+{{- define "release" -}}
   <mj-accordion-element>
     <mj-accordion-title>
       <strong>{{ .repository }}</strong>
@@ -32,8 +32,8 @@
     <mj-section background-color="#ffffff">
       <mj-column padding="0">
         <mj-accordion>
-          {{- range $index, $target := .targets -}}
-            {{ template "target" $target }}
+          {{- range $index, $release := .releases -}}
+            {{ template "release" $release }}
           {{- end -}}
         </mj-accordion>
       </mj-column>

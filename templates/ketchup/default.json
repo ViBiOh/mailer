@@ -1,5 +1,5 @@
 {
-  "targets": [
+  "releases": [
     {
       "repository": "vibioh/viws",
       "tag_name": "1.2.1",
