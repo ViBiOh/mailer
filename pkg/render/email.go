@@ -1,7 +1,6 @@
 package render
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -69,19 +68,13 @@ func (a app) getEmailOutput(r *http.Request, templateName string) (*ResponseWrit
 }
 
 func (a app) sendEmail(w http.ResponseWriter, r *http.Request, content []byte) {
-	emailValues := parseEmail(r)
-	if err := checkEmail(emailValues); err != nil {
+	email := parseEmail(r)
+	if err := checkEmail(email); err != nil {
 		httperror.BadRequest(w, err)
 		return
 	}
 
-	body := bytes.Buffer{}
-	body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", emailValues.sender, emailValues.from))
-	body.WriteString(fmt.Sprintf("Subject: %s\r\n", emailValues.subject))
-	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
-	body.WriteString(fmt.Sprintf("\r\n%s\r\n", content))
-
-	if err := a.smtpApp.Send(emailValues.from, emailValues.to, body.Bytes()); err != nil {
+	if err := a.senderApp.Send(r.Context(), email, content); err != nil {
 		httperror.InternalServerError(w, err)
 	}
 	w.WriteHeader(http.StatusOK)

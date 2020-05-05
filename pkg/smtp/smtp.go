@@ -1,16 +1,20 @@
 package smtp
 
 import (
+	"bytes"
+	"context"
 	"flag"
+	"fmt"
 	"net/smtp"
 	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/flags"
+	"github.com/ViBiOh/mailer/pkg/model"
 )
 
 // App of package
 type App interface {
-	Send(from string, to []string, content []byte) error
+	Send(ctx context.Context, mail model.Mail, html []byte) error
 }
 
 // Config of package
@@ -51,7 +55,12 @@ func New(config Config) App {
 	}
 }
 
-// Send emails to given recipients
-func (a app) Send(from string, to []string, content []byte) error {
-	return smtp.SendMail(a.addr, a.auth, from, to, content)
+func (a app) Send(_ context.Context, mail model.Mail, html []byte) error {
+	body := bytes.Buffer{}
+	body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", mail.Sender, mail.From))
+	body.WriteString(fmt.Sprintf("Subject: %s\r\n", mail.Subject))
+	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
+	body.WriteString(fmt.Sprintf("\r\n%s\r\n", html))
+
+	return smtp.SendMail(a.addr, a.auth, mail.From, mail.To, body.Bytes())
 }

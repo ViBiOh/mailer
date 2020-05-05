@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/ViBiOh/mailer/pkg/model"
 )
 
 var (
@@ -12,40 +14,33 @@ var (
 	errBlankTo   = errors.New("\"to\" item is blank")
 )
 
-type email struct {
-	from    string
-	sender  string
-	to      []string
-	subject string
-}
-
-func parseEmail(r *http.Request) email {
-	email := email{
-		from:    strings.TrimSpace(r.URL.Query().Get("from")),
-		sender:  strings.TrimSpace(r.URL.Query().Get("sender")),
-		subject: strings.TrimSpace(r.URL.Query().Get("subject")),
-		to:      make([]string, 0),
+func parseEmail(r *http.Request) model.Mail {
+	email := model.Mail{
+		From:    strings.TrimSpace(r.URL.Query().Get("from")),
+		Sender:  strings.TrimSpace(r.URL.Query().Get("sender")),
+		Subject: strings.TrimSpace(r.URL.Query().Get("subject")),
+		To:      make([]string, 0),
 	}
 
 	for _, rawTo := range strings.Split(r.URL.Query().Get("to"), ",") {
 		if cleanTo := strings.TrimSpace(rawTo); cleanTo != "" {
-			email.to = append(email.to, cleanTo)
+			email.To = append(email.To, cleanTo)
 		}
 	}
 
 	return email
 }
 
-func checkEmail(values email) error {
-	if strings.TrimSpace(values.from) == "" {
+func checkEmail(email model.Mail) error {
+	if strings.TrimSpace(email.From) == "" {
 		return errEmptyFrom
 	}
 
-	if len(values.to) == 0 {
+	if len(email.To) == 0 {
 		return errEmptyTo
 	}
 
-	for _, to := range values.to {
+	for _, to := range email.To {
 		if strings.TrimSpace(to) == "" {
 			return errBlankTo
 		}

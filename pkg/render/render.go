@@ -16,7 +16,7 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	"github.com/ViBiOh/mailer/pkg/mjml"
-	"github.com/ViBiOh/mailer/pkg/smtp"
+	"github.com/ViBiOh/mailer/pkg/model"
 )
 
 const (
@@ -39,20 +39,20 @@ type App interface {
 type app struct {
 	tpl *template.Template
 
-	mjmlApp mjml.App
-	smtpApp smtp.App
+	mjmlApp   mjml.App
+	senderApp model.Sender
 }
 
 // New creates new App
-func New(mjmlApp mjml.App, smtpApp smtp.App) App {
+func New(mjmlApp mjml.App, senderApp model.Sender) App {
 	templates, err := templates.GetTemplates(templatesDir, templateSuffix)
 	if err != nil {
 		logger.Error("%s", err)
 	}
 
 	return &app{
-		mjmlApp: mjmlApp,
-		smtpApp: smtpApp,
+		mjmlApp:   mjmlApp,
+		senderApp: senderApp,
 		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
 			"odd": func(i int) bool {
 				return i%2 == 0
