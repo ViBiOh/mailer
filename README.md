@@ -50,6 +50,10 @@ Usage of mailer:
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -key string
         [http] Key file {MAILER_KEY}
+  -mailjetApiPrivateKey string
+        [mailjetApi] Private Key {MAILER_MAILJET_API_PRIVATE_KEY}
+  -mailjetApiPublicKey string
+        [mailjetApi] Public Key {MAILER_MAILJET_API_PUBLIC_KEY}
   -mjmlPass string
         [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
   -mjmlURL string
@@ -65,7 +69,7 @@ Usage of mailer:
   -smtpAddress string
         [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
   -smtpAuthHost string
-        [smtp] Plain Auth host {MAILER_SMTP_AUTH_HOST}
+        [smtp] Plain Auth host {MAILER_SMTP_AUTH_HOST} (default "localhost")
   -smtpAuthPassword string
         [smtp] Plain Auth Password {MAILER_SMTP_AUTH_PASSWORD}
   -smtpAuthUser string
