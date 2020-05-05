@@ -88,6 +88,9 @@ func (a app) Send(ctx context.Context, mail model.Mail, html []byte) error {
 	}
 
 	response, err := request.New().Post(sendURL).BasicAuth(a.publicKey, a.privateKey).JSON(ctx, email)
+	if err != nil {
+		return err
+	}
 
 	body, err := request.ReadBodyResponse(response)
 	if err != nil {
@@ -95,6 +98,5 @@ func (a app) Send(ctx context.Context, mail model.Mail, html []byte) error {
 	}
 
 	logger.Info("Mail sent: %s", body)
-
-	return err
+	return nil
 }
