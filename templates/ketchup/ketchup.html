@@ -1,9 +1,9 @@
 {{- define "release" -}}
   <mj-text>
-    <strong>{{ .repository }}</strong>
+    <strong>{{ .repository.name }}</strong>
     new version is
     <strong>
-      <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository }}/releases/tag/{{ .tag_name }}">{{ .tag_name }}</a>
+      <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
     </strong>
   </mj-text>
 {{- end -}}

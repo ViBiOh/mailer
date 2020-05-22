@@ -1,14 +1,20 @@
 {
   "releases": [
     {
-      "repository": "vibioh/viws",
-      "tag_name": "1.2.1",
-      "body": "# Features\n\n* Adding mime types from apache inside container (#39) cec9dbf\n\n# Miscellaneous\n\n* *(deps)* Bumping deps (#40) d2a5cae\n* *(ci)* Bumping golang minor f3e3e8e\n* *(ci)* Harmonizing makefile accross repositories from gazr.io 69cfc27\n"
+      "repository": {
+        "name": "vibioh/viws",
+      },
+      "version": {
+        "name": "1.2.1",
+      }
     },
     {
-      "repository": "vibioh/deploy",
-      "tag_name": "1.0.1",
-      "body": "# Features\n\n* Adding mime types from apache inside container (#39) cec9dbf\n\n# Miscellaneous\n\n* *(deps)* Bumping deps (#40) d2a5cae\n* *(ci)* Bumping golang minor f3e3e8e\n* *(ci)* Harmonizing makefile accross repositories from gazr.io 69cfc27\n"
+      "repository": {
+        "name": "vibioh/deploy",
+      },
+      "version": {
+        "name": "1.0.1",
+      }
     }
   ]
 }
