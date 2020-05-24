@@ -2,4 +2,4 @@ module github.com/ViBiOh/mailer
 
 go 1.14
 
-require github.com/ViBiOh/httputils/v3 v3.19.2
+require github.com/ViBiOh/httputils/v3 v3.20.0
