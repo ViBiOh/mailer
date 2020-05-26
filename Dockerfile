@@ -1,4 +1,4 @@
-FROM scratch
+FROM vibioh/scratch
 
 EXPOSE 1080
 
