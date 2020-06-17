@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.com/ViBiOh/mailer.svg?branch=master)](https://travis-ci.com/ViBiOh/mailer)
 [![codecov](https://codecov.io/gh/ViBiOh/mailer/branch/master/graph/badge.svg)](https://codecov.io/gh/ViBiOh/mailer)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ViBiOh/mailer)](https://goreportcard.com/report/github.com/ViBiOh/mailer)
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=ViBiOh/mailer)](https://dependabot.com)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ViBiOh_mailer&metric=alert_status)](https://sonarcloud.io/dashboard?id=ViBiOh_mailer)
 
 Mailer is a service for rendering and sending email based on Golang Template with the help of MJML.
