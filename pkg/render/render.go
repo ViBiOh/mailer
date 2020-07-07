@@ -45,7 +45,7 @@ type app struct {
 
 // New creates new App
 func New(mjmlApp mjml.App, senderApp model.Sender) App {
-	templates, err := templates.GetTemplates(templatesDir, templateSuffix)
+	appTemplates, err := templates.GetTemplates(templatesDir, templateSuffix)
 	if err != nil {
 		logger.Error("%s", err)
 	}
@@ -60,7 +60,7 @@ func New(mjmlApp mjml.App, senderApp model.Sender) App {
 			"split": func(s string) []string {
 				return strings.Split(s, "\n")
 			},
-		}).ParseFiles(templates...)),
+		}).ParseFiles(appTemplates...)),
 	}
 }
 

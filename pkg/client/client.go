@@ -42,15 +42,14 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 
 // New creates new App from Config
 func New(config Config) App {
-	url := strings.TrimSpace(*config.url)
+	uri := strings.TrimSpace(*config.url)
 
-	if url == "" {
+	if uri == "" {
 		return &app{}
 	}
 
 	return &app{
-		url: strings.TrimSpace(*config.url),
-
+		url:  uri,
 		user: strings.TrimSpace(*config.user),
 		pass: strings.TrimSpace(*config.pass),
 	}
