@@ -49,10 +49,6 @@ Usage of mailer:
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -key string
         [http] Key file {MAILER_KEY}
-  -mailjetApiPrivateKey string
-        [mailjetApi] Private Key {MAILER_MAILJET_API_PRIVATE_KEY}
-  -mailjetApiPublicKey string
-        [mailjetApi] Public Key {MAILER_MAILJET_API_PUBLIC_KEY}
   -mjmlPass string
         [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
   -mjmlURL string
