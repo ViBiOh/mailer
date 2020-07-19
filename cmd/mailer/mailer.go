@@ -14,7 +14,6 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
 	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
-	"github.com/ViBiOh/mailer/pkg/mailjet"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/render"
 	"github.com/ViBiOh/mailer/pkg/smtp"
@@ -36,7 +35,6 @@ func main() {
 	swaggerConfig := swagger.Flags(fs, "swagger")
 
 	smtpConfig := smtp.Flags(fs, "smtp")
-	mailjetConfig := mailjet.Flags(fs, "mailjetApi")
 	mjmlConfig := mjml.Flags(fs, "mjml")
 
 	logger.Fatal(fs.Parse(os.Args[1:]))
@@ -45,11 +43,7 @@ func main() {
 
 	server := httputils.New(serverConfig)
 	mjmlApp := mjml.New(mjmlConfig)
-
-	senderApp := mailjet.New(mailjetConfig)
-	if senderApp == nil {
-		senderApp = smtp.New(smtpConfig)
-	}
+	senderApp := smtp.New(smtpConfig)
 
 	renderApp := render.New(mjmlApp, senderApp)
 	prometheusApp := prometheus.New(prometheusConfig)

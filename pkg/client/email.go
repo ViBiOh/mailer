@@ -1,11 +1,17 @@
 package client
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+var (
+	// EmptyEmail for not found case
+	EmptyEmail = Email{}
+)
 
 // Email describes an email to be sent
 type Email struct {
-	mailer App
-
 	template   string
 	from       string
 	sender     string
@@ -15,10 +21,8 @@ type Email struct {
 }
 
 // NewEmail create a new email
-func NewEmail(mailer App) *Email {
-	return &Email{
-		mailer: mailer,
-	}
+func NewEmail() *Email {
+	return &Email{}
 }
 
 // Template set template
@@ -51,27 +55,27 @@ func (e *Email) WithSubject(subject string) *Email {
 
 // To add recipients to list
 func (e *Email) To(recipients ...string) *Email {
-	if e.recipients == nil {
-		e.recipients = make([]string, 0)
+	if len(e.recipients) == 0 {
+		e.recipients = recipients
+	} else {
+		e.recipients = append(e.recipients, recipients...)
 	}
-
-	e.recipients = append(e.recipients, recipients...)
 
 	return e
 }
 
 // Data set payload
-func (e *Email) Data(data interface{}) *Email {
-	e.payload = data
+func (e *Email) Data(payload interface{}) *Email {
+	e.payload = payload
 
 	return e
 }
 
 // Send email
-func (e *Email) Send(ctx context.Context) error {
-	if e.mailer == nil {
-		return nil
+func (e *Email) Send(ctx context.Context, mailer App) error {
+	if mailer == nil {
+		return errors.New("mailer not provided")
 	}
 
-	return e.mailer.SendEmail(ctx, *e)
+	return mailer.Send(ctx, *e)
 }

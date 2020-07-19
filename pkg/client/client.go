@@ -15,7 +15,7 @@ import (
 // App of package
 type App interface {
 	Enabled() bool
-	SendEmail(context.Context, Email) error
+	Send(context.Context, Email) error
 }
 
 // Config of package
@@ -42,25 +42,24 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 
 // New creates new App from Config
 func New(config Config) App {
-	uri := strings.TrimSpace(*config.url)
-
-	if uri == "" {
+	url := strings.TrimSpace(*config.url)
+	if len(url) == 0 {
 		return &app{}
 	}
 
 	return &app{
-		url:  uri,
+		url:  url,
 		user: strings.TrimSpace(*config.user),
 		pass: strings.TrimSpace(*config.pass),
 	}
 }
 
 func (a app) Enabled() bool {
-	return a.url != ""
+	return len(a.url) == 0
 }
 
-// SendEmail sends emails with Mailer for defined parameters
-func (a app) SendEmail(ctx context.Context, email Email) error {
+// Send sends emails with Mailer for defined parameters
+func (a app) Send(ctx context.Context, email Email) error {
 	if !a.Enabled() {
 		return nil
 	}
