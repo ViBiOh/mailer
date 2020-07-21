@@ -55,7 +55,7 @@ func New(config Config) App {
 }
 
 func (a app) Enabled() bool {
-	return len(a.url) == 0
+	return len(a.url) != 0
 }
 
 // Send sends emails with Mailer for defined parameters
