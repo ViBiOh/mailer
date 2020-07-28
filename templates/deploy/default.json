@@ -6,9 +6,15 @@
     { "Color": "", "Value": "Pulling api       ... " },
     { "Color": "", "Value": "Pulling portainer ... " },
     { "Color": "", "Value": "deploy_api is up-to-date" },
-    { "Color": "limegreen", "Value": "Creating deploy6ec1787_portainer_1_ada65f9d245b  ... " },
+    {
+      "Color": "limegreen",
+      "Value": "Creating deploy6ec1787_portainer_1_ada65f9d245b  ... "
+    },
     { "Color": "", "Value": "Removing old containers from deploy" },
-    { "Color": "", "Value": "Renaming containers from deploy6ec1787 to deploy" },
+    {
+      "Color": "",
+      "Value": "Renaming containers from deploy6ec1787 to deploy"
+    },
     { "Color": "limegreen", "Value": "Deploy successful! " },
     { "Color": "", "Value": "Cleaning docker system" }
   ]

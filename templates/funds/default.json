@@ -7,7 +7,15 @@
   ],
   "belowFunds": [
     { "isin": "FR0010250084", "label": "CD Euro Capital C", "score": -3.21 },
-    { "isin": "GB00B739JW74", "label": "M&G Global Macro Bond Fund Euro B Acc", "score": -4.24 },
-    { "isin": "FR0000982761", "label": "AXA Euro Valeurs Responsables C", "score": -1.77 }
+    {
+      "isin": "GB00B739JW74",
+      "label": "M&G Global Macro Bond Fund Euro B Acc",
+      "score": -4.24
+    },
+    {
+      "isin": "FR0000982761",
+      "label": "AXA Euro Valeurs Responsables C",
+      "score": -1.77
+    }
   ]
 }

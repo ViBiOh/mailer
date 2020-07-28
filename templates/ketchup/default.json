@@ -2,18 +2,18 @@
   "releases": [
     {
       "repository": {
-        "name": "vibioh/viws",
+        "name": "vibioh/viws"
       },
       "version": {
-        "name": "1.2.1",
+        "name": "1.2.1"
       }
     },
     {
       "repository": {
-        "name": "vibioh/deploy",
+        "name": "vibioh/deploy"
       },
       "version": {
-        "name": "1.0.1",
+        "name": "1.0.1"
       }
     }
   ]
