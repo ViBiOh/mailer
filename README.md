@@ -49,6 +49,16 @@ Usage of mailer:
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -key string
         [http] Key file {MAILER_KEY}
+  -loggerJson
+        [logger] Log format as JSON {MAILER_LOGGER_JSON}
+  -loggerLevel string
+        [logger] Logger level {MAILER_LOGGER_LEVEL} (default "INFO")
+  -loggerLevelKey string
+        [logger] Key for level in JSON {MAILER_LOGGER_LEVEL_KEY} (default "level")
+  -loggerMessageKey string
+        [logger] Key for message in JSON {MAILER_LOGGER_MESSAGE_KEY} (default "message")
+  -loggerTimeKey string
+        [logger] Key for timestam in JSON {MAILER_LOGGER_TIME_KEY} (default "time")
   -mjmlPass string
         [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
   -mjmlURL string
