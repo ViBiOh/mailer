@@ -35,6 +35,9 @@ spec:
       containers:
         - name: funds
           image: vibioh/mailer
+          env:
+            - name: MAILER_LOGGER_JSON
+              value: "true"
           envFrom:
             - configMapRef:
                 name: mailer
