@@ -7,6 +7,3 @@ image:
 config:
   MAILER_MJML_URL: http://mjml
   MAILER_LOGGER_JSON: "true"
-
-ingress:
-  enabled: false
