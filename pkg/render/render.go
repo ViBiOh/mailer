@@ -12,7 +12,6 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/query"
-	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/httputils/v3/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	"github.com/ViBiOh/mailer/pkg/mjml"
@@ -25,15 +24,12 @@ const (
 )
 
 var (
-	_ swagger.Provider = app{}.Swagger
-
 	errTemplateNotFound = errors.New("template not found")
 )
 
 // App of package
 type App interface {
 	Handler() http.Handler
-	Swagger() (swagger.Configuration, error)
 }
 
 type app struct {
@@ -142,91 +138,4 @@ func (a app) listTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httpjson.ResponseArrayJSON(w, http.StatusOK, templatesList, httpjson.IsPretty(r))
-}
-
-// Swagger exposes swagger configuration for API
-func (a app) Swagger() (swagger.Configuration, error) {
-	return swagger.Configuration{
-		Paths: `/render:
-  get:
-    description: List templates
-
-    responses:
-      200:
-        description: List of availables templates
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                results:
-                  type: array
-                  description: Templates' name
-                  items:
-                    type: string
-
-/render/{template}:
-  parameters:
-    - name: template
-      in: path
-      description: Template's name
-      required: true
-      schema:
-        type: string
-
-  get:
-    description: Render template
-    parameters:
-      - name: fixture
-        in: query
-        description: Fixture's name
-        schema:
-          type: string
-
-    responses:
-      200:
-        description: Render template for fixture
-        content:
-          text/html:
-            type: string
-
-  post:
-    description: Render and send template
-    parameters:
-      - name: from
-        in: query
-        description: From value of email
-        schema:
-          type: string
-      - name: sender
-        in: query
-        description: Sender name of email
-        schema:
-          type: string
-      - name: subject
-        in: query
-        description: Email subject
-        schema:
-          type: string
-      - name: to
-        in: query
-        description: Recipients of email, comma separated
-        schema:
-          type: string
-    requestBody:
-      description: Payload of content
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-
-    responses:
-      200:
-        description: Render and send template
-      400:
-        description: Invalid parameters for sending
-      500:
-        $ref: '#/components/schemas/Error'`,
-	}, nil
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/owasp"
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
-	"github.com/ViBiOh/httputils/v3/pkg/swagger"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/render"
@@ -33,7 +32,6 @@ func main() {
 	prometheusConfig := prometheus.Flags(fs, "prometheus")
 	owaspConfig := owasp.Flags(fs, "")
 	corsConfig := cors.Flags(fs, "cors")
-	swaggerConfig := swagger.Flags(fs, "swagger")
 
 	smtpConfig := smtp.Flags(fs, "smtp")
 	mjmlConfig := mjml.Flags(fs, "mjml")
@@ -42,6 +40,7 @@ func main() {
 
 	alcotest.DoAndExit(alcotestConfig)
 	logger.Global(logger.New(loggerConfig))
+	defer logger.Close()
 
 	server := httputils.New(serverConfig)
 	mjmlApp := mjml.New(mjmlConfig)
@@ -50,12 +49,8 @@ func main() {
 	renderApp := render.New(mjmlApp, senderApp)
 	prometheusApp := prometheus.New(prometheusConfig)
 
-	swaggerApp, err := swagger.New(swaggerConfig, server.Swagger, prometheusApp.Swagger, renderApp.Swagger, fixtures.Swagger)
-	logger.Fatal(err)
-
 	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
 	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
-	swaggerHandler := swaggerApp.Handler()
 
 	mailerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, renderPath) {
@@ -68,7 +63,7 @@ func main() {
 			return
 		}
 
-		swaggerHandler.ServeHTTP(w, r)
+		w.WriteHeader(http.StatusNotFound)
 	})
 
 	server.Middleware(prometheusApp.Middleware)

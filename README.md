@@ -79,10 +79,6 @@ Usage of mailer:
         [smtp] Plain Auth Password {MAILER_SMTP_AUTH_PASSWORD}
   -smtpAuthUser string
         [smtp] Plain Auth User {MAILER_SMTP_AUTH_USER}
-  -swaggerTitle string
-        [swagger] API Title {MAILER_SWAGGER_TITLE} (default "API")
-  -swaggerVersion string
-        [swagger] API Version {MAILER_SWAGGER_VERSION} (default "1.0.0")
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
