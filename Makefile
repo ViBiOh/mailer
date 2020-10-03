@@ -76,5 +76,5 @@ build:
 .PHONY: run
 run:
 	$(MAIN_RUNNER) \
-		-csp "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' unpkg.com/swagger-ui-dist@3/; style-src 'self' 'unsafe-inline' unpkg.com/swagger-ui-dist@3/ fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com" \
-		-swaggerTitle "Mailer"
+		-mjmlURL "http://localhost:4000" \
+		-csp "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com"

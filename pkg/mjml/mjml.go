@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/flags"
@@ -85,17 +86,17 @@ func (a app) Render(ctx context.Context, template string) (string, error) {
 
 	resp, err := request.New().Post(a.url).BasicAuth(a.user, a.pass).JSON(ctx, mjmlRequest{template})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to render mjml template: %s", err)
 	}
 
 	content, err := request.ReadBodyResponse(resp)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to read mjml response: %s", err)
 	}
 
 	var response mjmlResponse
 	if err := json.Unmarshal(content, &response); err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to parse mjml response: %s", err)
 	}
 
 	return response.HTML, nil
