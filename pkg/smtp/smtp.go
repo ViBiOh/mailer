@@ -56,7 +56,7 @@ func New(config Config) App {
 }
 
 func (a app) Send(_ context.Context, mail model.Mail, html []byte) error {
-	body := bytes.Buffer{}
+	body := bytes.NewBuffer(nil)
 	body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", mail.Sender, mail.From))
 	body.WriteString(fmt.Sprintf("Subject: %s\r\n", mail.Subject))
 	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
