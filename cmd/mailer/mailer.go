@@ -10,6 +10,7 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/cors"
 	"github.com/ViBiOh/httputils/v3/pkg/httputils"
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
+	"github.com/ViBiOh/httputils/v3/pkg/model"
 	"github.com/ViBiOh/httputils/v3/pkg/owasp"
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
@@ -42,7 +43,6 @@ func main() {
 	logger.Global(logger.New(loggerConfig))
 	defer logger.Close()
 
-	server := httputils.New(serverConfig)
 	mjmlApp := mjml.New(mjmlConfig)
 	senderApp := smtp.New(smtpConfig)
 
@@ -66,8 +66,9 @@ func main() {
 		w.WriteHeader(http.StatusNotFound)
 	})
 
-	server.Middleware(prometheusApp.Middleware)
-	server.Middleware(owasp.New(owaspConfig).Middleware)
-	server.Middleware(cors.New(corsConfig).Middleware)
-	server.ListenServeWait(mailerHandler)
+	httputils.New(serverConfig).ListenAndServe(mailerHandler, []model.Middleware{
+		prometheusApp.Middleware,
+		owasp.New(owaspConfig).Middleware,
+		cors.New(corsConfig).Middleware,
+	})
 }
