@@ -47,6 +47,8 @@ Usage of mailer:
         [http] Grace duration when SIGTERM received {MAILER_GRACE_DURATION} (default "30s")
   -hsts
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
+  -idleTimeout string
+        [http] Idle Timeout {MAILER_IDLE_TIMEOUT} (default "2m")
   -key string
         [http] Key file {MAILER_KEY}
   -loggerJson
@@ -71,6 +73,10 @@ Usage of mailer:
         [http] Listen port {MAILER_PORT} (default 1080)
   -prometheusPath string
         [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
+  -readTimeout string
+        [http] Read Timeout {MAILER_READ_TIMEOUT} (default "5s")
+  -shutdownTimeout string
+        [http] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default "10s")
   -smtpAddress string
         [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
   -smtpAuthHost string
@@ -83,4 +89,6 @@ Usage of mailer:
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
         [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Alcotest")
+  -writeTimeout string
+        [http] Write Timeout {MAILER_WRITE_TIMEOUT} (default "10s")
 ```
