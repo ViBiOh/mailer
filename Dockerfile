@@ -1,9 +1,9 @@
 FROM vibioh/scratch
 
+ENV MAILER_PORT 1080
+
 EXPOSE 1080
 
-ENV MAILER_CSP "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com"
-ENV MAILER_PORT 1080
 COPY templates/ /templates
 
 HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://localhost:1080/health" ]

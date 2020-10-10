@@ -8,9 +8,9 @@ import (
 
 	"github.com/ViBiOh/httputils/v3/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v3/pkg/cors"
+	"github.com/ViBiOh/httputils/v3/pkg/flags"
 	"github.com/ViBiOh/httputils/v3/pkg/httputils"
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
-	"github.com/ViBiOh/httputils/v3/pkg/model"
 	"github.com/ViBiOh/httputils/v3/pkg/owasp"
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
 	"github.com/ViBiOh/mailer/pkg/fixtures"
@@ -31,7 +31,7 @@ func main() {
 	alcotestConfig := alcotest.Flags(fs, "")
 	loggerConfig := logger.Flags(fs, "logger")
 	prometheusConfig := prometheus.Flags(fs, "prometheus")
-	owaspConfig := owasp.Flags(fs, "")
+	owaspConfig := owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com"))
 	corsConfig := cors.Flags(fs, "cors")
 
 	smtpConfig := smtp.Flags(fs, "smtp")
@@ -66,9 +66,5 @@ func main() {
 		w.WriteHeader(http.StatusNotFound)
 	})
 
-	httputils.New(serverConfig).ListenAndServe(mailerHandler, []model.Middleware{
-		prometheusApp.Middleware,
-		owasp.New(owaspConfig).Middleware,
-		cors.New(corsConfig).Middleware,
-	})
+	httputils.New(serverConfig).ListenAndServe(mailerHandler, nil, prometheusApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware)
 }
