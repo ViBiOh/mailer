@@ -81,5 +81,4 @@ build:
 .PHONY: run
 run:
 	$(MAIN_RUNNER) \
-		-mjmlURL "http://localhost:4000" \
-		-csp "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com"
+		-mjmlURL "http://localhost:4000"
