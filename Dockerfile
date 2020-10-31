@@ -1,8 +1,11 @@
 FROM vibioh/scratch
 
 ENV MAILER_PORT 1080
-
 EXPOSE 1080
+
+ENV ZONEINFO /zoneinfo.zip
+COPY zoneinfo.zip /zoneinfo.zip
+COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 COPY templates/ /templates
 
@@ -15,6 +18,4 @@ ENV VERSION=${VERSION}
 ARG TARGETOS
 ARG TARGETARCH
 
-COPY cacert.pem /etc/ssl/certs/ca-certificates.crt
-COPY zoneinfo.zip /
 COPY release/mailer_${TARGETOS}_${TARGETARCH} /mailer
