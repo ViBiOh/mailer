@@ -71,6 +71,8 @@ Usage of mailer:
         [http] Healthy HTTP Status code {MAILER_OK_STATUS} (default 204)
   -port uint
         [http] Listen port {MAILER_PORT} (default 1080)
+  -prometheusIgnore string
+        [prometheus] Ignored path prefixes for metrics, comma separated {MAILER_PROMETHEUS_IGNORE}
   -prometheusPath string
         [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
   -readTimeout string
