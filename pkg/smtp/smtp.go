@@ -26,8 +26,8 @@ type Config struct {
 }
 
 type app struct {
-	addr string
 	auth smtp.Auth
+	addr string
 }
 
 // Flags adds flags for configuring package

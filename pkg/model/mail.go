@@ -11,6 +11,6 @@ type Sender interface {
 type Mail struct {
 	From    string
 	Sender  string
-	To      []string
 	Subject string
+	To      []string
 }

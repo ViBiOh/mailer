@@ -12,12 +12,12 @@ var (
 
 // Email describes an email to be sent
 type Email struct {
+	payload    interface{}
 	template   string
 	from       string
 	sender     string
 	subject    string
 	recipients []string
-	payload    interface{}
 }
 
 // NewEmail create a new email

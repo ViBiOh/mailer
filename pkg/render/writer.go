@@ -7,9 +7,9 @@ import (
 
 // ResponseWriter implements http.ResponseWriter by storing content in memory
 type ResponseWriter struct {
-	status  int
 	header  http.Header
 	content *bytes.Buffer
+	status  int
 }
 
 // CreateWriter create ResponseWriter
