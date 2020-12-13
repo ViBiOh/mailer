@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app
-      version: "0.0.30"
+      version: "0.0.32"
       sourceRef:
         kind: HelmRepository
         name: vibioh
@@ -20,7 +20,7 @@ spec:
     nameOverride: mailer
 
     image:
-      repository: vibioh/mailer
+      repository: vibioh/mailer # {"$imagepolicy": "default:mailer"}
 
     config:
       MAILER_MJML_URL: http://mjml
