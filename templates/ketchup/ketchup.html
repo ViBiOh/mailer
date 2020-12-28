@@ -3,7 +3,11 @@
     <strong>{{ .repository.name }}</strong>
     new version is
     <strong>
-      <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
+      {{- if eq .repository.type 0 }}
+        <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
+      {{ else }}
+        <span style="color: #5cb85c">{{ .version.name }}</a>
+      {{- end }}
     </strong>
   </mj-text>
 {{- end -}}
