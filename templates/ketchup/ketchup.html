@@ -3,7 +3,7 @@
     <strong>{{ .repository.name }}</strong>
     new version is
     <strong>
-      {{- if eq .repository.type 0 }}
+      {{- if eq .repository.type "github" }}
         <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
       {{ else }}
         <span style="color: #5cb85c">{{ .version.name }}</a>
