@@ -2,7 +2,9 @@
   "releases": [
     {
       "repository": {
-        "name": "vibioh/viws"
+        "name": "vibioh/viws",
+        "version": "1.2.1",
+        "kind": 0
       },
       "version": {
         "name": "1.2.1"
@@ -10,7 +12,8 @@
     },
     {
       "repository": {
-        "name": "vibioh/deploy"
+        "name": "vibioh/deploy",
+        "kind": 1
       },
       "version": {
         "name": "1.0.1"
