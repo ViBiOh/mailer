@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/smtp"
 	"strings"
 
@@ -14,7 +15,7 @@ import (
 
 // App of package
 type App interface {
-	Send(ctx context.Context, mail model.Mail, html []byte) error
+	Send(ctx context.Context, mail model.Mail) error
 }
 
 // Config of package
@@ -55,12 +56,18 @@ func New(config Config) App {
 	}
 }
 
-func (a app) Send(_ context.Context, mail model.Mail, html []byte) error {
+func (a app) Send(_ context.Context, mail model.Mail) error {
 	body := bytes.NewBuffer(nil)
+
+	content, err := ioutil.ReadAll(mail.Content)
+	if err != nil {
+		return fmt.Errorf("unable to read content: %s", err)
+	}
+
 	body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", mail.Sender, mail.From))
 	body.WriteString(fmt.Sprintf("Subject: %s\r\n", mail.Subject))
 	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
-	body.WriteString(fmt.Sprintf("\r\n%s\r\n", html))
+	body.WriteString(fmt.Sprintf("\r\n%s\r\n", content))
 
 	return smtp.SendMail(a.addr, a.auth, mail.From, mail.To, body.Bytes())
 }

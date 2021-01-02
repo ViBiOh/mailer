@@ -1,0 +1,134 @@
+package mailer
+
+import (
+	"bytes"
+	"context"
+	"flag"
+	"fmt"
+	"io"
+	"strings"
+	"text/template"
+
+	"github.com/ViBiOh/httputils/v3/pkg/flags"
+	"github.com/ViBiOh/httputils/v3/pkg/logger"
+	rendererModel "github.com/ViBiOh/httputils/v3/pkg/renderer/model"
+	"github.com/ViBiOh/httputils/v3/pkg/templates"
+	"github.com/ViBiOh/mailer/pkg/mjml"
+	"github.com/ViBiOh/mailer/pkg/model"
+)
+
+const (
+	templateExtension = ".html"
+	jsonExtension     = ".json"
+)
+
+// App of package
+type App interface {
+	Render(context.Context, string, map[string]interface{}) (io.Reader, error)
+	Send(context.Context, model.Mail) error
+	ListTemplates() []string
+	ListFixtures(string) ([]string, error)
+	GetFixture(string, string) (map[string]interface{}, error)
+}
+
+// Config of package
+type Config struct {
+	templatesDir *string
+}
+
+type app struct {
+	templatesDir string
+	tpl          *template.Template
+
+	mjmlApp   mjml.App
+	senderApp model.Sender
+}
+
+// Flags adds flags for configuring package
+func Flags(fs *flag.FlagSet, prefix string) Config {
+	return Config{
+		templatesDir: flags.New(prefix, "mailer").Name("Templates").Default("./templates/").Label("Templates directory").ToString(fs),
+	}
+}
+
+// New creates new App from Config
+func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
+	templatesDir := strings.TrimSpace(*config.templatesDir)
+
+	appTemplates, err := templates.GetTemplates(templatesDir, templateExtension)
+	if err != nil {
+		logger.Error("%s", err)
+	}
+
+	return &app{
+		templatesDir: templatesDir,
+		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
+			"odd": func(i int) bool {
+				return i%2 == 0
+			},
+			"split": func(s string) []string {
+				return strings.Split(s, "\n")
+			},
+		}).ParseFiles(appTemplates...)),
+
+		mjmlApp:   mjmlApp,
+		senderApp: senderApp,
+	}
+}
+
+func (a app) Render(ctx context.Context, name string, content map[string]interface{}) (io.Reader, error) {
+	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", name, templateExtension))
+	if tpl == nil {
+		return nil, rendererModel.ErrNotFound
+	}
+
+	buffer := bytes.NewBuffer(nil)
+	if err := tpl.Execute(buffer, content); err != nil {
+		return nil, err
+	}
+
+	if err := a.convertMjml(ctx, buffer); err != nil {
+		return nil, err
+	}
+
+	return buffer, nil
+}
+
+func (a app) Send(ctx context.Context, mail model.Mail) error {
+	return a.senderApp.Send(ctx, mail)
+}
+
+func (a app) ListTemplates() []string {
+	var templatesList []string
+
+	for _, tpl := range a.tpl.Templates() {
+		if strings.HasSuffix(tpl.Name(), templateExtension) {
+			templatesList = append(templatesList, strings.TrimSuffix(tpl.Name(), templateExtension))
+		}
+	}
+
+	return templatesList
+}
+
+func (a app) convertMjml(ctx context.Context, content *bytes.Buffer) error {
+	if a.mjmlApp == nil {
+		return nil
+	}
+
+	payload := content.Bytes()
+	if !mjml.IsMJML(payload) {
+		return nil
+	}
+
+	output, err := a.mjmlApp.Render(ctx, string(payload))
+	if err != nil {
+		return err
+	}
+
+	content.Reset()
+	if _, err := content.WriteString(output); err != nil {
+		return err
+	}
+
+	return nil
+}
