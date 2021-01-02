@@ -61,6 +61,8 @@ Usage of mailer:
         [logger] Key for message in JSON {MAILER_LOGGER_MESSAGE_KEY} (default "message")
   -loggerTimeKey string
         [logger] Key for timestamp in JSON {MAILER_LOGGER_TIME_KEY} (default "time")
+  -mailerTemplates string
+        [mailer] Templates directory {MAILER_MAILER_TEMPLATES} (default "./templates/")
   -mjmlPass string
         [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
   -mjmlURL string

@@ -2,9 +2,7 @@ package main
 
 import (
 	"flag"
-	"net/http"
 	"os"
-	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v3/pkg/cors"
@@ -13,9 +11,9 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/owasp"
 	"github.com/ViBiOh/httputils/v3/pkg/prometheus"
-	"github.com/ViBiOh/mailer/pkg/fixtures"
+	"github.com/ViBiOh/mailer/pkg/httphandler"
+	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/mjml"
-	"github.com/ViBiOh/mailer/pkg/render"
 	"github.com/ViBiOh/mailer/pkg/smtp"
 )
 
@@ -36,6 +34,7 @@ func main() {
 
 	smtpConfig := smtp.Flags(fs, "smtp")
 	mjmlConfig := mjml.Flags(fs, "mjml")
+	mailerConfig := mailer.Flags(fs, "mailer")
 
 	logger.Fatal(fs.Parse(os.Args[1:]))
 
@@ -46,25 +45,7 @@ func main() {
 	mjmlApp := mjml.New(mjmlConfig)
 	senderApp := smtp.New(smtpConfig)
 
-	renderApp := render.New(mjmlApp, senderApp)
-	prometheusApp := prometheus.New(prometheusConfig)
+	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp)
 
-	renderHandler := http.StripPrefix(renderPath, renderApp.Handler())
-	fixtureHandler := http.StripPrefix(fixturesPath, fixtures.Handler())
-
-	mailerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, renderPath) {
-			renderHandler.ServeHTTP(w, r)
-			return
-		}
-
-		if strings.HasPrefix(r.URL.Path, fixturesPath) {
-			fixtureHandler.ServeHTTP(w, r)
-			return
-		}
-
-		w.WriteHeader(http.StatusNotFound)
-	})
-
-	httputils.New(serverConfig).ListenAndServe(mailerHandler, nil, prometheusApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware)
+	httputils.New(serverConfig).ListenAndServe(httphandler.New(mailerApp).Handler(), nil, prometheus.New(prometheusConfig).Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware)
 }
