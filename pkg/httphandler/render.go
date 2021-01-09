@@ -7,7 +7,9 @@ import (
 
 	"github.com/ViBiOh/httputils/v3/pkg/httperror"
 	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
+	httpModel "github.com/ViBiOh/httputils/v3/pkg/model"
 	"github.com/ViBiOh/httputils/v3/pkg/query"
+	"github.com/ViBiOh/mailer/pkg/model"
 )
 
 func (a app) renderHandler() http.Handler {
@@ -27,14 +29,16 @@ func (a app) renderHandler() http.Handler {
 			return
 		}
 
-		name := strings.Trim(r.URL.Path, "/")
-		content, err := a.getContent(r, name)
+		mailRequest := parseMailRequest(r)
+
+		content, err := a.getContent(r, mailRequest.Tpl)
 		if err != nil {
 			httperror.InternalServerError(w, err)
 			return
 		}
 
-		output, err := a.mailerApp.Render(r.Context(), name, content)
+		mailRequest.Data(content)
+		output, err := a.mailerApp.Render(r.Context(), *mailRequest)
 		if httperror.HandleError(w, err) {
 			return
 		}
@@ -52,6 +56,31 @@ func (a app) renderHandler() http.Handler {
 			return
 		}
 
-		a.sendEmail(w, r, output)
+		if err := mailRequest.Check(); err != nil {
+			httperror.HandleError(w, httpModel.WrapInvalid(err))
+			return
+		}
+
+		if httperror.HandleError(w, a.mailerApp.Send(r.Context(), mailRequest.ConvertToMail(output))) {
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	})
+}
+
+func parseMailRequest(r *http.Request) *model.MailRequest {
+	mailRequest := model.NewMailRequest()
+
+	mailRequest.Template(strings.Trim(r.URL.Path, "/"))
+	mailRequest.From(strings.TrimSpace(r.URL.Query().Get("from")))
+	mailRequest.As(strings.TrimSpace(r.URL.Query().Get("sender")))
+	mailRequest.WithSubject(strings.TrimSpace(r.URL.Query().Get("subject")))
+
+	for _, rawTo := range strings.Split(r.URL.Query().Get("to"), ",") {
+		if cleanTo := strings.TrimSpace(rawTo); cleanTo != "" {
+			mailRequest.To(cleanTo)
+		}
+	}
+
+	return mailRequest
 }
