@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/url"
@@ -10,12 +10,15 @@ import (
 
 	"github.com/ViBiOh/httputils/v3/pkg/flags"
 	"github.com/ViBiOh/httputils/v3/pkg/request"
+	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/streadway/amqp"
 )
 
 // App of package
 type App interface {
 	Enabled() bool
-	Send(context.Context, Email) error
+	Send(context.Context, model.MailRequest) error
+	Close()
 }
 
 // Config of package
@@ -29,29 +32,45 @@ type app struct {
 	url  string
 	user string
 	pass string
+
+	amqpConnection *amqp.Connection
+	amqpChannel    *amqp.Channel
+	amqpQueue      amqp.Queue
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (an instance of github.com/ViBiOh/mailer)").ToString(fs),
-		user: flags.New(prefix, "mailer").Name("User").Default("").Label("User").ToString(fs),
-		pass: flags.New(prefix, "mailer").Name("Pass").Default("").Label("Pass").ToString(fs),
+		url:  flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (https?:// or amqps?://)").ToString(fs),
+		user: flags.New(prefix, "mailer").Name("User").Default("").Label("HTTP User").ToString(fs),
+		pass: flags.New(prefix, "mailer").Name("Pass").Default("").Label("HTTP Pass").ToString(fs),
 	}
 }
 
 // New creates new App from Config
-func New(config Config) App {
+func New(config Config, done <-chan struct{}) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
-		return &app{}
+		return &app{}, nil
 	}
 
-	return &app{
-		url:  url,
-		user: strings.TrimSpace(*config.user),
-		pass: strings.TrimSpace(*config.pass),
+	app := &app{}
+
+	if strings.HasPrefix(url, "amqp://") {
+		var err error
+		app.amqpConnection, app.amqpChannel, app.amqpQueue, err = model.InitAMQP(url)
+		if err != nil {
+			app.Close()
+			return nil, err
+		}
+
+		return app, nil
 	}
+
+	app.url = url
+	app.user = strings.TrimSpace(*config.user)
+	app.pass = strings.TrimSpace(*config.pass)
+	return app, nil
 }
 
 func (a app) Enabled() bool {
@@ -59,27 +78,56 @@ func (a app) Enabled() bool {
 }
 
 // Send sends emails with Mailer for defined parameters
-func (a app) Send(ctx context.Context, email Email) error {
+func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
 	if !a.Enabled() {
 		return nil
 	}
 
-	if len(email.recipients) == 0 {
-		return errors.New("recipients are required")
+	if err := mailRequest.Check(); err != nil {
+		return err
 	}
 
-	strRecipients := strings.Join(email.recipients, ",")
-	if strRecipients == "" {
-		return errors.New("no recipient found")
+	if a.amqpConnection != nil {
+		return a.amqpSend(ctx, mailRequest)
 	}
+	return a.httpSend(ctx, mailRequest)
+}
 
-	url := fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(email.template), url.QueryEscape(email.from), url.QueryEscape(email.sender), url.QueryEscape(strRecipients), url.QueryEscape(email.subject))
+func (a app) Close() {
+	if a.amqpChannel != nil {
+		model.LoggedCloser(a.amqpChannel)
+	}
+	if a.amqpConnection != nil {
+		model.LoggedCloser(a.amqpConnection)
+	}
+}
+
+func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
+	recipients := strings.Join(mail.Recipients, ",")
+
+	url := fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(mail.Tpl), url.QueryEscape(mail.FromEmail), url.QueryEscape(mail.Sender), url.QueryEscape(recipients), url.QueryEscape(mail.Subject))
 
 	req := request.New().Post(url)
 	if a.pass != "" {
 		req.BasicAuth(a.user, a.pass)
 	}
 
-	_, err := req.JSON(ctx, email.payload)
+	_, err := req.JSON(ctx, mail.Payload)
 	return err
+}
+
+func (a app) amqpSend(ctx context.Context, mailRequest model.MailRequest) error {
+	payload, err := json.Marshal(mailRequest)
+	if err != nil {
+		return fmt.Errorf("unable to marshal email: %s", err)
+	}
+
+	if err := a.amqpChannel.Publish("", a.amqpQueue.Name, false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        payload,
+	}); err != nil {
+		return fmt.Errorf("unable to publish message: %s", err)
+	}
+
+	return nil
 }

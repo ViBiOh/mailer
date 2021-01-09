@@ -24,7 +24,7 @@ const (
 
 // App of package
 type App interface {
-	Render(context.Context, string, map[string]interface{}) (io.Reader, error)
+	Render(context.Context, model.MailRequest) (io.Reader, error)
 	Send(context.Context, model.Mail) error
 	ListTemplates() []string
 	ListFixtures(string) ([]string, error)
@@ -37,11 +37,12 @@ type Config struct {
 }
 
 type app struct {
-	templatesDir string
-	tpl          *template.Template
+	tpl *template.Template
 
 	mjmlApp   mjml.App
 	senderApp model.Sender
+
+	templatesDir string
 }
 
 // Flags adds flags for configuring package
@@ -76,14 +77,14 @@ func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
 	}
 }
 
-func (a app) Render(ctx context.Context, name string, content map[string]interface{}) (io.Reader, error) {
-	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", name, templateExtension))
+func (a app) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
+	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
 		return nil, httpModel.ErrNotFound
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	if err := tpl.Execute(buffer, content); err != nil {
+	if err := tpl.Execute(buffer, mailRequest.Payload); err != nil {
 		return nil, err
 	}
 

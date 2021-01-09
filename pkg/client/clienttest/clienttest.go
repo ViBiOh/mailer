@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/ViBiOh/mailer/pkg/client"
+	"github.com/ViBiOh/mailer/pkg/model"
 )
 
 var (
@@ -30,7 +31,7 @@ func (a App) Enabled() bool {
 }
 
 // Send mocked implementation
-func (a App) Send(ctx context.Context, email client.Email) error {
+func (a App) Send(ctx context.Context, email model.MailRequest) error {
 	if !a.Enabled() {
 		return nil
 	}
@@ -39,9 +40,13 @@ func (a App) Send(ctx context.Context, email client.Email) error {
 		return errors.New("invalid context")
 	}
 
-	if reflect.DeepEqual(email, client.EmptyEmail) {
+	if reflect.DeepEqual(email, model.EmptyMailRequest) {
 		return errors.New("email is required")
 	}
 
 	return nil
+}
+
+// Close mocked ressources
+func (a App) Close() {
 }

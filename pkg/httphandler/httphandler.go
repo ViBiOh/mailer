@@ -1,7 +1,6 @@
 package httphandler
 
 import (
-	"io"
 	"net/http"
 	"strings"
 
@@ -60,19 +59,4 @@ func checkRequest(r *http.Request) bool {
 	default:
 		return false
 	}
-}
-
-func (a app) sendEmail(w http.ResponseWriter, r *http.Request, output io.Reader) {
-	email := parseEmail(r)
-	if err := checkEmail(email); err != nil {
-		httperror.BadRequest(w, err)
-		return
-	}
-
-	email.Content = output
-
-	if err := a.mailerApp.Send(r.Context(), email); err != nil {
-		httperror.InternalServerError(w, err)
-	}
-	w.WriteHeader(http.StatusOK)
 }
