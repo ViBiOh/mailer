@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	rendererModel "github.com/ViBiOh/httputils/v3/pkg/renderer/model"
+	"github.com/ViBiOh/httputils/v3/pkg/model"
 )
 
 func (a app) getTemplatePath(templateName string) string {
@@ -22,11 +22,11 @@ func (a app) getFixturePath(templateName, fixtureName string) string {
 func isExists(path string, directory bool) error {
 	if info, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
-			return rendererModel.ErrNotFound
+			return model.ErrNotFound
 		}
 		return err
 	} else if directory && !info.IsDir() {
-		return rendererModel.ErrNotFound
+		return model.ErrNotFound
 	}
 
 	return nil
