@@ -1,7 +1,6 @@
 package httphandler
 
 import (
-	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -9,7 +8,6 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/httperror"
 	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v3/pkg/query"
-	rendererModel "github.com/ViBiOh/httputils/v3/pkg/renderer/model"
 )
 
 func (a app) renderHandler() http.Handler {
@@ -37,11 +35,7 @@ func (a app) renderHandler() http.Handler {
 		}
 
 		output, err := a.mailerApp.Render(r.Context(), name, content)
-		if errors.Is(err, rendererModel.ErrNotFound) {
-			httperror.NotFound(w)
-			return
-		} else if err != nil {
-			httperror.InternalServerError(w, err)
+		if httperror.HandleError(w, err) {
 			return
 		}
 

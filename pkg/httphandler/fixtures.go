@@ -1,13 +1,11 @@
 package httphandler
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/httperror"
 	"github.com/ViBiOh/httputils/v3/pkg/httpjson"
-	rendererModel "github.com/ViBiOh/httputils/v3/pkg/renderer/model"
 )
 
 func (a app) fixturesHandler() http.Handler {
@@ -22,13 +20,7 @@ func (a app) fixturesHandler() http.Handler {
 
 		if len(urlParts) == 1 {
 			fixturesList, err := a.mailerApp.ListFixtures(urlParts[0])
-			if err != nil {
-				if errors.Is(err, rendererModel.ErrNotFound) {
-					httperror.NotFound(w)
-				} else {
-					httperror.InternalServerError(w, err)
-				}
-
+			if httperror.HandleError(w, err) {
 				return
 			}
 
@@ -38,13 +30,7 @@ func (a app) fixturesHandler() http.Handler {
 
 		if len(urlParts) == 2 {
 			content, err := a.mailerApp.GetFixture(urlParts[0], urlParts[1])
-			if err != nil {
-				if errors.Is(err, rendererModel.ErrNotFound) {
-					httperror.NotFound(w)
-				} else {
-					httperror.InternalServerError(w, err)
-				}
-
+			if httperror.HandleError(w, err) {
 				return
 			}
 

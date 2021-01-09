@@ -11,7 +11,7 @@ import (
 
 	"github.com/ViBiOh/httputils/v3/pkg/flags"
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
-	rendererModel "github.com/ViBiOh/httputils/v3/pkg/renderer/model"
+	httpModel "github.com/ViBiOh/httputils/v3/pkg/model"
 	"github.com/ViBiOh/httputils/v3/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
@@ -79,7 +79,7 @@ func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
 func (a app) Render(ctx context.Context, name string, content map[string]interface{}) (io.Reader, error) {
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", name, templateExtension))
 	if tpl == nil {
-		return nil, rendererModel.ErrNotFound
+		return nil, httpModel.ErrNotFound
 	}
 
 	buffer := bytes.NewBuffer(nil)
