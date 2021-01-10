@@ -56,7 +56,7 @@ func New(config Config, done <-chan struct{}) (App, error) {
 
 	app := &app{}
 
-	if strings.HasPrefix(url, "amqp://") {
+	if strings.HasPrefix(url, "amqp") {
 		var err error
 		app.amqpConnection, app.amqpChannel, app.amqpQueue, err = model.InitAMQP(url)
 		if err != nil {
