@@ -48,7 +48,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, done <-chan struct{}) (App, error) {
+func New(config Config) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return &app{}, nil
