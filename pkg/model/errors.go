@@ -12,5 +12,8 @@ var (
 
 // WrapRetryable wraps given error into retryable
 func WrapRetryable(err error) error {
+	if err == nil {
+		return nil
+	}
 	return fmt.Errorf("%s: %w", err, ErrRetryable)
 }

@@ -105,11 +105,7 @@ func (a *app) sendEmail(payload []byte) error {
 		return fmt.Errorf("unable to render email: %s", err)
 	}
 
-	if err := a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output)); err != nil {
-		return fmt.Errorf("unable to send email: %s", err)
-	}
-
-	return nil
+	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
 func (a *app) Ping() error {
