@@ -80,10 +80,14 @@ func (a *app) Start(done <-chan struct{}) {
 		case message := <-messages:
 			if err := a.sendEmail(message.Body); err != nil {
 				logger.Error("unable to send email: %s", err)
-			}
-			if err := message.Ack(true); err != nil {
+
+				if err := message.Reject(errors.Is(err, model.ErrRetryable)); err != nil {
+					logger.Error("unable to reject message: %s", err)
+				}
+			} else if err := message.Ack(false); err != nil {
 				logger.Error("unable to ack message: %s", err)
 			}
+
 		}
 	}
 }
