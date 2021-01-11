@@ -20,24 +20,24 @@ type App interface {
 
 // Config of package
 type Config struct {
-	addr     *string
-	user     *string
+	address  *string
+	username *string
 	password *string
 	host     *string
 }
 
 type app struct {
-	auth smtp.Auth
-	addr string
+	auth    smtp.Auth
+	address string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		addr:     flags.New(prefix, "smtp").Name("Address").Default("localhost:25").Label("Address").ToString(fs),
-		user:     flags.New(prefix, "smtp").Name("AuthUser").Default("").Label("Plain Auth User").ToString(fs),
-		password: flags.New(prefix, "smtp").Name("AuthPassword").Default("").Label("Plain Auth Password").ToString(fs),
-		host:     flags.New(prefix, "smtp").Name("AuthHost").Default("localhost").Label("Plain Auth host").ToString(fs),
+		address:  flags.New(prefix, "smtp").Name("Address").Default("localhost:25").Label("Address").ToString(fs),
+		username: flags.New(prefix, "smtp").Name("Username").Default("").Label("Plain Auth Username").ToString(fs),
+		password: flags.New(prefix, "smtp").Name("Password").Default("").Label("Plain Auth Password").ToString(fs),
+		host:     flags.New(prefix, "smtp").Name("Host").Default("localhost").Label("Plain Auth host").ToString(fs),
 	}
 }
 
@@ -45,14 +45,14 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config) App {
 	var auth smtp.Auth
 
-	user := strings.TrimSpace(*config.user)
+	user := strings.TrimSpace(*config.username)
 	if len(user) > 0 {
 		auth = smtp.PlainAuth("", user, strings.TrimSpace(*config.password), strings.TrimSpace(*config.host))
 	}
 
 	return &app{
-		addr: strings.TrimSpace(*config.addr),
-		auth: auth,
+		address: strings.TrimSpace(*config.address),
+		auth:    auth,
 	}
 }
 
@@ -69,5 +69,5 @@ func (a app) Send(_ context.Context, mail model.Mail) error {
 	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
 	body.WriteString(fmt.Sprintf("\r\n%s\r\n", content))
 
-	return smtp.SendMail(a.addr, a.auth, mail.From, mail.To, body.Bytes())
+	return smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
 }

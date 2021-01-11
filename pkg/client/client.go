@@ -29,15 +29,15 @@ type App interface {
 
 // Config of package
 type Config struct {
-	url  *string
-	name *string
-	pass *string
+	url      *string
+	name     *string
+	password *string
 }
 
 type app struct {
-	url  string
-	name string
-	pass string
+	url      string
+	name     string
+	password string
 
 	amqpConnection *amqp.Connection
 	amqpChannel    *amqp.Channel
@@ -47,9 +47,9 @@ type app struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (https?:// or amqps?://)").ToString(fs),
-		name: flags.New(prefix, "mailer").Name("Name").Default("mailer").Label("HTTP Username or AMQP Queue name").ToString(fs),
-		pass: flags.New(prefix, "mailer").Name("Pass").Default("").Label("HTTP Pass").ToString(fs),
+		url:      flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (https?:// or amqps?://)").ToString(fs),
+		name:     flags.New(prefix, "mailer").Name("Name").Default("mailer").Label("HTTP Username or AMQP Queue name").ToString(fs),
+		password: flags.New(prefix, "mailer").Name("Password").Default("").Label("HTTP Pass").ToString(fs),
 	}
 }
 
@@ -76,7 +76,7 @@ func New(config Config) (App, error) {
 
 	app.url = url
 	app.name = name
-	app.pass = strings.TrimSpace(*config.pass)
+	app.password = strings.TrimSpace(*config.password)
 	return app, nil
 }
 
@@ -115,8 +115,8 @@ func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
 	url := fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(mail.Tpl), url.QueryEscape(mail.FromEmail), url.QueryEscape(mail.Sender), url.QueryEscape(recipients), url.QueryEscape(mail.Subject))
 
 	req := request.New().Post(url)
-	if a.pass != "" {
-		req.BasicAuth(a.name, a.pass)
+	if a.password != "" {
+		req.BasicAuth(a.name, a.password)
 	}
 
 	_, err := req.JSON(ctx, mail.Payload)

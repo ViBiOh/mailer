@@ -98,9 +98,9 @@ func TestSend(t *testing.T) {
 		{
 			"http",
 			app{
-				url:  testServer.URL,
-				name: "admin",
-				pass: "password",
+				url:      testServer.URL,
+				name:     "admin",
+				password: "password",
 			},
 			args{
 				mailRequest: *model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
