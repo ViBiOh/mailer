@@ -85,7 +85,7 @@ func (a app) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 
 	buffer := bytes.NewBuffer(nil)
 	if err := tpl.Execute(buffer, mailRequest.Payload); err != nil {
-		return nil, model.WrapRetryable(err)
+		return nil, err
 	}
 
 	if err := a.convertMjml(ctx, buffer); err != nil {

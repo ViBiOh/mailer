@@ -23,19 +23,22 @@ type App interface {
 
 // Config of package
 type Config struct {
-	url *string
+	url   *string
+	queue *string
 }
 
 type app struct {
 	amqpConnection *amqp.Connection
 	mailerApp      mailer.App
 	url            string
+	queue          string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url: flags.New(prefix, "amqp").Name("URL").Default("").Label("Address").ToString(fs),
+		url:   flags.New(prefix, "amqp").Name("URL").Default("").Label("Address").ToString(fs),
+		queue: flags.New(prefix, "amqp").Name("Name").Default("mailer").Label("Queue name").ToString(fs),
 	}
 }
 
@@ -43,6 +46,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config, mailerApp mailer.App) App {
 	return &app{
 		url:       strings.TrimSpace(*config.url),
+		queue:     strings.TrimSpace(*config.queue),
 		mailerApp: mailerApp,
 	}
 }
@@ -52,7 +56,7 @@ func (a *app) Start(done <-chan struct{}) {
 		return
 	}
 
-	conn, channel, queue, err := model.InitAMQP(a.url)
+	conn, channel, queue, err := model.InitAMQP(a.url, a.queue)
 	if conn != nil {
 		defer model.LoggedCloser(conn)
 		a.amqpConnection = conn
@@ -81,7 +85,7 @@ func (a *app) Start(done <-chan struct{}) {
 			if err := a.sendEmail(message.Body); err != nil {
 				logger.Error("unable to send email: %s", err)
 
-				if err := message.Reject(errors.Is(err, model.ErrRetryable)); err != nil {
+				if err := message.Reject(false); err != nil {
 					logger.Error("unable to reject message: %s", err)
 				}
 			} else if err := message.Ack(false); err != nil {

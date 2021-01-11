@@ -30,13 +30,13 @@ type App interface {
 // Config of package
 type Config struct {
 	url  *string
-	user *string
+	name *string
 	pass *string
 }
 
 type app struct {
 	url  string
-	user string
+	name string
 	pass string
 
 	amqpConnection *amqp.Connection
@@ -48,7 +48,7 @@ type app struct {
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
 		url:  flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (https?:// or amqps?://)").ToString(fs),
-		user: flags.New(prefix, "mailer").Name("User").Default("").Label("HTTP User").ToString(fs),
+		name: flags.New(prefix, "mailer").Name("Name").Default("mailer").Label("HTTP Username or AMQP Queue name").ToString(fs),
 		pass: flags.New(prefix, "mailer").Name("Pass").Default("").Label("HTTP Pass").ToString(fs),
 	}
 }
@@ -61,10 +61,11 @@ func New(config Config) (App, error) {
 	}
 
 	app := &app{}
+	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
 		var err error
-		app.amqpConnection, app.amqpChannel, app.amqpQueue, err = model.InitAMQP(url)
+		app.amqpConnection, app.amqpChannel, app.amqpQueue, err = model.InitAMQP(url, name)
 		if err != nil {
 			app.Close()
 			return nil, err
@@ -74,7 +75,7 @@ func New(config Config) (App, error) {
 	}
 
 	app.url = url
-	app.user = strings.TrimSpace(*config.user)
+	app.name = name
 	app.pass = strings.TrimSpace(*config.pass)
 	return app, nil
 }
@@ -115,7 +116,7 @@ func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
 
 	req := request.New().Post(url)
 	if a.pass != "" {
-		req.BasicAuth(a.user, a.pass)
+		req.BasicAuth(a.name, a.pass)
 	}
 
 	_, err := req.JSON(ctx, mail.Payload)
