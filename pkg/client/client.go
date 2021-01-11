@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"net/url"
@@ -12,6 +13,11 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/streadway/amqp"
+)
+
+var (
+	// ErrNotEnabled occurs when no configuration is provided
+	ErrNotEnabled = errors.New("mailer not enabled")
 )
 
 // App of package
@@ -80,7 +86,7 @@ func (a app) Enabled() bool {
 // Send sends emails with Mailer for defined parameters
 func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
 	if !a.Enabled() {
-		return nil
+		return ErrNotEnabled
 	}
 
 	if err := mailRequest.Check(); err != nil {
@@ -119,7 +125,7 @@ func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
 func (a app) amqpSend(ctx context.Context, mailRequest model.MailRequest) error {
 	payload, err := json.Marshal(mailRequest)
 	if err != nil {
-		return fmt.Errorf("unable to marshal email: %s", err)
+		return fmt.Errorf("unable to marshal mail: %s", err)
 	}
 
 	if err := a.amqpChannel.Publish("", a.amqpQueue.Name, false, false, amqp.Publishing{
