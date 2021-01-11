@@ -24,77 +24,67 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 ## Usage
 
 ```bash
-Usage of mailer:
+Usage of deploy:
   -address string
-        [http] Listen address {MAILER_ADDRESS}
-  -amqpURL string
-        [amqp] Address {MAILER_AMQP_URL}
+        [http] Listen address {DEPLOY_ADDRESS}
+  -annotationPass string
+        [annotation] Pass {DEPLOY_ANNOTATION_PASS}
+  -annotationURL string
+        [annotation] URL of Annotation server (e.g. my.grafana.com/api/annotations) {DEPLOY_ANNOTATION_URL}
+  -annotationUser string
+        [annotation] User {DEPLOY_ANNOTATION_USER}
+  -apiNotification string
+        [api] Email notificiation when deploy ends (possibles values ares 'never', 'onError', 'all') {DEPLOY_API_NOTIFICATION} (default "onError")
+  -apiNotificationEmail string
+        [api] Email address to notify {DEPLOY_API_NOTIFICATION_EMAIL}
+  -apiTempFolder string
+        [api] Temp folder for uploading files {DEPLOY_API_TEMP_FOLDER} (default "/tmp")
   -cert string
-        [http] Certificate file {MAILER_CERT}
-  -corsCredentials
-        [cors] Access-Control-Allow-Credentials {MAILER_CORS_CREDENTIALS}
-  -corsExpose string
-        [cors] Access-Control-Expose-Headers {MAILER_CORS_EXPOSE}
-  -corsHeaders string
-        [cors] Access-Control-Allow-Headers {MAILER_CORS_HEADERS} (default "Content-Type")
-  -corsMethods string
-        [cors] Access-Control-Allow-Methods {MAILER_CORS_METHODS} (default "GET")
-  -corsOrigin string
-        [cors] Access-Control-Allow-Origin {MAILER_CORS_ORIGIN} (default "*")
+        [http] Certificate file {DEPLOY_CERT}
   -csp string
-        [owasp] Content-Security-Policy {MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com")
+        [owasp] Content-Security-Policy {DEPLOY_CSP} (default "default-src 'self'; base-uri 'self'")
   -frameOptions string
-        [owasp] X-Frame-Options {MAILER_FRAME_OPTIONS} (default "deny")
+        [owasp] X-Frame-Options {DEPLOY_FRAME_OPTIONS} (default "deny")
   -graceDuration string
-        [http] Grace duration when SIGTERM received {MAILER_GRACE_DURATION} (default "30s")
+        [http] Grace duration when SIGTERM received {DEPLOY_GRACE_DURATION} (default "30s")
   -hsts
-        [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
+        [owasp] Indicate Strict Transport Security {DEPLOY_HSTS} (default true)
   -idleTimeout string
-        [http] Idle Timeout {MAILER_IDLE_TIMEOUT} (default "2m")
+        [http] Idle Timeout {DEPLOY_IDLE_TIMEOUT} (default "2m")
   -key string
-        [http] Key file {MAILER_KEY}
+        [http] Key file {DEPLOY_KEY}
   -loggerJson
-        [logger] Log format as JSON {MAILER_LOGGER_JSON}
+        [logger] Log format as JSON {DEPLOY_LOGGER_JSON}
   -loggerLevel string
-        [logger] Logger level {MAILER_LOGGER_LEVEL} (default "INFO")
+        [logger] Logger level {DEPLOY_LOGGER_LEVEL} (default "INFO")
   -loggerLevelKey string
-        [logger] Key for level in JSON {MAILER_LOGGER_LEVEL_KEY} (default "level")
+        [logger] Key for level in JSON {DEPLOY_LOGGER_LEVEL_KEY} (default "level")
   -loggerMessageKey string
-        [logger] Key for message in JSON {MAILER_LOGGER_MESSAGE_KEY} (default "message")
+        [logger] Key for message in JSON {DEPLOY_LOGGER_MESSAGE_KEY} (default "message")
   -loggerTimeKey string
-        [logger] Key for timestamp in JSON {MAILER_LOGGER_TIME_KEY} (default "time")
-  -mailerTemplates string
-        [mailer] Templates directory {MAILER_MAILER_TEMPLATES} (default "./templates/")
-  -mjmlPass string
-        [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
-  -mjmlURL string
-        [mjml] MJML API Converter URL {MAILER_MJML_URL} (default "https://api.mjml.io/v1/render")
-  -mjmlUser string
-        [mjml] Application ID or Basic Auth user {MAILER_MJML_USER}
+        [logger] Key for timestamp in JSON {DEPLOY_LOGGER_TIME_KEY} (default "time")
+  -mailerPass string
+        [mailer] HTTP Pass {DEPLOY_MAILER_PASS}
+  -mailerURL string
+        [mailer] URL (https?:// or amqps?://) {DEPLOY_MAILER_URL}
+  -mailerUser string
+        [mailer] HTTP User {DEPLOY_MAILER_USER}
   -okStatus int
-        [http] Healthy HTTP Status code {MAILER_OK_STATUS} (default 204)
+        [http] Healthy HTTP Status code {DEPLOY_OK_STATUS} (default 204)
   -port uint
-        [http] Listen port {MAILER_PORT} (default 1080)
+        [http] Listen port {DEPLOY_PORT} (default 1080)
   -prometheusIgnore string
-        [prometheus] Ignored path prefixes for metrics, comma separated {MAILER_PROMETHEUS_IGNORE}
+        [prometheus] Ignored path prefixes for metrics, comma separated {DEPLOY_PROMETHEUS_IGNORE}
   -prometheusPath string
-        [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
+        [prometheus] Path for exposing metrics {DEPLOY_PROMETHEUS_PATH} (default "/metrics")
   -readTimeout string
-        [http] Read Timeout {MAILER_READ_TIMEOUT} (default "5s")
+        [http] Read Timeout {DEPLOY_READ_TIMEOUT} (default "5s")
   -shutdownTimeout string
-        [http] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default "10s")
-  -smtpAddress string
-        [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
-  -smtpAuthHost string
-        [smtp] Plain Auth host {MAILER_SMTP_AUTH_HOST} (default "localhost")
-  -smtpAuthPassword string
-        [smtp] Plain Auth Password {MAILER_SMTP_AUTH_PASSWORD}
-  -smtpAuthUser string
-        [smtp] Plain Auth User {MAILER_SMTP_AUTH_USER}
+        [http] Shutdown Timeout {DEPLOY_SHUTDOWN_TIMEOUT} (default "10s")
   -url string
-        [alcotest] URL to check {MAILER_URL}
+        [alcotest] URL to check {DEPLOY_URL}
   -userAgent string
-        [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Alcotest")
+        [alcotest] User-Agent for check {DEPLOY_USER_AGENT} (default "Alcotest")
   -writeTimeout string
-        [http] Write Timeout {MAILER_WRITE_TIMEOUT} (default "10s")
+        [http] Write Timeout {DEPLOY_WRITE_TIMEOUT} (default "2m")
 ```
