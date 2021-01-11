@@ -69,5 +69,5 @@ func (a app) Send(_ context.Context, mail model.Mail) error {
 	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
 	body.WriteString(fmt.Sprintf("\r\n%s\r\n", content))
 
-	return model.WrapRetryable(smtp.SendMail(a.addr, a.auth, mail.From, mail.To, body.Bytes()))
+	return smtp.SendMail(a.addr, a.auth, mail.From, mail.To, body.Bytes())
 }

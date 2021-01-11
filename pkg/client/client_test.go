@@ -99,7 +99,7 @@ func TestSend(t *testing.T) {
 			"http",
 			app{
 				url:  testServer.URL,
-				user: "admin",
+				name: "admin",
 				pass: "password",
 			},
 			args{
