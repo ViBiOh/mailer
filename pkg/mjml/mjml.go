@@ -32,23 +32,23 @@ type App interface {
 
 // Config of package
 type Config struct {
-	url  *string
-	user *string
-	pass *string
+	url      *string
+	username *string
+	password *string
 }
 
 type app struct {
-	url  string
-	user string
-	pass string
+	url      string
+	username string
+	password string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:  flags.New(prefix, "mjml").Name("URL").Default("https://api.mjml.io/v1/render").Label("MJML API Converter URL").ToString(fs),
-		user: flags.New(prefix, "mjml").Name("User").Default("").Label("Application ID or Basic Auth user").ToString(fs),
-		pass: flags.New(prefix, "mjml").Name("Pass").Default("").Label("Secret Key or Basic Auth pass").ToString(fs),
+		url:      flags.New(prefix, "mjml").Name("URL").Default("https://api.mjml.io/v1/render").Label("MJML API Converter URL").ToString(fs),
+		username: flags.New(prefix, "mjml").Name("Username").Default("").Label("Application ID or Basic Auth username").ToString(fs),
+		password: flags.New(prefix, "mjml").Name("Password").Default("").Label("Secret Key or Basic Auth password").ToString(fs),
 	}
 }
 
@@ -61,9 +61,9 @@ func New(config Config) App {
 	}
 
 	app := app{
-		url:  converter,
-		user: strings.TrimSpace(*config.user),
-		pass: strings.TrimSpace(*config.pass),
+		url:      converter,
+		username: strings.TrimSpace(*config.username),
+		password: strings.TrimSpace(*config.password),
 	}
 
 	return app
@@ -84,7 +84,7 @@ func (a app) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
-	resp, err := request.New().Post(a.url).BasicAuth(a.user, a.pass).JSON(ctx, mjmlRequest{template})
+	resp, err := request.New().Post(a.url).BasicAuth(a.username, a.password).JSON(ctx, mjmlRequest{template})
 	if err != nil {
 		return "", fmt.Errorf("unable to render mjml template: %s", err)
 	}

@@ -37,7 +37,7 @@ func main() {
 	amqpConfig := amqphandler.Flags(fs, "amqp")
 	smtpConfig := smtp.Flags(fs, "smtp")
 	mjmlConfig := mjml.Flags(fs, "mjml")
-	mailerConfig := mailer.Flags(fs, "mailer")
+	mailerConfig := mailer.Flags(fs, "")
 
 	logger.Fatal(fs.Parse(os.Args[1:]))
 

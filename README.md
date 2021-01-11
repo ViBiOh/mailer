@@ -65,14 +65,12 @@ Usage of mailer:
         [logger] Key for message in JSON {MAILER_LOGGER_MESSAGE_KEY} (default "message")
   -loggerTimeKey string
         [logger] Key for timestamp in JSON {MAILER_LOGGER_TIME_KEY} (default "time")
-  -mailerTemplates string
-        [mailer] Templates directory {MAILER_MAILER_TEMPLATES} (default "./templates/")
-  -mjmlPass string
-        [mjml] Secret Key or Basic Auth pass {MAILER_MJML_PASS}
+  -mjmlPassword string
+        [mjml] Secret Key or Basic Auth password {MAILER_MJML_PASSWORD}
   -mjmlURL string
         [mjml] MJML API Converter URL {MAILER_MJML_URL} (default "https://api.mjml.io/v1/render")
-  -mjmlUser string
-        [mjml] Application ID or Basic Auth user {MAILER_MJML_USER}
+  -mjmlUsername string
+        [mjml] Application ID or Basic Auth username {MAILER_MJML_USERNAME}
   -okStatus int
         [http] Healthy HTTP Status code {MAILER_OK_STATUS} (default 204)
   -port uint
@@ -87,12 +85,14 @@ Usage of mailer:
         [http] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default "10s")
   -smtpAddress string
         [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
-  -smtpAuthHost string
-        [smtp] Plain Auth host {MAILER_SMTP_AUTH_HOST} (default "localhost")
-  -smtpAuthPassword string
-        [smtp] Plain Auth Password {MAILER_SMTP_AUTH_PASSWORD}
-  -smtpAuthUser string
-        [smtp] Plain Auth User {MAILER_SMTP_AUTH_USER}
+  -smtpHost string
+        [smtp] Plain Auth host {MAILER_SMTP_HOST} (default "localhost")
+  -smtpPassword string
+        [smtp] Plain Auth Password {MAILER_SMTP_PASSWORD}
+  -smtpUsername string
+        [smtp] Plain Auth Username {MAILER_SMTP_USERNAME}
+  -templates string
+        [mailer] Templates directory {MAILER_TEMPLATES} (default "./templates/")
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
