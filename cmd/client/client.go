@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fs := flag.NewFlagSet("mailer", flag.ExitOnError)
+	fs := flag.NewFlagSet("client", flag.ExitOnError)
 
 	loggerConfig := logger.Flags(fs, "logger")
 	mailerConfig := client.Flags(fs, "mailer")
@@ -25,6 +25,7 @@ func main() {
 
 	client, err := client.New(mailerConfig)
 	logger.Fatal(err)
+	defer client.Close()
 
 	logger.Fatal(client.Send(context.Background(), *model.NewMailRequest().From("mailer@vibioh.fr").As("Client").To(*recipient).Template("hello")))
 }

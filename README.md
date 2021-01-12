@@ -27,8 +27,12 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 Usage of mailer:
   -address string
         [http] Listen address {MAILER_ADDRESS}
+  -amqpExchange string
+        [amqp] Exchange name {MAILER_AMQP_EXCHANGE} (default "mailer")
   -amqpName string
-        [amqp] Queue name {MAILER_AMQP_NAME} (default "mailer")
+        [amqp] Client name {MAILER_AMQP_NAME} (default "mailer")
+  -amqpQueue string
+        [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
   -amqpURL string
         [amqp] Address {MAILER_AMQP_URL}
   -cert string

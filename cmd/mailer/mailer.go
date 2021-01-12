@@ -48,6 +48,7 @@ func main() {
 	mjmlApp := mjml.New(mjmlConfig)
 	senderApp := smtp.New(smtpConfig)
 	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp)
+
 	amqpApp := amqphandler.New(amqpConfig, mailerApp)
 
 	httputilsApp := httputils.New(serverConfig)
