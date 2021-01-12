@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/ViBiOh/mailer/pkg/model"
-	"github.com/streadway/amqp"
 )
 
 func TestEnabled(t *testing.T) {
@@ -27,13 +26,6 @@ func TestEnabled(t *testing.T) {
 			"simple",
 			app{
 				url: "http://mailer",
-			},
-			true,
-		},
-		{
-			"amqp",
-			app{
-				amqpConnection: &amqp.Connection{},
 			},
 			true,
 		},
@@ -106,16 +98,6 @@ func TestSend(t *testing.T) {
 				mailRequest: *model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
 			},
 			nil,
-		},
-		{
-			"invalid marshal",
-			app{
-				amqpConnection: &amqp.Connection{},
-			},
-			args{
-				mailRequest: *model.NewMailRequest().From("alice@localhost").To("bob@localhost").Data(func() {}),
-			},
-			errors.New("unable to marshal mail"),
 		},
 	}
 

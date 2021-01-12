@@ -3,7 +3,6 @@ package amqphandler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -12,7 +11,6 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/model"
-	"github.com/streadway/amqp"
 )
 
 // App of package
@@ -23,22 +21,29 @@ type App interface {
 
 // Config of package
 type Config struct {
-	url   *string
-	queue *string
+	url      *string
+	queue    *string
+	exchange *string
+	client   *string
 }
 
 type app struct {
-	amqpConnection *amqp.Connection
-	mailerApp      mailer.App
-	url            string
-	queue          string
+	amqpClient model.AMQPClient
+	mailerApp  mailer.App
+
+	url      string
+	exchange string
+	queue    string
+	client   string
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:   flags.New(prefix, "amqp").Name("URL").Default("").Label("Address").ToString(fs),
-		queue: flags.New(prefix, "amqp").Name("Name").Default("mailer").Label("Queue name").ToString(fs),
+		url:      flags.New(prefix, "amqp").Name("URL").Default("").Label("Address").ToString(fs),
+		exchange: flags.New(prefix, "amqp").Name("Exchange").Default("mailer").Label("Exchange name").ToString(fs),
+		queue:    flags.New(prefix, "amqp").Name("Queue").Default("mailer").Label("Queue name").ToString(fs),
+		client:   flags.New(prefix, "amqp").Name("Name").Default("mailer").Label("Client name").ToString(fs),
 	}
 }
 
@@ -46,7 +51,9 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config, mailerApp mailer.App) App {
 	return &app{
 		url:       strings.TrimSpace(*config.url),
+		exchange:  strings.TrimSpace(*config.exchange),
 		queue:     strings.TrimSpace(*config.queue),
+		client:    strings.TrimSpace(*config.client),
 		mailerApp: mailerApp,
 	}
 }
@@ -56,26 +63,22 @@ func (a *app) Start(done <-chan struct{}) {
 		return
 	}
 
-	conn, channel, queue, err := model.InitAMQP(a.url, a.queue)
-	if conn != nil {
-		defer model.LoggedCloser(conn)
-		a.amqpConnection = conn
+	client, err := model.GetAMQPClient(a.url, a.exchange, a.queue, a.client)
+	if err != nil {
+		logger.Error("%s", err)
+		return
 	}
-	if channel != nil {
-		defer model.LoggedCloser(channel)
-	}
+	defer client.Close()
+
+	a.amqpClient = client
+
+	messages, err := client.Listen()
 	if err != nil {
 		logger.Error("%s", err)
 		return
 	}
 
-	messages, err := channel.Consume(queue.Name, "", false, false, false, false, nil)
-	if err != nil {
-		logger.Error("unable to consume queue `%s`: %s", queue.Name, err)
-		return
-	}
-
-	logger.Info("Consuming queue `%s` on vhost `%s`", queue.Name, conn.Config.Vhost)
+	logger.Info("Listening queue `%s` on vhost `%s`, on exchange `%s`", a.queue, client.Vhost(), a.exchange)
 
 	for {
 		select {
@@ -113,13 +116,5 @@ func (a *app) sendEmail(payload []byte) error {
 }
 
 func (a *app) Ping() error {
-	if a.amqpConnection == nil {
-		return nil
-	}
-
-	if a.amqpConnection.IsClosed() {
-		return errors.New("amqp closed")
-	}
-
-	return nil
+	return a.amqpClient.Ping()
 }

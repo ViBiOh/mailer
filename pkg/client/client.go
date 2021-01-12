@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/httputils/v3/pkg/flags"
+	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/httputils/v3/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/streadway/amqp"
@@ -31,6 +32,8 @@ type App interface {
 type Config struct {
 	url      *string
 	name     *string
+	exchange *string
+	client   *string
 	password *string
 }
 
@@ -39,9 +42,7 @@ type app struct {
 	name     string
 	password string
 
-	amqpConnection *amqp.Connection
-	amqpChannel    *amqp.Channel
-	amqpQueue      amqp.Queue
+	amqpClient model.AMQPClient
 }
 
 // Flags adds flags for configuring package
@@ -49,6 +50,8 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
 		url:      flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (https?:// or amqps?://)").ToString(fs),
 		name:     flags.New(prefix, "mailer").Name("Name").Default("mailer").Label("HTTP Username or AMQP Queue name").ToString(fs),
+		exchange: flags.New(prefix, "mailer").Name("Exchange").Default("mailer").Label("AMQP Exchange name").ToString(fs),
+		client:   flags.New(prefix, "mailer").Name("Client").Default("AppName").Label("AMQP Client name").ToString(fs),
 		password: flags.New(prefix, "mailer").Name("Password").Default("").Label("HTTP Pass").ToString(fs),
 	}
 }
@@ -57,31 +60,34 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
-		return &app{}, nil
+		return app{}, nil
 	}
 
-	app := &app{}
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		var err error
-		app.amqpConnection, app.amqpChannel, app.amqpQueue, err = model.InitAMQP(url, name)
+		exchangeName := strings.TrimSpace(*config.exchange)
+		client, err := model.GetAMQPClient(url, exchangeName, name, strings.TrimSpace(*config.client))
 		if err != nil {
-			app.Close()
 			return nil, err
 		}
 
-		return app, nil
+		logger.Info("Publishing message to queue `%s` on vhost `%s`, on exchange `%s`", name, client.Vhost(), exchangeName)
+
+		return app{
+			amqpClient: client,
+		}, nil
 	}
 
-	app.url = url
-	app.name = name
-	app.password = strings.TrimSpace(*config.password)
-	return app, nil
+	return app{
+		url:      url,
+		name:     name,
+		password: strings.TrimSpace(*config.password),
+	}, nil
 }
 
 func (a app) Enabled() bool {
-	return len(a.url) != 0 || a.amqpConnection != nil
+	return len(a.url) != 0 || a.amqpClient.Enabled()
 }
 
 // Send sends emails with Mailer for defined parameters
@@ -94,19 +100,14 @@ func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
 		return err
 	}
 
-	if a.amqpConnection != nil {
+	if a.amqpClient.Enabled() {
 		return a.amqpSend(ctx, mailRequest)
 	}
 	return a.httpSend(ctx, mailRequest)
 }
 
 func (a app) Close() {
-	if a.amqpChannel != nil {
-		model.LoggedCloser(a.amqpChannel)
-	}
-	if a.amqpConnection != nil {
-		model.LoggedCloser(a.amqpConnection)
-	}
+	a.amqpClient.Close()
 }
 
 func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
@@ -129,12 +130,8 @@ func (a app) amqpSend(ctx context.Context, mailRequest model.MailRequest) error 
 		return fmt.Errorf("unable to marshal mail: %s", err)
 	}
 
-	if err := a.amqpChannel.Publish("", a.amqpQueue.Name, false, false, amqp.Publishing{
+	return a.amqpClient.Send(amqp.Publishing{
 		ContentType: "application/json",
 		Body:        payload,
-	}); err != nil {
-		return fmt.Errorf("unable to publish message: %s", err)
-	}
-
-	return nil
+	})
 }
