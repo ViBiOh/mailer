@@ -64,7 +64,7 @@ func (a *app) Start(done <-chan struct{}) {
 		return
 	}
 
-	client, err := model.GetAMQPClient(a.url, a.exchange, a.queue, a.client)
+	client, err := model.GetAMQPClient(a.url, a.exchange, a.client, a.queue)
 	if err != nil {
 		logger.Error("%s", err)
 		return
@@ -73,13 +73,33 @@ func (a *app) Start(done <-chan struct{}) {
 
 	a.amqpClient = client
 
+	go func() {
+		garbages, err := client.ListenGarbage()
+		if err != nil {
+			logger.Error("%s", err)
+			return
+		}
+
+		for {
+			select {
+			case <-done:
+				return
+			case message := <-garbages:
+				logger.Warn("garbage message: %s", message.Body)
+				if err := message.Ack(false); err != nil {
+					logger.Error("unable to ack garbage message: %s", err)
+				}
+			}
+		}
+	}()
+
 	messages, err := client.Listen()
 	if err != nil {
 		logger.Error("%s", err)
 		return
 	}
 
-	logger.Info("Listening queue `%s` on vhost `%s`, on exchange `%s`", a.queue, client.Vhost(), a.exchange)
+	logger.Info("Listening queue `%s` on vhost `%s`", client.QueueName(), client.Vhost())
 
 	for {
 		select {
@@ -95,7 +115,6 @@ func (a *app) Start(done <-chan struct{}) {
 			} else if err := message.Ack(false); err != nil {
 				logger.Error("unable to ack message: %s", err)
 			}
-
 		}
 	}
 }
