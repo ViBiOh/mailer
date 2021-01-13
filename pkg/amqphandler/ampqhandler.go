@@ -28,19 +28,20 @@ type Config struct {
 }
 
 type app struct {
-	amqpClient model.AMQPClient
-	mailerApp  mailer.App
+	mailerApp mailer.App
 
 	url      string
 	exchange string
 	queue    string
 	client   string
+
+	amqpClient model.AMQPClient
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:      flags.New(prefix, "amqp").Name("URL").Default("").Label("Address").ToString(fs),
+		url:      flags.New(prefix, "amqp").Name("URL").Default("").Label("Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost>").ToString(fs),
 		exchange: flags.New(prefix, "amqp").Name("Exchange").Default("mailer").Label("Exchange name").ToString(fs),
 		queue:    flags.New(prefix, "amqp").Name("Queue").Default("mailer").Label("Queue name").ToString(fs),
 		client:   flags.New(prefix, "amqp").Name("Name").Default("mailer").Label("Client name").ToString(fs),

@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
@@ -26,7 +27,9 @@ func GetAMQPClient(uri, exchangeName, queueName, clientName string) (client AMQP
 		}
 	}()
 
-	client.clientName = clientName
+	raw := make([]byte, 3)
+	rand.New(rand.NewSource(time.Now().UnixNano())).Read(raw)
+	client.clientName = fmt.Sprintf("%s-%x", clientName, raw)
 
 	client.connection, err = amqp.Dial(uri)
 	if err != nil {

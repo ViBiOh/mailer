@@ -34,7 +34,7 @@ Usage of mailer:
   -amqpQueue string
         [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
   -amqpURL string
-        [amqp] Address {MAILER_AMQP_URL}
+        [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> {MAILER_AMQP_URL}
   -cert string
         [http] Certificate file {MAILER_CERT}
   -corsCredentials
