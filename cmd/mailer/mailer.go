@@ -49,7 +49,9 @@ func main() {
 	senderApp := smtp.New(smtpConfig)
 	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp)
 
-	amqpApp := amqphandler.New(amqpConfig, mailerApp)
+	amqpApp, err := amqphandler.New(amqpConfig, mailerApp)
+	logger.Fatal(err)
+	defer amqpApp.Close()
 
 	httputilsApp := httputils.New(serverConfig)
 	go amqpApp.Start(httputilsApp.GetDone())
