@@ -28,24 +28,28 @@ type App interface {
 
 // Config of package
 type Config struct {
-	url      *string
-	queue    *string
-	exchange *string
-	client   *string
+	url           *string
+	queue         *string
+	exchange      *string
+	retryInterval *string
+	maxRetry      *int
 }
 
 type app struct {
-	mailerApp  mailer.App
-	amqpClient model.AMQPClient
+	mailerApp     mailer.App
+	amqpClient    model.AMQPClient
+	retryInterval time.Duration
+	maxRetry      int64
 }
 
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:      flags.New(prefix, "amqp").Name("URL").Default("").Label("Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost>").ToString(fs),
-		exchange: flags.New(prefix, "amqp").Name("Exchange").Default("mailer").Label("Exchange name").ToString(fs),
-		queue:    flags.New(prefix, "amqp").Name("Queue").Default("mailer").Label("Queue name").ToString(fs),
-		client:   flags.New(prefix, "amqp").Name("Name").Default("mailer").Label("Client name").ToString(fs),
+		url:           flags.New(prefix, "amqp").Name("URL").Default("").Label("Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost>").ToString(fs),
+		exchange:      flags.New(prefix, "amqp").Name("Exchange").Default("mailer").Label("Exchange name").ToString(fs),
+		queue:         flags.New(prefix, "amqp").Name("Queue").Default("mailer").Label("Queue name").ToString(fs),
+		retryInterval: flags.New(prefix, "amqp").Name("RetryInterval").Default("1h").Label("Interval duration when send fails").ToString(fs),
+		maxRetry:      flags.New(prefix, "amqp").Name("MaxRetry").Default(3).Label("Max send retries").ToInt(fs),
 	}
 }
 
@@ -56,14 +60,21 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		return app{}, nil
 	}
 
-	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.client), strings.TrimSpace(*config.queue))
+	retryInterval, err := time.ParseDuration(strings.TrimSpace(*config.retryInterval))
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse retry duration: %s", err)
+	}
+
+	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.queue))
 	if err != nil {
 		return nil, fmt.Errorf("unable to create amqp client: %s", err)
 	}
 
 	return app{
-		mailerApp:  mailerApp,
-		amqpClient: client,
+		retryInterval: retryInterval,
+		maxRetry:      int64(*config.maxRetry),
+		mailerApp:     mailerApp,
+		amqpClient:    client,
 	}, nil
 }
 
@@ -86,15 +97,35 @@ func (a app) Start(done <-chan struct{}) {
 			if err := a.sendEmail(message.Body); err != nil {
 				logger.Error("unable to send email: %s", err)
 				model.LoggedReject(message, false)
-			} else {
-				model.LoggedAck(message)
+				continue
 			}
+
+			model.LoggedAck(message)
 		}
 	}
 }
 
+func (a app) sendEmail(payload []byte) error {
+	ctx := context.Background()
+
+	var mailRequest model.MailRequest
+	if err := json.Unmarshal(payload, &mailRequest); err != nil {
+		return fmt.Errorf("unable to parse payload: %s", err)
+	}
+
+	output, err := a.mailerApp.Render(ctx, mailRequest)
+	if err != nil {
+		return fmt.Errorf("unable to render email: %s", err)
+	}
+
+	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
+}
+
 func (a app) startGarbageCollector(done <-chan struct{}) {
-	garbageCron := cron.New().Each(time.Hour).Now()
+	logger.Info("Retrying garbage collector every %s", a.retryInterval)
+	defer logger.Info("Garbage collector cron if off")
+
+	garbageCron := cron.New().Each(a.retryInterval).Now()
 	defer garbageCron.Stop()
 
 	go garbageCron.Start(func(_ time.Time) error {
@@ -146,8 +177,8 @@ func (a app) garbageCollector(done <-chan struct{}) error {
 			continue
 		}
 
-		if count > 2 {
-			logger.Error("message was rejected 3 times, content was `%s`", garbage.Body)
+		if count > a.maxRetry {
+			logger.Error("message was rejected %d times, content was `%s`", a.maxRetry, garbage.Body)
 			model.LoggedAck(garbage)
 			continue
 		}
@@ -189,22 +220,6 @@ func getDeathCount(table amqp.Table) (int64, error) {
 	}
 
 	return count, nil
-}
-
-func (a app) sendEmail(payload []byte) error {
-	ctx := context.Background()
-
-	var mailRequest model.MailRequest
-	if err := json.Unmarshal(payload, &mailRequest); err != nil {
-		return fmt.Errorf("unable to parse payload: %s", err)
-	}
-
-	output, err := a.mailerApp.Render(ctx, mailRequest)
-	if err != nil {
-		return fmt.Errorf("unable to render email: %s", err)
-	}
-
-	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
 func (a app) Ping() error {
