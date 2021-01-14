@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ViBiOh/httputils/v3/pkg/cron"
@@ -13,6 +16,7 @@ import (
 	"github.com/ViBiOh/httputils/v3/pkg/logger"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/streadway/amqp"
 )
 
 // App of package
@@ -72,6 +76,24 @@ func (a app) Start(done <-chan struct{}) {
 
 	logger.Info("Listening queue `%s` on vhost `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost())
 
+	go a.startGarbageCollector(done)
+
+	for {
+		select {
+		case <-done:
+			return
+		case message := <-messages:
+			if err := a.sendEmail(message.Body); err != nil {
+				logger.Error("unable to send email: %s", err)
+				model.LoggedReject(message, false)
+			} else {
+				model.LoggedAck(message)
+			}
+		}
+	}
+}
+
+func (a app) startGarbageCollector(done <-chan struct{}) {
 	garbageCron := cron.New().Each(time.Hour).Now()
 	defer garbageCron.Stop()
 
@@ -81,20 +103,18 @@ func (a app) Start(done <-chan struct{}) {
 		logger.Error("error while running garbage collector: %s", err)
 	})
 
+	signals := make(chan os.Signal, 1)
+	defer close(signals)
+
+	signal.Notify(signals, syscall.SIGUSR1)
+	defer signal.Stop(signals)
+
 	for {
 		select {
 		case <-done:
 			return
-		case message := <-messages:
-			if err := a.sendEmail(message.Body); err != nil {
-				logger.Error("unable to send email: %s", err)
-
-				if err := message.Reject(false); err != nil {
-					logger.Error("unable to reject message: %s", err)
-				}
-			} else if err := message.Ack(false); err != nil {
-				logger.Error("unable to ack message: %s", err)
-			}
+		case <-signals:
+			garbageCron.Now()
 		}
 	}
 }
@@ -119,13 +139,56 @@ func (a app) garbageCollector(done <-chan struct{}) error {
 			return nil
 		}
 
-		logger.Warn("garbage message: %s", garbage.Body)
-		if err := garbage.Ack(false); err != nil {
-			return fmt.Errorf("unable to ack garbage message: %s", err)
+		count, err := getDeathCount(garbage.Headers)
+		if err != nil {
+			logger.Error("unable to get count from garbage: %s", err)
+			model.LoggedReject(garbage, false)
+			continue
 		}
+
+		if count > 2 {
+			logger.Error("message was rejected 3 times, content was `%s`", garbage.Body)
+			model.LoggedAck(garbage)
+			continue
+		}
+
+		logger.Info("Requeuing message from garbage with payload=`%s`", garbage.Body)
+
+		if err := a.amqpClient.Send(model.ConvertDeliveryToPublishing(garbage)); err != nil {
+			logger.Error("unable to re-send garbage message: %s", err)
+			model.LoggedReject(garbage, true)
+			continue
+		}
+
+		model.LoggedAck(garbage)
 	}
 
 	return nil
+}
+
+func getDeathCount(table amqp.Table) (int64, error) {
+	rawDeath := table["x-death"]
+
+	death, ok := rawDeath.([]interface{})
+	if !ok {
+		return 0, fmt.Errorf("`x-death` header in not an array")
+	}
+
+	if len(death) == 0 {
+		return 0, fmt.Errorf("`x-death` is an empty array")
+	}
+
+	deathData, ok := death[0].(amqp.Table)
+	if !ok {
+		return 0, fmt.Errorf("`x-death` datas are not a map")
+	}
+
+	count, ok := deathData["count"].(int64)
+	if !ok {
+		return 0, fmt.Errorf("`count` is not an int")
+	}
+
+	return count, nil
 }
 
 func (a app) sendEmail(payload []byte) error {
