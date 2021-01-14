@@ -72,6 +72,11 @@ func GetAMQPClient(uri, exchangeName, clientName, queueName string) (client AMQP
 		return client, nil
 	}
 
+	if err = client.channel.Qos(1, 0, false); err != nil {
+		err = fmt.Errorf("unable to configure QoS on channel: %s", err)
+		return client, nil
+	}
+
 	deadLetterExchange := fmt.Sprintf("%s-garbage", exchangeName)
 	deadLetterQueue := fmt.Sprintf("%s-garbage", queueName)
 	client.deadLetterQueue, err = createExchangeAndQueue(client.channel, deadLetterExchange, deadLetterQueue, true, nil)
@@ -183,5 +188,39 @@ func (a AMQPClient) Close() {
 	if a.connection != nil {
 		logger.Info("Closing connection on %s", a.Vhost())
 		LoggedCloser(a.connection)
+	}
+}
+
+// LoggedAck ack a message with error handling
+func LoggedAck(message amqp.Delivery) {
+	if err := message.Ack(false); err != nil {
+		logger.Error("unable to ack message: %s", err)
+	}
+}
+
+// LoggedReject reject a message with error handling
+func LoggedReject(message amqp.Delivery, requeue bool) {
+	if err := message.Reject(requeue); err != nil {
+		logger.Error("unable to reject message: %s", err)
+	}
+}
+
+// ConvertDeliveryToPublishing convert a delivery to a publishing, for requeuing
+func ConvertDeliveryToPublishing(message amqp.Delivery) amqp.Publishing {
+	return amqp.Publishing{
+		Headers:         message.Headers,
+		ContentType:     message.ContentType,
+		ContentEncoding: message.ContentEncoding,
+		DeliveryMode:    message.DeliveryMode,
+		Priority:        message.Priority,
+		CorrelationId:   message.CorrelationId,
+		ReplyTo:         message.ReplyTo,
+		Expiration:      message.Expiration,
+		MessageId:       message.MessageId,
+		Timestamp:       message.Timestamp,
+		Type:            message.Type,
+		UserId:          message.UserId,
+		AppId:           message.AppId,
+		Body:            message.Body,
 	}
 }
