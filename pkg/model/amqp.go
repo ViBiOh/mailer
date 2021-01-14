@@ -12,12 +12,11 @@ import (
 
 // AMQPClient wraps all object required for AMQP usage
 type AMQPClient struct {
-	connection   *amqp.Connection
-	channel      *amqp.Channel
-	exchangeName string
+	connection *amqp.Connection
+	channel    *amqp.Channel
 
-	clientName        string
-	garbageClientName string
+	exchangeName string
+	clientName   string
 
 	queue           amqp.Queue
 	deadLetterQueue amqp.Queue
@@ -55,9 +54,7 @@ func GetAMQPClient(uri, exchangeName, clientName, queueName string) (client AMQP
 	}()
 
 	client.exchangeName = exchangeName
-
 	client.clientName = createClientName(clientName)
-	client.garbageClientName = createClientName(clientName)
 
 	client.connection, err = amqp.Dial(uri)
 	if err != nil {
@@ -165,14 +162,9 @@ func (a AMQPClient) Listen() (<-chan amqp.Delivery, error) {
 	return messages, nil
 }
 
-// ListenGarbage listen to dead letter queue
-func (a AMQPClient) ListenGarbage() (<-chan amqp.Delivery, error) {
-	messages, err := a.channel.Consume(a.deadLetterQueue.Name, a.garbageClientName, false, false, false, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("unable to consume queue `%s`: %s", a.deadLetterQueue.Name, err)
-	}
-
-	return messages, nil
+// GetGarbage get a message from the garbage
+func (a AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
+	return a.channel.Get(a.deadLetterQueue.Name, false)
 }
 
 // Close closes opened ressources
@@ -182,13 +174,6 @@ func (a AMQPClient) Close() {
 			logger.Info("Closing channel for %s", a.clientName)
 			if err := a.channel.Cancel(a.clientName, false); err != nil {
 				logger.Error("unable to cancel consumer `%s`: %s", a.clientName, err)
-			}
-		}
-
-		if len(a.deadLetterQueue.Name) != 0 {
-			logger.Info("Closing channel for %s", a.garbageClientName)
-			if err := a.channel.Cancel(a.garbageClientName, false); err != nil {
-				logger.Error("unable to cancel consumer `%s`: %s", a.garbageClientName, err)
 			}
 		}
 
