@@ -22,10 +22,10 @@ type AMQPClient struct {
 	deadLetterQueue amqp.Queue
 }
 
-func createClientName(basename string) string {
-	raw := make([]byte, 3)
+func createClientName() string {
+	raw := make([]byte, 4)
 	rand.New(rand.NewSource(time.Now().UnixNano())).Read(raw)
-	return fmt.Sprintf("%s-%x", basename, raw)
+	return fmt.Sprintf("%x", raw)
 }
 
 func createExchangeAndQueue(channel *amqp.Channel, exchangeName, queueName string, internal bool, args amqp.Table) (amqp.Queue, error) {
@@ -46,7 +46,7 @@ func createExchangeAndQueue(channel *amqp.Channel, exchangeName, queueName strin
 }
 
 // GetAMQPClient inits AMQP connection, channel and queue
-func GetAMQPClient(uri, exchangeName, clientName, queueName string) (client AMQPClient, err error) {
+func GetAMQPClient(uri, exchangeName, queueName string) (client AMQPClient, err error) {
 	defer func() {
 		if err != nil {
 			client.Close()
@@ -54,7 +54,6 @@ func GetAMQPClient(uri, exchangeName, clientName, queueName string) (client AMQP
 	}()
 
 	client.exchangeName = exchangeName
-	client.clientName = createClientName(clientName)
 
 	client.connection, err = amqp.Dial(uri)
 	if err != nil {
@@ -71,6 +70,8 @@ func GetAMQPClient(uri, exchangeName, clientName, queueName string) (client AMQP
 	if len(queueName) == 0 {
 		return client, nil
 	}
+
+	client.clientName = createClientName()
 
 	if err = client.channel.Qos(1, 0, false); err != nil {
 		err = fmt.Errorf("unable to configure QoS on channel: %s", err)

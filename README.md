@@ -29,10 +29,12 @@ Usage of mailer:
         [http] Listen address {MAILER_ADDRESS}
   -amqpExchange string
         [amqp] Exchange name {MAILER_AMQP_EXCHANGE} (default "mailer")
-  -amqpName string
-        [amqp] Client name {MAILER_AMQP_NAME} (default "mailer")
+  -amqpMaxRetry int
+        [amqp] Max send retries {MAILER_AMQP_MAX_RETRY} (default 3)
   -amqpQueue string
         [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
+  -amqpRetryInterval string
+        [amqp] Interval duration when send fails {MAILER_AMQP_RETRY_INTERVAL} (default "1h")
   -amqpURL string
         [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> {MAILER_AMQP_URL}
   -cert string

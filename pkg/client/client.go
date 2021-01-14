@@ -32,7 +32,6 @@ type App interface {
 type Config struct {
 	url      *string
 	name     *string
-	client   *string
 	password *string
 }
 
@@ -49,7 +48,6 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
 		url:      flags.New(prefix, "mailer").Name("URL").Default("").Label("URL (https?:// or amqps?://)").ToString(fs),
 		name:     flags.New(prefix, "mailer").Name("Name").Default("mailer").Label("HTTP Username or AMQP Exchange name").ToString(fs),
-		client:   flags.New(prefix, "mailer").Name("Client").Default("AppName").Label("AMQP Client name").ToString(fs),
 		password: flags.New(prefix, "mailer").Name("Password").Default("").Label("HTTP Pass").ToString(fs),
 	}
 }
@@ -64,7 +62,7 @@ func New(config Config) (App, error) {
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := model.GetAMQPClient(url, name, strings.TrimSpace(*config.client), "")
+		client, err := model.GetAMQPClient(url, name, "")
 		if err != nil {
 			return nil, err
 		}
