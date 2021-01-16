@@ -84,6 +84,7 @@ func (a app) Start(done <-chan struct{}) {
 		logger.Error("unable to listen on queue: %s", err)
 		return
 	}
+	defer a.amqpClient.Close()
 
 	logger.Info("Listening queue `%s` on vhost `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost())
 
@@ -92,6 +93,7 @@ func (a app) Start(done <-chan struct{}) {
 	for {
 		select {
 		case <-done:
+			logger.Info("Stopping listen on queue `%s` on vhost `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost())
 			return
 		case message := <-messages:
 			if err := a.sendEmail(message.Body); err != nil {
@@ -122,8 +124,8 @@ func (a app) sendEmail(payload []byte) error {
 }
 
 func (a app) startGarbageCollector(done <-chan struct{}) {
-	logger.Info("Retrying garbage collector every %s", a.retryInterval)
-	defer logger.Info("Garbage collector cron if off")
+	logger.Info("Launching garbage collector every %s", a.retryInterval)
+	defer logger.Info("Garbage collector cron is off")
 
 	garbageCron := cron.New().Each(a.retryInterval).Now()
 	defer garbageCron.Stop()

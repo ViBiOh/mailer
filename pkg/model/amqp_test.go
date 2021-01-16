@@ -46,14 +46,14 @@ func TestPing(t *testing.T) {
 		{
 			"empty",
 			AMQPClient{},
-			errors.New("amqp client closed"),
+			errors.New("amqp client disabled"),
 		},
 		{
 			"not opened",
 			AMQPClient{
 				connection: &amqp.Connection{},
 			},
-			errors.New("amqp client closed"),
+			nil,
 		},
 	}
 

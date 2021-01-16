@@ -104,7 +104,11 @@ func (a AMQPClient) Enabled() bool {
 
 // Ping checks if connection is live
 func (a AMQPClient) Ping() error {
-	if !a.Enabled() || !a.connection.IsClosed() {
+	if !a.Enabled() {
+		return errors.New("amqp client disabled")
+	}
+
+	if a.connection.IsClosed() {
 		return errors.New("amqp client closed")
 	}
 
