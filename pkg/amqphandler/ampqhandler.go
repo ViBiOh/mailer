@@ -86,14 +86,13 @@ func (a app) Start(done <-chan struct{}) {
 	}
 	defer a.amqpClient.Close()
 
-	logger.Info("Listening queue `%s` on vhost `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost())
+	logger.Info("Listening queue `%s` on vhost `%s` as `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost(), a.amqpClient.ClientName())
 
 	go a.startGarbageCollector(done)
 
 	for {
 		select {
 		case <-done:
-			logger.Info("Stopping listen on queue `%s` on vhost `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost())
 			return
 		case message := <-messages:
 			if err := a.sendEmail(message.Body); err != nil {
