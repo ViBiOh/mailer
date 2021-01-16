@@ -125,6 +125,11 @@ func (a AMQPClient) ExchangeName() string {
 	return a.exchangeName
 }
 
+// ClientName returns client name
+func (a AMQPClient) ClientName() string {
+	return a.clientName
+}
+
 // Vhost returns connection Vhost
 func (a AMQPClient) Vhost() string {
 	if a.connection == nil {
@@ -181,17 +186,18 @@ func (a AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
 func (a AMQPClient) Close() {
 	if a.channel != nil {
 		if len(a.queue.Name) != 0 {
-			logger.Info("Closing channel for %s", a.clientName)
+			logger.Info("Canceling AMQP channel for %s", a.clientName)
 			if err := a.channel.Cancel(a.clientName, false); err != nil {
 				logger.Error("unable to cancel consumer `%s`: %s", a.clientName, err)
 			}
 		}
 
+		logger.Info("Closing AMQP channel")
 		LoggedCloser(a.channel)
 	}
 
 	if a.connection != nil {
-		logger.Info("Closing connection on %s", a.Vhost())
+		logger.Info("Closing AMQP connection on %s", a.Vhost())
 		LoggedCloser(a.connection)
 	}
 }
