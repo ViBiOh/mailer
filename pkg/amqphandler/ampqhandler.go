@@ -186,7 +186,7 @@ func (a app) garbageCollector(done <-chan struct{}) error {
 
 		logger.Info("Requeuing message from garbage with payload=`%s`", garbage.Body)
 
-		if err := a.amqpClient.Send(model.ConvertDeliveryToPublishing(garbage)); err != nil {
+		if err := a.amqpClient.Send(model.ConvertDeliveryToPublishing(garbage), false); err != nil {
 			logger.Error("unable to re-send garbage message: %s", err)
 			model.LoggedReject(garbage, true)
 			continue
