@@ -146,39 +146,12 @@ func (a AMQPClient) Vhost() string {
 }
 
 // Send sends payload to the underlying exchange and queue
-func (a AMQPClient) Send(payload amqp.Publishing, confirm bool) error {
-	var notifyPublish chan amqp.Confirmation
-
-	if confirm {
-		if err := a.channel.Confirm(false); err != nil {
-			logger.Error("unable to put channel in confirm mode: %s", err)
-		} else {
-			notifyPublish = a.channel.NotifyPublish(make(chan amqp.Confirmation, 1))
-		}
-	}
-
+func (a AMQPClient) Send(payload amqp.Publishing) error {
 	if err := a.channel.Publish(a.exchangeName, "", false, false, payload); err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
 	}
 
-	if notifyPublish == nil {
-		return nil
-	}
-
-	timeout := time.NewTicker(time.Second * 15)
-	defer timeout.Stop()
-
-	select {
-	case <-timeout.C:
-		return errors.New("timeout while waiting for delivery confirmation")
-	case confirmed := <-notifyPublish:
-		if confirmed.Ack {
-			logger.Info("Delivery confirmed with tag %d", confirmed.DeliveryTag)
-			return nil
-		}
-
-		return fmt.Errorf("unable to confirme delivery with tag %d", confirmed.DeliveryTag)
-	}
+	return nil
 }
 
 // Listen listen to queue
