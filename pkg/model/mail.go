@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"strings"
 
@@ -100,12 +101,34 @@ func (mr *MailRequest) Check() error {
 	return nil
 }
 
+func getSubject(subject string, payload interface{}) string {
+	if !strings.Contains(subject, "{{") {
+		return subject
+	}
+
+	tpl, err := template.New("subject").Parse(subject)
+	if err != nil {
+		logger.Warn("subject `%s` is not a template: %s", subject, err)
+		return subject
+	}
+
+	subjectOutput := strings.Builder{}
+
+	if err := tpl.Execute(&subjectOutput, payload); err != nil {
+		logger.Warn("subject `%s` template got an error: %s", subject, err)
+		return subject
+	}
+
+	return subjectOutput.String()
+}
+
 // ConvertToMail convert mail request to Mail with given content
 func (mr *MailRequest) ConvertToMail(content io.Reader) Mail {
+
 	return Mail{
 		From:    mr.FromEmail,
 		Sender:  mr.Sender,
-		Subject: mr.Subject,
+		Subject: getSubject(mr.Subject, mr.Payload),
 		Content: content,
 		To:      mr.Recipients,
 	}
