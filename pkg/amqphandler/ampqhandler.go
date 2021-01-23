@@ -126,14 +126,14 @@ func (a app) startGarbageCollector(done <-chan struct{}) {
 	logger.Info("Launching garbage collector every %s", a.retryInterval)
 	defer logger.Info("Garbage collector cron is off")
 
-	garbageCron := cron.New().Each(a.retryInterval).Now()
-	defer garbageCron.Stop()
+	garbageCron := cron.New().Each(a.retryInterval).Now().OnError(func(err error) {
+		logger.Error("error while running garbage collector: %s", err)
+	})
+	defer garbageCron.Shutdown()
 
 	go garbageCron.Start(func(_ time.Time) error {
 		return a.garbageCollector(done)
-	}, func(err error) {
-		logger.Error("error while running garbage collector: %s", err)
-	})
+	}, done)
 
 	signals := make(chan os.Signal, 1)
 	defer close(signals)
