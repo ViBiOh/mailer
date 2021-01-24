@@ -6,6 +6,7 @@
         "version": "1.2.1",
         "kind": 0
       },
+      "pattern": "stable",
       "version": {
         "name": "1.2.1"
       }
@@ -15,6 +16,7 @@
         "name": "vibioh/deploy",
         "kind": 1
       },
+      "pattern": "stable",
       "version": {
         "name": "1.0.1"
       }

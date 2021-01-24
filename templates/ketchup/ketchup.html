@@ -1,7 +1,7 @@
 {{- define "release" -}}
   <mj-text>
     <strong>{{ .repository.name }}</strong>
-    new version is
+    new version for pattern <pre style="display: inline; background-color: silver; padding: 2px; border-radius: 4px">{{ .pattern }}</pre> is
     <strong>
       {{- if eq .repository.kind 0.0 }}
         <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
