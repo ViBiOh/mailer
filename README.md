@@ -21,6 +21,41 @@ You'll find a Kubernetes exemple in the [`infra/`](infra/) folder, using my [`ap
 
 In order to use the MJML converter, you need to register to [MJML API](https://mjml.io/api) for having credentials or provided a compliant API like [mjml-api](https://github.com/ViBiOh/mjml-api).
 
+## Features
+
+- Golang templating ease-of-use and performance
+- MJML conversion on-the-fly
+- Read-only container
+- Prometheus monitoring
+- Configurable logger with JSON support
+
+## Templating & fixtures
+
+Templates are read from the [`-templates option dir`](#usage). You can have a look at the [hello world example](templates/hello/hello.html) provided in this repository. Every files with `*.html` extension is parsed as a template.
+
+Fixtures for each template are found from the directory where the template is. The default fixture is a file named `default.json`.
+
+## HTTP or AMQP Client
+
+`mailer` is capable to render and send email in a synchrone manner with the HTTP endpoint. If any action has an error (parsing, rendering, converting, sending), the HTTP response will be in error.
+
+It can also send email in an asynchronous way with AMQP. If an error occurs, the dead-letter queue will be processed every hour and a message will be processed at most 3 times before being dropped.
+
+## Sending email
+
+The only provider implemented for sending emails is via the SMTP protocol. This quite-old protocol is the broader compatible: you can connect it to Postfix, to SMTP providers (e.g. MailGun, SendGrid) and is more resilient than an vendor-specific HTTP endpoint.
+
+### Endpoints
+
+- `GET /render/`: list available templates, in JSON format
+- `GET /render/{templateName}?fixture={fixtureName}`: render `templateName` as HTML with given `fixtureName` (`default` by default)
+- `GET /fixtures/{templateName}/`: list available fixtures for given `templateName`, in JSON format
+- `POST /render/{templateName}?from={senderEmail}&sender={senderName}&subject={emailSubject}&to={recipient}`: render `{templateName}` with data from JSON payload in body and send it with the given parameters. The `emailSubject` can be a Golang template. The `to` parameters can be passed multiple times.
+
+- `GET /health`: healthcheck of server, respond [`okStatus (default 204)`](#usage) or `503` during [`graceDuration`](#usage) when SIGTERM is received
+- `GET /version`: value of `VERSION` environment variable
+- `GET /metrics`: Prometheus metrics values
+
 ## Usage
 
 ```bash
