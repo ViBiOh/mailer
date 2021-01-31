@@ -18,7 +18,13 @@
           </h2>
         </mj-text>
 
-        <mj-text>{{ .commonAnnotations.description }}</mj-text>
+        {{ if .commonAnnotations.summary }}
+          <mj-text>{{ .commonAnnotations.summary }}</mj-text>
+        {{ end }}
+
+        {{ if .commonAnnotations.description }}
+          <mj-text>{{ .commonAnnotations.description }}</mj-text>
+        {{ end }}
 
         {{ if .commonAnnotations.image }}
           <mj-image width="300px" src="{{ .commonAnnotations.image }}"></mj-image>
