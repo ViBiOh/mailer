@@ -18,21 +18,25 @@
           </h2>
         </mj-text>
 
-        {{ if .commonAnnotations.summary }}
-          <mj-text>{{ .commonAnnotations.summary }}</mj-text>
-        {{ end }}
-
-        {{ if .commonAnnotations.description }}
-          <mj-text>{{ .commonAnnotations.description }}</mj-text>
-        {{ end }}
-
         {{ if .commonAnnotations.image }}
           <mj-image width="300px" src="{{ .commonAnnotations.image }}"></mj-image>
         {{ end }}
 
-        <mj-text align="center">
-          <a href="{{ .externalURL }}" rel="noopener noreferrer" target="_blank">Go to alertmanager for more details</a>
-        </mj-text>
+        {{ with .alerts }}
+          {{ range $index, $alert := . }}
+            {{ if gt $index 0 }}
+              <mj-divider border-width="1px" border-style="dashed" border-color="lightgrey" />
+            {{ end }}
+
+            {{ with .annotations.summary }}
+              <mj-text>{{ . }}</mj-text>
+            {{ end }}
+
+            {{ with .annotations.description }}
+              <mj-text>{{ . }}</mj-text>
+            {{ end }}
+          {{ end }}
+        {{ end }}
 
         <mj-spacer height="20px"></mj-spacer>
       </mj-column>
