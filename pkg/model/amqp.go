@@ -24,7 +24,11 @@ type AMQPClient struct {
 
 func createClientName() string {
 	raw := make([]byte, 4)
-	rand.New(rand.NewSource(time.Now().UnixNano())).Read(raw)
+	if _, err := rand.Read(raw); err != nil {
+		logger.Fatal(err)
+		return "mailer"
+	}
+
 	return fmt.Sprintf("%x", raw)
 }
 
