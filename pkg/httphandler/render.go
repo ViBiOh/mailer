@@ -1,6 +1,7 @@
 package httphandler
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"strings"
@@ -44,28 +45,35 @@ func (a app) renderHandler() http.Handler {
 		}
 
 		if r.Method == http.MethodGet {
-			w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-			w.Header().Set("Cache-Control", "no-cache")
-			w.Header().Set("X-UA-Compatible", "ie=edge")
-			w.WriteHeader(http.StatusOK)
-
-			if _, err = io.Copy(w, output); err != nil {
-				httperror.InternalServerError(w, err)
-			}
-
+			writeOutput(w, output)
 			return
 		}
 
-		if err := mailRequest.Check(); err != nil {
-			httperror.HandleError(w, httpModel.WrapInvalid(err))
-			return
-		}
-
-		if httperror.HandleError(w, a.mailerApp.Send(r.Context(), mailRequest.ConvertToMail(output))) {
-			return
-		}
-		w.WriteHeader(http.StatusOK)
+		a.sendOutput(r.Context(), w, mailRequest, output)
 	})
+}
+
+func writeOutput(w http.ResponseWriter, output io.Reader) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("X-UA-Compatible", "ie=edge")
+	w.WriteHeader(http.StatusOK)
+
+	if _, err := io.Copy(w, output); err != nil {
+		httperror.InternalServerError(w, err)
+	}
+}
+
+func (a app) sendOutput(ctx context.Context, w http.ResponseWriter, mailRequest *model.MailRequest, output io.Reader) {
+	if err := mailRequest.Check(); err != nil {
+		httperror.HandleError(w, httpModel.WrapInvalid(err))
+		return
+	}
+
+	if httperror.HandleError(w, a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))) {
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func parseMailRequest(r *http.Request) *model.MailRequest {

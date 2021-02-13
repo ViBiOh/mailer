@@ -49,4 +49,5 @@ func (a App) Send(ctx context.Context, email model.MailRequest) error {
 
 // Close mocked ressources
 func (a App) Close() {
+	// Nothing to do on mock
 }
