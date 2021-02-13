@@ -2,6 +2,10 @@ package model
 
 import "testing"
 
+func noop() {
+	// Do nothing
+}
+
 func TestGetSubject(t *testing.T) {
 	type args struct {
 		subject string
@@ -18,7 +22,7 @@ func TestGetSubject(t *testing.T) {
 			args{
 				subject: "All is fine",
 				payload: map[string]interface{}{
-					"Name": func() {},
+					"Name": noop,
 				},
 			},
 			"All is fine",
@@ -28,7 +32,7 @@ func TestGetSubject(t *testing.T) {
 			args{
 				subject: "All is fine {{-. toto}",
 				payload: map[string]interface{}{
-					"Name": func() {},
+					"Name": noop,
 				},
 			},
 			"All is fine {{-. toto}",
@@ -38,7 +42,7 @@ func TestGetSubject(t *testing.T) {
 			args{
 				subject: "All is fine Mr {{ .Name.Test }}",
 				payload: map[string]interface{}{
-					"Name": func() {},
+					"Name": noop,
 				},
 			},
 			"All is fine Mr {{ .Name.Test }}",
