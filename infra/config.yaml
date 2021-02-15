@@ -17,7 +17,7 @@ spec:
   values:
     nameOverride: mailer
     image:
-      repository: vibioh/mailer:202102151059 # {"$imagepolicy": "default:mailer"}
+      repository: vibioh/mailer:202102152201 # {"$imagepolicy": "default:mailer"}
     config:
       MAILER_MJML_URL: http://mjml
       MAILER_LOGGER_JSON: "true"
