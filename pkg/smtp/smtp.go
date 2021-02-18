@@ -65,6 +65,7 @@ func (a app) Send(_ context.Context, mail model.Mail) error {
 	}
 
 	body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", mail.Sender, mail.From))
+	body.WriteString(fmt.Sprintf("To: %s\r\n", strings.Join(mail.To, ",")))
 	body.WriteString(fmt.Sprintf("Subject: %s\r\n", mail.Subject))
 	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
 	body.WriteString(fmt.Sprintf("\r\n%s\r\n", content))
