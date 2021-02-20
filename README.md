@@ -26,7 +26,7 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 - Golang templating ease-of-use and performance
 - MJML conversion on-the-fly
 - Read-only container
-- Prometheus monitoring
+- Prometheus monitoring on a dedicated port
 - Configurable logger with JSON support
 
 ## Templating & fixtures
@@ -54,14 +54,14 @@ The only provider implemented for sending emails is via the SMTP protocol. This 
 
 - `GET /health`: healthcheck of server, respond [`okStatus (default 204)`](#usage) or `503` during [`graceDuration`](#usage) when SIGTERM is received
 - `GET /version`: value of `VERSION` environment variable
-- `GET /metrics`: Prometheus metrics values
+- `GET /metrics`: Prometheus metrics values, on a dedicated port
 
 ## Usage
 
 ```bash
 Usage of mailer:
   -address string
-        [http] Listen address {MAILER_ADDRESS}
+        [server] Listen address {MAILER_ADDRESS}
   -amqpExchange string
         [amqp] Exchange name {MAILER_AMQP_EXCHANGE} (default "mailer")
   -amqpMaxRetry int
@@ -73,7 +73,7 @@ Usage of mailer:
   -amqpURL string
         [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> {MAILER_AMQP_URL}
   -cert string
-        [http] Certificate file {MAILER_CERT}
+        [server] Certificate file {MAILER_CERT}
   -corsCredentials
         [cors] Access-Control-Allow-Credentials {MAILER_CORS_CREDENTIALS}
   -corsExpose string
@@ -93,9 +93,9 @@ Usage of mailer:
   -hsts
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
   -idleTimeout string
-        [http] Idle Timeout {MAILER_IDLE_TIMEOUT} (default "2m")
+        [server] Idle Timeout {MAILER_IDLE_TIMEOUT} (default "2m")
   -key string
-        [http] Key file {MAILER_KEY}
+        [server] Key file {MAILER_KEY}
   -loggerJson
         [logger] Log format as JSON {MAILER_LOGGER_JSON}
   -loggerLevel string
@@ -115,15 +115,29 @@ Usage of mailer:
   -okStatus int
         [http] Healthy HTTP Status code {MAILER_OK_STATUS} (default 204)
   -port uint
-        [http] Listen port {MAILER_PORT} (default 1080)
+        [server] Listen port {MAILER_PORT} (default 1080)
+  -prometheusAddress string
+        [prometheus] Listen address {MAILER_PROMETHEUS_ADDRESS}
+  -prometheusCert string
+        [prometheus] Certificate file {MAILER_PROMETHEUS_CERT}
+  -prometheusIdleTimeout string
+        [prometheus] Idle Timeout {MAILER_PROMETHEUS_IDLE_TIMEOUT} (default "10s")
   -prometheusIgnore string
         [prometheus] Ignored path prefixes for metrics, comma separated {MAILER_PROMETHEUS_IGNORE}
-  -prometheusPath string
-        [prometheus] Path for exposing metrics {MAILER_PROMETHEUS_PATH} (default "/metrics")
+  -prometheusKey string
+        [prometheus] Key file {MAILER_PROMETHEUS_KEY}
+  -prometheusPort uint
+        [prometheus] Listen port {MAILER_PROMETHEUS_PORT} (default 9090)
+  -prometheusReadTimeout string
+        [prometheus] Read Timeout {MAILER_PROMETHEUS_READ_TIMEOUT} (default "5s")
+  -prometheusShutdownTimeout string
+        [prometheus] Shutdown Timeout {MAILER_PROMETHEUS_SHUTDOWN_TIMEOUT} (default "5s")
+  -prometheusWriteTimeout string
+        [prometheus] Write Timeout {MAILER_PROMETHEUS_WRITE_TIMEOUT} (default "10s")
   -readTimeout string
-        [http] Read Timeout {MAILER_READ_TIMEOUT} (default "5s")
+        [server] Read Timeout {MAILER_READ_TIMEOUT} (default "5s")
   -shutdownTimeout string
-        [http] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default "10s")
+        [server] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default "10s")
   -smtpAddress string
         [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
   -smtpHost string
@@ -139,5 +153,5 @@ Usage of mailer:
   -userAgent string
         [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Alcotest")
   -writeTimeout string
-        [http] Write Timeout {MAILER_WRITE_TIMEOUT} (default "10s")
+        [server] Write Timeout {MAILER_WRITE_TIMEOUT} (default "10s")
 ```
