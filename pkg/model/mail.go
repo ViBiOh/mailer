@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v3/pkg/logger"
+	"github.com/ViBiOh/httputils/v4/pkg/logger"
 )
 
 var (

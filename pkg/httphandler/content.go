@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ViBiOh/httputils/v3/pkg/logger"
-	"github.com/ViBiOh/httputils/v3/pkg/query"
-	"github.com/ViBiOh/httputils/v3/pkg/request"
+	"github.com/ViBiOh/httputils/v4/pkg/logger"
+	"github.com/ViBiOh/httputils/v4/pkg/query"
+	"github.com/ViBiOh/httputils/v4/pkg/request"
 )
 
 func (a app) getBodyContent(r *http.Request) (map[string]interface{}, error) {

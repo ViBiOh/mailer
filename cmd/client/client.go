@@ -5,8 +5,8 @@ import (
 	"flag"
 	"os"
 
-	"github.com/ViBiOh/httputils/v3/pkg/flags"
-	"github.com/ViBiOh/httputils/v3/pkg/logger"
+	"github.com/ViBiOh/httputils/v4/pkg/flags"
+	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/mailer/pkg/client"
 	"github.com/ViBiOh/mailer/pkg/model"
 )

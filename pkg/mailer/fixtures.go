@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v3/pkg/model"
+	"github.com/ViBiOh/httputils/v4/pkg/model"
 )
 
 func (a app) getTemplatePath(templateName string) string {

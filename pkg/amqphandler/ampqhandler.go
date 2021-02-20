@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ViBiOh/httputils/v3/pkg/cron"
-	"github.com/ViBiOh/httputils/v3/pkg/flags"
-	"github.com/ViBiOh/httputils/v3/pkg/logger"
+	"github.com/ViBiOh/httputils/v4/pkg/cron"
+	"github.com/ViBiOh/httputils/v4/pkg/flags"
+	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/streadway/amqp"
