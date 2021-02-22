@@ -57,6 +57,14 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client AMQPClient, err 
 		}
 	}()
 
+	if len(uri) == 0 {
+		return AMQPClient{}, errors.New("URI is required")
+	}
+
+	if len(exchangeName) == 0 {
+		return AMQPClient{}, errors.New("exchange name is required")
+	}
+
 	client.exchangeName = exchangeName
 
 	logger.Info("Dialing AMQP with 10seconds timeout...")

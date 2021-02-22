@@ -1,19 +1,19 @@
 <mjml>
-  <mj-body background-color="#e1e1e8">
+  <mj-body background-color="#3b3b3b">
     {{- template "header" "AlertManager" -}}
 
-    <mj-section background-color="#ffffff" padding="0">
+    <mj-section background-color="#3b3b3b" padding="0">
       <mj-column>
-        <mj-text align="center">
+        <mj-text color="#c0c0c0" align="center">
           <h1>
             {{ .commonLabels.alertname }}
           </h1>
 
           <h2>
             {{- if eq .status "resolved" -}}
-              <span style="color: #4cae4c;">Resolved</span>
+              <span style="color: #32cd32;">Resolved</span>
             {{- else -}}
-              <span style="color: #ff6347;">Firing</span>
+              <span style="color: #fa8072;">Firing</span>
             {{- end -}}
           </h2>
         </mj-text>
@@ -25,15 +25,15 @@
         {{ with .alerts }}
           {{ range $index, $alert := . }}
             {{ if gt $index 0 }}
-              <mj-divider border-width="1px" border-style="dashed" border-color="lightgrey" />
+              <mj-divider border-width="1px" border-style="dashed" border-color="#c0c0c0" />
             {{ end }}
 
             {{ with .annotations.summary }}
-              <mj-text>{{ . }}</mj-text>
+              <mj-text color="#c0c0c0">{{ . }}</mj-text>
             {{ end }}
 
             {{ with .annotations.description }}
-              <mj-text>{{ . }}</mj-text>
+              <mj-text color="#c0c0c0">{{ . }}</mj-text>
             {{ end }}
           {{ end }}
         {{ end }}

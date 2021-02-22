@@ -58,7 +58,9 @@ func main() {
 	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp)
 
 	amqpApp, err := amqphandler.New(amqpConfig, mailerApp)
-	logger.Fatal(err)
+	if err != nil {
+		logger.Error("unable to create amqp: %s", err)
+	}
 	defer amqpApp.Close()
 
 	healthApp := health.New(healthConfig, amqpApp.Ping)

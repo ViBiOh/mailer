@@ -1,22 +1,22 @@
 {{- define "release" -}}
-  <mj-text>
+  <mj-text color="#c0c0c0">
     <strong>{{ .repository.name }}</strong>
-    new version for pattern <pre style="display: inline; background-color: silver; padding: 2px; border-radius: 4px">{{ .pattern }}</pre> is
+    new version for pattern <pre style="display: inline">{{ .pattern }}</pre> is
     <strong>
       {{- if eq .repository.kind 0.0 }}
-        <a style="color: #5cb85c" target="_blank" rel="noopener noreferrer" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
+        <a style="color: #6495ed" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
       {{ else }}
-        <span style="color: #5cb85c">{{ .version.name }}</a>
+        <span style="color: #6495ed">{{ .version.name }}</a>
       {{- end }}
     </strong>
   </mj-text>
 {{- end -}}
 
 <mjml>
-  <mj-body background-color="#e1e1e8">
+  <mj-body background-color="#3b3b3b">
     {{- template "header" "Ketchup" -}}
 
-    <mj-section background-color="#ffffff">
+    <mj-section background-color="#3b3b3b">
       <mj-column>
         {{- range $index, $release := .releases -}}
           {{ template "release" $release }}
