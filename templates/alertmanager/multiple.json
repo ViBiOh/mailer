@@ -12,7 +12,7 @@
         "severity": "warning"
       },
       "annotations": {
-        "summary": "Reconciliation of Kustomization for default/flux-notifier has been failing for more than thirty minutes."
+        "description": "Reconciliation of Kustomization for default/flux-notifier has been failing for more than thirty minutes."
       },
       "startsAt": "2021-02-05T18:40:55.765621979Z",
       "endsAt": "0001-01-01T00:00:00Z",
@@ -29,7 +29,7 @@
         "severity": "warning"
       },
       "annotations": {
-        "summary": "Reconciliation of Kustomization for default/mailer has been failing for more than thirty minutes."
+        "description": "Reconciliation of Kustomization for default/mailer has been failing for more than thirty minutes."
       },
       "startsAt": "2021-02-05T18:40:55.765621979Z",
       "endsAt": "0001-01-01T00:00:00Z",
@@ -46,7 +46,7 @@
         "severity": "warning"
       },
       "annotations": {
-        "summary": "Reconciliation of Kustomization for default/mjml-api has been failing for more than thirty minutes."
+        "description": "Reconciliation of Kustomization for default/mjml-api has been failing for more than thirty minutes."
       },
       "startsAt": "2021-02-05T18:40:55.765621979Z",
       "endsAt": "0001-01-01T00:00:00Z",
@@ -63,7 +63,7 @@
         "severity": "warning"
       },
       "annotations": {
-        "summary": "Reconciliation of Kustomization for default/netatmo has been failing for more than thirty minutes."
+        "description": "Reconciliation of Kustomization for default/netatmo has been failing for more than thirty minutes."
       },
       "startsAt": "2021-02-05T18:40:55.765621979Z",
       "endsAt": "0001-01-01T00:00:00Z",
@@ -80,7 +80,7 @@
         "severity": "warning"
       },
       "annotations": {
-        "summary": "Reconciliation of Kustomization for default/sodo-web has been failing for more than thirty minutes."
+        "description": "Reconciliation of Kustomization for default/sodo-web has been failing for more than thirty minutes."
       },
       "startsAt": "2021-02-05T18:40:55.765621979Z",
       "endsAt": "0001-01-01T00:00:00Z",
@@ -97,7 +97,7 @@
         "severity": "warning"
       },
       "annotations": {
-        "summary": "Reconciliation of Kustomization for default/talks has been failing for more than thirty minutes."
+        "description": "Reconciliation of Kustomization for default/talks has been failing for more than thirty minutes."
       },
       "startsAt": "2021-02-05T18:40:55.765621979Z",
       "endsAt": "0001-01-01T00:00:00Z",

@@ -6,6 +6,18 @@
       <mj-column>
         <mj-text color="#c0c0c0" align="center">
           <h1>
+            {{- with.commonLabels.severity -}}
+              {{- if eq . "info" -}}
+                ℹ️
+              {{- end -}}
+              {{- if eq . "warning" -}}
+                ⚠️
+              {{- end -}}
+              {{- if eq . "critical" -}}
+                🚨
+              {{- end -}}
+              {{- " " -}}
+            {{- end -}}
             {{ .commonLabels.alertname }}
           </h1>
 
@@ -26,10 +38,6 @@
           {{ range $index, $alert := . }}
             {{ if gt $index 0 }}
               <mj-divider border-width="1px" border-style="dashed" border-color="#c0c0c0" />
-            {{ end }}
-
-            {{ with .annotations.summary }}
-              <mj-text color="#c0c0c0">{{ . }}</mj-text>
             {{ end }}
 
             {{ with .annotations.description }}
