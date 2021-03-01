@@ -24,7 +24,7 @@ spec:
   values:
     nameOverride: mailer
     image:
-      repository: vibioh/mailer:202102271815 # {"$imagepolicy": "default:flux-mailer-web"}
+      repository: vibioh/mailer:202103011632 # {"$imagepolicy": "default:flux-mailer-web"}
     config:
       MAILER_MJML_URL: http://mjml
       MAILER_LOGGER_JSON: "true"
