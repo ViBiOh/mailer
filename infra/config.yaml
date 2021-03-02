@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app
-      version: "0.0.47"
+      version: '0.0.47'
       sourceRef:
         kind: HelmRepository
         name: vibioh
@@ -16,6 +16,7 @@ spec:
       interval: 120m
   install:
     skipCRDs: true
+  maxHistory: 3
   upgrade:
     remediation:
       retries: 3
@@ -27,7 +28,7 @@ spec:
       repository: vibioh/mailer:202103011632 # {"$imagepolicy": "default:flux-mailer-web"}
     config:
       MAILER_MJML_URL: http://mjml
-      MAILER_LOGGER_JSON: "true"
+      MAILER_LOGGER_JSON: 'true'
     secrets:
       MAILER_SMTP_ADDRESS: AgAKXuxnSpMeeXxWkYOHlEaikjuN6HIgfsZTb0HuLZ9vTm/zm3bCmwW6/eylIYzrjGykWwye5d58oLGUJEEJ3MkqVIWwEzeAxM7LU87biOwdbbapypwMxD70Q+BF6BzL/CQ/LRXEM9OHMK0VnCGXZNT5rr2b3TY60Y7ZRA8Gt3WAATB6wZFR9X1k4Ju8I73yXpXiaoaQVSAUo8HF5Yzj6/HA4Hkfy4CLPrXP6d9S2LVRdanW7ftvCX/6umvqpcch2HOpEhBqknxY/VAVu/lu9ByptYQ6ZtZJtj/l0EKXGsgmdagL2bbAEhOwF3sPRak5FrxggQ0wt1wd/LsOU41yvqpT7AXcYzyXqVEodVa/gTacsPMg94pOrtEcO8SJ2lXOZc1ngK9cI2VqFoyMLB5Isso9XVtKAFwpz6qd+BGHT17mMkVLic9NOJDMRs9Wr7UXnlDuGHxJdapspu9uou16hCBiS9c3BMq99nXFZA09iQGpKZtfBUw6fFMoDeFuuMF1eN8Hdh9yVKkMnjnvWaz44ap8KoYz9isANb5HvSYxKtNCqHpc5KHv2HcXOLVZDY6lGL3votzZNxHl+5HW9mLqhuKWhlZUsRGyiOTM9/3NfqjTm/vxPOI60gJJ3axISCSfLJCapM34hkP4k22DQLYvRfy23JwK02eW4UrWui7x06EAkjRXutMMBuouT8PjAfTsxJqKKMYcxbxYnL78NKnYjPIfIURTqWo=
       MAILER_SMTP_USERNAME: AgDYD0moMvBOo9UIJEn527oNcpPV80KHF3KX+sHF71Fs2DadxvIp5B1RMqyd6uQk+1KGBa5SFxX0FFWjX31e/jEmJ7EVTw0MAaPwk83EHBrau7GGq/HF5vXEiQQYRe+Zivpm9oBNBHb5BwvLVss6U2oyuC8OHbC15BtsnM+86x6o5BfqajJoVLMaBvGq9eG1mlvpwv0p5vATN+wGsdzM6OWS5ZFPBQvxunGlFTO2Jz4jnzkBINGEhRhqIQOzVT5GPZom9frUj6fCjBrqV6tZmaGA1YV8udMsfY7tvFMglwp7PeJYNcyElZRiqxvmbN0e6S6G1k1Prl/2TLsk3KBFou+Mh3uQS0CYud136seZWHxzD47+tTyWR86HTz0UewEg2DaokZH9X9O7KdJi5h49i/KlWwz+L/YlokxIBZvniZFnrVgF7SLPDUQRAMgA9FdD7HNo6XS1/jTXX6F1Wgy7EWeyOJyymBrNFNJ1NQsoXY8xqFyaNpNFe2xJbp62WPrOgdf0qAj2FM9JHgaCMwx/cROFDSEkOlb0v+YSbkJRFeGJRYuFBhYeTT3S1Tjjm360bVZm0zKPyIZ0dVIu4ze/Ma4aGWhq5KOc5loGlkLHKd9cns/K3NUcZfAikZ9PwUDrmKVe+25JC2KbRe1sCtu2qgMchZtvWuQw76rnh/9v3cnY1RsBdcA9qdItj3xwBnJkyukqhM1nfOUpLfkk6jU6AFrA72f1BIq3W3H+jjeM3ZGrQA==
