@@ -11,17 +11,17 @@ import (
 func TestEnabled(t *testing.T) {
 	var cases = []struct {
 		intention string
-		instance  AMQPClient
+		instance  *AMQPClient
 		want      bool
 	}{
 		{
 			"empty",
-			AMQPClient{},
+			&AMQPClient{},
 			false,
 		},
 		{
 			"connection",
-			AMQPClient{
+			&AMQPClient{
 				connection: &amqp.Connection{},
 			},
 			true,
@@ -40,17 +40,17 @@ func TestEnabled(t *testing.T) {
 func TestPing(t *testing.T) {
 	var cases = []struct {
 		intention string
-		instance  AMQPClient
+		instance  *AMQPClient
 		want      error
 	}{
 		{
 			"empty",
-			AMQPClient{},
+			&AMQPClient{},
 			errors.New("amqp client disabled"),
 		},
 		{
 			"not opened",
-			AMQPClient{
+			&AMQPClient{
 				connection: &amqp.Connection{},
 			},
 			nil,

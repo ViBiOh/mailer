@@ -36,11 +36,11 @@ type Config struct {
 }
 
 type app struct {
+	amqpClient *model.AMQPClient
+
 	url      string
 	name     string
 	password string
-
-	amqpClient model.AMQPClient
 }
 
 // Flags adds flags for configuring package
@@ -82,7 +82,7 @@ func New(config Config) (App, error) {
 }
 
 func (a app) Enabled() bool {
-	return len(a.url) != 0 || a.amqpClient.Enabled()
+	return len(a.url) != 0 || (a.amqpClient != nil && a.amqpClient.Enabled())
 }
 
 // Send sends emails with Mailer for defined parameters
@@ -95,7 +95,7 @@ func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
 		return err
 	}
 
-	if a.amqpClient.Enabled() {
+	if a.amqpClient != nil && a.amqpClient.Enabled() {
 		return a.amqpSend(ctx, mailRequest)
 	}
 	return a.httpSend(ctx, mailRequest)
