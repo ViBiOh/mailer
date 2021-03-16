@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
@@ -20,6 +21,8 @@ type AMQPClient struct {
 
 	queue           amqp.Queue
 	deadLetterQueue amqp.Queue
+
+	mutex sync.RWMutex
 }
 
 func createClientName() string {
@@ -50,7 +53,7 @@ func createExchangeAndQueue(channel *amqp.Channel, exchangeName, queueName strin
 }
 
 // GetAMQPClient inits AMQP connection, channel and queue
-func GetAMQPClient(uri, exchangeName, queueName string) (client AMQPClient, err error) {
+func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err error) {
 	defer func() {
 		if err != nil {
 			client.Close()
@@ -58,14 +61,18 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client AMQPClient, err 
 	}()
 
 	if len(uri) == 0 {
-		return AMQPClient{}, errors.New("URI is required")
+		err = errors.New("URI is required")
+		return
 	}
 
 	if len(exchangeName) == 0 {
-		return AMQPClient{}, errors.New("exchange name is required")
+		err = errors.New("exchange name is required")
+		return
 	}
 
-	client.exchangeName = exchangeName
+	client = &AMQPClient{
+		exchangeName: exchangeName,
+	}
 
 	logger.Info("Dialing AMQP with 10seconds timeout...")
 
@@ -116,12 +123,12 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client AMQPClient, err 
 }
 
 // Enabled checks if connection is setup
-func (a AMQPClient) Enabled() bool {
+func (a *AMQPClient) Enabled() bool {
 	return a.connection != nil
 }
 
 // Ping checks if connection is live
-func (a AMQPClient) Ping() error {
+func (a *AMQPClient) Ping() error {
 	if !a.Enabled() {
 		return errors.New("amqp client disabled")
 	}
@@ -134,22 +141,22 @@ func (a AMQPClient) Ping() error {
 }
 
 // QueueName returns queue name
-func (a AMQPClient) QueueName() string {
+func (a *AMQPClient) QueueName() string {
 	return a.queue.Name
 }
 
 // ExchangeName returns exchange name
-func (a AMQPClient) ExchangeName() string {
+func (a *AMQPClient) ExchangeName() string {
 	return a.exchangeName
 }
 
 // ClientName returns client name
-func (a AMQPClient) ClientName() string {
+func (a *AMQPClient) ClientName() string {
 	return a.clientName
 }
 
 // Vhost returns connection Vhost
-func (a AMQPClient) Vhost() string {
+func (a *AMQPClient) Vhost() string {
 	if a.connection == nil {
 		return ""
 	}
@@ -158,8 +165,27 @@ func (a AMQPClient) Vhost() string {
 }
 
 // Send sends payload to the underlying exchange and queue
-func (a AMQPClient) Send(payload amqp.Publishing) error {
-	if err := a.channel.Publish(a.exchangeName, "", false, false, payload); err != nil {
+func (a *AMQPClient) Send(payload amqp.Publishing) error {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
+	var err error
+
+	if err = a.channel.Publish(a.exchangeName, "", false, false, payload); err == amqp.ErrClosed {
+		logger.Warn("Channel was closed, trying to reopen...")
+		newChannel, err := a.connection.Channel()
+		if err != nil {
+			return fmt.Errorf("unable to reopen closed channel: %s", err)
+		}
+
+		a.mutex.Lock()
+		a.channel = newChannel
+		a.mutex.Unlock()
+
+		err = a.channel.Publish(a.exchangeName, "", false, false, payload)
+	}
+
+	if err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
 	}
 
@@ -167,7 +193,10 @@ func (a AMQPClient) Send(payload amqp.Publishing) error {
 }
 
 // Listen listen to queue
-func (a AMQPClient) Listen() (<-chan amqp.Delivery, error) {
+func (a *AMQPClient) Listen() (<-chan amqp.Delivery, error) {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
 	messages, err := a.channel.Consume(a.queue.Name, a.clientName, false, false, false, false, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to consume queue `%s`: %s", a.queue.Name, err)
@@ -177,12 +206,18 @@ func (a AMQPClient) Listen() (<-chan amqp.Delivery, error) {
 }
 
 // GetGarbage get a message from the garbage
-func (a AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
+func (a *AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
 	return a.channel.Get(a.deadLetterQueue.Name, false)
 }
 
 // Close closes opened ressources
-func (a AMQPClient) Close() {
+func (a *AMQPClient) Close() {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
 	if a.channel != nil {
 		if len(a.queue.Name) != 0 {
 			logger.Info("Canceling AMQP channel for %s", a.clientName)

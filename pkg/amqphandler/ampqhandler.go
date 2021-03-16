@@ -37,7 +37,7 @@ type Config struct {
 
 type app struct {
 	mailerApp     mailer.App
-	amqpClient    model.AMQPClient
+	amqpClient    *model.AMQPClient
 	retryInterval time.Duration
 	maxRetry      int64
 }
