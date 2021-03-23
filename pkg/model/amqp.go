@@ -71,6 +71,7 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err
 	}
 
 	client = &AMQPClient{
+		mutex:        sync.RWMutex{},
 		exchangeName: exchangeName,
 	}
 
