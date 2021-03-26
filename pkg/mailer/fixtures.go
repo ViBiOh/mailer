@@ -3,7 +3,6 @@ package mailer
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -38,7 +37,7 @@ func (a app) ListFixtures(name string) ([]string, error) {
 		return nil, err
 	}
 
-	files, err := ioutil.ReadDir(templatePath)
+	files, err := os.ReadDir(templatePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read templates directory: %s", err)
 	}
@@ -64,7 +63,7 @@ func (a app) GetFixture(name, fixture string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	payload, err := ioutil.ReadFile(fixturePath)
+	payload, err := os.ReadFile(fixturePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read file: %w", err)
 	}

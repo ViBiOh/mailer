@@ -5,7 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/smtp"
 	"strings"
 
@@ -59,7 +59,7 @@ func New(config Config) App {
 func (a app) Send(_ context.Context, mail model.Mail) error {
 	body := bytes.NewBuffer(nil)
 
-	content, err := ioutil.ReadAll(mail.Content)
+	content, err := io.ReadAll(mail.Content)
 	if err != nil {
 		return fmt.Errorf("unable to read content: %s", err)
 	}
