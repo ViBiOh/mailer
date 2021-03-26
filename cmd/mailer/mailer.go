@@ -20,11 +20,6 @@ import (
 	"github.com/ViBiOh/mailer/pkg/smtp"
 )
 
-const (
-	fixturesPath = "/fixtures"
-	renderPath   = "/render"
-)
-
 func main() {
 	fs := flag.NewFlagSet("mailer", flag.ExitOnError)
 

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/httputils/v4/pkg/httperror"
-	"github.com/ViBiOh/httputils/v4/pkg/query"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 )
 
@@ -48,15 +47,4 @@ func (a app) Handler() http.Handler {
 
 		httperror.NotFound(w)
 	})
-}
-
-func checkRequest(r *http.Request) bool {
-	switch r.Method {
-	case http.MethodPost:
-		return !query.IsRoot(r)
-	case http.MethodGet:
-		return true
-	default:
-		return false
-	}
 }
