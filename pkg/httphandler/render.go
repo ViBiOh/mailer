@@ -21,7 +21,7 @@ func (a app) renderHandler() http.Handler {
 				return
 			}
 
-			httpjson.ResponseArrayJSON(w, http.StatusOK, a.mailerApp.ListTemplates(), httpjson.IsPretty(r))
+			httpjson.WriteArray(w, http.StatusOK, a.mailerApp.ListTemplates(), httpjson.IsPretty(r))
 			return
 		}
 
