@@ -3,12 +3,12 @@ package mjml
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
+	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 )
 
@@ -89,14 +89,9 @@ func (a app) Render(ctx context.Context, template string) (string, error) {
 		return "", fmt.Errorf("unable to render mjml template: %s", err)
 	}
 
-	content, err := request.ReadBodyResponse(resp)
-	if err != nil {
-		return "", fmt.Errorf("unable to read mjml response: %s", err)
-	}
-
 	var response mjmlResponse
-	if err := json.Unmarshal(content, &response); err != nil {
-		return "", fmt.Errorf("unable to parse mjml response: %s", err)
+	if err := httpjson.Read(resp, &response, "mjml response"); err != nil {
+		return "", err
 	}
 
 	return response.HTML, nil
