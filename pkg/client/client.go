@@ -82,7 +82,11 @@ func New(config Config) (App, error) {
 }
 
 func (a app) Enabled() bool {
-	return len(a.url) != 0 || (a.amqpClient != nil && a.amqpClient.Enabled())
+	return len(a.url) != 0 || a.amqpEnabled()
+}
+
+func (a app) amqpEnabled() bool {
+	return a.amqpClient != nil && a.amqpClient.Enabled()
 }
 
 // Send sends emails with Mailer for defined parameters
@@ -95,14 +99,16 @@ func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
 		return err
 	}
 
-	if a.amqpClient != nil && a.amqpClient.Enabled() {
+	if a.amqpEnabled() {
 		return a.amqpSend(ctx, mailRequest)
 	}
 	return a.httpSend(ctx, mailRequest)
 }
 
 func (a app) Close() {
-	a.amqpClient.Close()
+	if a.amqpEnabled() {
+		a.amqpClient.Close()
+	}
 }
 
 func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
