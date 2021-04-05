@@ -7,6 +7,8 @@
 
 Mailer is a service for rendering and sending email based on Golang Template with the help of MJML.
 
+![](mailer.png)
+
 ## Getting Started
 
 Golang binary is built with static link. You can download it directly from the [Github Release page](https://github.com/ViBiOh/mailer/releases) or build it by yourself by cloning this repo and running `make`.
@@ -45,6 +47,10 @@ It can also send email in an asynchronous way with AMQP. If an error occurs, the
 
 The only provider implemented for sending emails is via the SMTP protocol. This quite-old protocol is the broader compatible: you can connect it to Postfix, to SMTP providers (e.g. MailGun, SendGrid) and is more resilient than an vendor-specific HTTP endpoint.
 
+## Client usage
+
+You can reach HTTP or AMQP endpoints directly or use the provided package `client` to send email easily from you Golang application. You can find a full usage example in [`cmd/client/client.go`](cmd/client/client.go)
+
 ### Endpoints
 
 - `GET /render/`: list available templates, in JSON format
@@ -53,6 +59,7 @@ The only provider implemented for sending emails is via the SMTP protocol. This 
 - `POST /render/{templateName}?from={senderEmail}&sender={senderName}&subject={emailSubject}&to={recipient}`: render `{templateName}` with data from JSON payload in body and send it with the given parameters. The `emailSubject` can be a Golang template. The `to` parameters can be passed multiple times.
 
 - `GET /health`: healthcheck of server, respond [`okStatus (default 204)`](#usage) or `503` during [`graceDuration`](#usage) when SIGTERM is received
+- `GET /ready`: same response than `/health` but it also checks external dependencies availability
 - `GET /version`: value of `VERSION` environment variable
 - `GET /metrics`: Prometheus metrics values, on a dedicated port
 

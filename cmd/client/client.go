@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
 
-	"github.com/ViBiOh/httputils/v4/pkg/flags"
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/mailer/pkg/client"
 	"github.com/ViBiOh/mailer/pkg/model"
 )
@@ -14,18 +13,21 @@ import (
 func main() {
 	fs := flag.NewFlagSet("client", flag.ExitOnError)
 
-	loggerConfig := logger.Flags(fs, "logger")
 	mailerConfig := client.Flags(fs, "mailer")
-	recipient := flags.New("", "").Name("Recipient").Default("").Label("Recipient").ToString(fs)
 
-	logger.Fatal(fs.Parse(os.Args[1:]))
-
-	logger.Global(logger.New(loggerConfig))
-	defer logger.Close()
+	if err := fs.Parse(os.Args[1:]); err != nil {
+		log.Fatal(err)
+	}
 
 	client, err := client.New(mailerConfig)
-	logger.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer client.Close()
 
-	logger.Fatal(client.Send(context.Background(), *model.NewMailRequest().From("mailer@vibioh.fr").As("Client").To(*recipient).Template("hello")))
+	log.Printf("Mailer Client: %s\n", client)
+
+	if err := client.Send(context.Background(), *model.NewMailRequest().From("mailer@vibioh.fr").As("Client").To("customer@vibioh.fr").Template("hello")); err != nil {
+		log.Fatal(err)
+	}
 }

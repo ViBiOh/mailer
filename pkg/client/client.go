@@ -10,13 +10,14 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/streadway/amqp"
 )
 
 var (
+	_ fmt.Stringer = app{}
+
 	// ErrNotEnabled occurs when no configuration is provided
 	ErrNotEnabled = errors.New("mailer not enabled")
 )
@@ -26,6 +27,7 @@ type App interface {
 	Enabled() bool
 	Send(context.Context, model.MailRequest) error
 	Close()
+	String() string
 }
 
 // Config of package
@@ -67,8 +69,6 @@ func New(config Config) (App, error) {
 			return nil, err
 		}
 
-		logger.Info("Publishing message to exchange `%s` on vhost `%s`", client.ExchangeName(), client.Vhost())
-
 		return app{
 			amqpClient: client,
 		}, nil
@@ -79,6 +79,18 @@ func New(config Config) (App, error) {
 		name:     name,
 		password: strings.TrimSpace(*config.password),
 	}, nil
+}
+
+func (a app) String() string {
+	if !a.Enabled() {
+		return "not enabled"
+	}
+
+	if a.amqpClient == nil {
+		return fmt.Sprintf("Sending emails via HTTP to `%s`.", a.url)
+	}
+
+	return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.amqpClient.ExchangeName(), a.amqpClient.Vhost())
 }
 
 func (a app) Enabled() bool {

@@ -25,6 +25,11 @@ func New(enabled bool) App {
 	}
 }
 
+// String mocked implementation
+func (a App) String() string {
+	return "clienttest"
+}
+
 // Enabled mocked implementation
 func (a App) Enabled() bool {
 	return a.enabled
