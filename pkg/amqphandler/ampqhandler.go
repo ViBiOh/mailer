@@ -135,7 +135,7 @@ func (a app) startGarbageCollector(done <-chan struct{}) {
 	})
 	defer garbageCron.Shutdown()
 
-	go garbageCron.Start(func(_ time.Time) error {
+	go garbageCron.Start(func(_ context.Context) error {
 		return a.garbageCollector(done)
 	}, done)
 
