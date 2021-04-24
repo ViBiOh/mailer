@@ -90,7 +90,7 @@ func (a app) Start(done <-chan struct{}) {
 	}
 	defer a.amqpClient.Close()
 
-	logger.Info("Listening queue `%s` on vhost `%s` as `%s`", a.amqpClient.QueueName(), a.amqpClient.Vhost(), a.amqpClient.ClientName())
+	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
 
 	go a.startGarbageCollector(done)
 

@@ -221,9 +221,9 @@ func (a *AMQPClient) Close() {
 
 	if a.channel != nil {
 		if len(a.queue.Name) != 0 {
-			logger.Info("Canceling AMQP channel for %s", a.clientName)
+			logger.WithField("name", a.clientName).Info("Canceling AMQP channel")
 			if err := a.channel.Cancel(a.clientName, false); err != nil {
-				logger.Error("unable to cancel consumer `%s`: %s", a.clientName, err)
+				logger.WithField("name", a.clientName).Error("unable to cancel consumer: %s", err)
 			}
 		}
 
@@ -232,7 +232,7 @@ func (a *AMQPClient) Close() {
 	}
 
 	if a.connection != nil {
-		logger.Info("Closing AMQP connection on %s", a.Vhost())
+		logger.WithField("vhost", a.Vhost).Info("Closing AMQP connection")
 		LoggedCloser(a.connection)
 	}
 }

@@ -56,8 +56,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
-	logger.Info("Loading templates with `%s` extension in `%s` directory...", templateExtension, templatesDir)
-
+	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")
 	appTemplates, err := templates.GetTemplates(templatesDir, templateExtension)
 	if err != nil {
 		logger.Error("%s", err)
