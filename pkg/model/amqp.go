@@ -238,14 +238,22 @@ func (a *AMQPClient) Close() {
 }
 
 // LoggedAck ack a message with error handling
-func LoggedAck(message amqp.Delivery) {
+func (a *AMQPClient) LoggedAck(message amqp.Delivery) {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
+	message.Acknowledger = a.channel
 	if err := message.Ack(false); err != nil {
 		logger.Error("unable to ack message: %s", err)
 	}
 }
 
 // LoggedReject reject a message with error handling
-func LoggedReject(message amqp.Delivery, requeue bool) {
+func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
+	message.Acknowledger = a.channel
 	if err := message.Reject(requeue); err != nil {
 		logger.Error("unable to reject message: %s", err)
 	}

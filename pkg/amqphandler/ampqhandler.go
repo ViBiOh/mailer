@@ -101,11 +101,11 @@ func (a app) Start(done <-chan struct{}) {
 		case message := <-messages:
 			if err := a.sendEmail(message.Body); err != nil {
 				logger.Error("unable to send email: %s", err)
-				model.LoggedReject(message, false)
+				a.amqpClient.LoggedReject(message, false)
 				continue
 			}
 
-			model.LoggedAck(message)
+			a.amqpClient.LoggedAck(message)
 		}
 	}
 }
@@ -178,13 +178,13 @@ func (a app) garbageCollector(done <-chan struct{}) error {
 		count, err := getDeathCount(garbage.Headers)
 		if err != nil {
 			logger.Error("unable to get count from garbage: %s", err)
-			model.LoggedReject(garbage, false)
+			a.amqpClient.LoggedReject(garbage, false)
 			continue
 		}
 
 		if count > a.maxRetry {
 			logger.Error("message was rejected %d times, content was `%s`", a.maxRetry, garbage.Body)
-			model.LoggedAck(garbage)
+			a.amqpClient.LoggedAck(garbage)
 			continue
 		}
 
@@ -192,11 +192,11 @@ func (a app) garbageCollector(done <-chan struct{}) error {
 
 		if err := a.amqpClient.Send(model.ConvertDeliveryToPublishing(garbage)); err != nil {
 			logger.Error("unable to re-send garbage message: %s", err)
-			model.LoggedReject(garbage, true)
+			a.amqpClient.LoggedReject(garbage, true)
 			continue
 		}
 
-		model.LoggedAck(garbage)
+		a.amqpClient.LoggedAck(garbage)
 	}
 
 	return nil
