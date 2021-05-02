@@ -1,31 +1,10 @@
 package httphandler
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
-	"github.com/ViBiOh/httputils/v4/pkg/query"
-	"github.com/ViBiOh/httputils/v4/pkg/request"
+	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 )
-
-func (a app) getBodyContent(r *http.Request) (map[string]interface{}, error) {
-	rawContent, err := request.ReadBodyRequest(r)
-	if err != nil {
-		return nil, err
-	}
-
-	if query.GetBool(r, "dump") {
-		logger.Info("Payload for %s: %s", r.URL.Path, rawContent)
-	}
-
-	var content map[string]interface{}
-	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return nil, err
-	}
-
-	return content, nil
-}
 
 func (a app) getContent(r *http.Request, name string) (map[string]interface{}, error) {
 	if r.Method == http.MethodGet {
@@ -37,5 +16,6 @@ func (a app) getContent(r *http.Request, name string) (map[string]interface{}, e
 		return a.mailerApp.GetFixture(name, fixtureName)
 	}
 
-	return a.getBodyContent(r)
+	var content map[string]interface{}
+	return content, httpjson.Parse(r, &content, "content")
 }

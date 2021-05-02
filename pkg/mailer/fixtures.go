@@ -63,14 +63,14 @@ func (a app) GetFixture(name, fixture string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	payload, err := os.ReadFile(fixturePath)
+	file, err := os.OpenFile(fixturePath, os.O_RDONLY, 0600)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read file: %w", err)
+		return nil, fmt.Errorf("unable to open file `%s`: %w", fixturePath, err)
 	}
 
 	var content map[string]interface{}
-	if err := json.Unmarshal(payload, &content); err != nil {
-		return nil, fmt.Errorf("unable to parse fixture: %w", err)
+	if err := json.NewDecoder(file).Decode(&content); err != nil {
+		return nil, fmt.Errorf("unable to parse JSON fixture: %w", err)
 	}
 
 	return content, nil
