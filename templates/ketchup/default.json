@@ -13,7 +13,8 @@
     },
     {
       "repository": {
-        "name": "vibioh/deploy",
+        "name": "https://charts.vibioh.fr",
+        "part": "app",
         "kind": 1
       },
       "pattern": "stable",
