@@ -174,7 +174,9 @@ func (a *AMQPClient) Send(payload amqp.Publishing) error {
 
 	if err = a.channel.Publish(a.exchangeName, "", false, false, payload); err == amqp.ErrClosed {
 		logger.Warn("Channel was closed, trying to reopen...")
-		newChannel, err := a.connection.Channel()
+
+		var newChannel *amqp.Channel
+		newChannel, err = a.connection.Channel()
 		if err != nil {
 			return fmt.Errorf("unable to reopen closed channel: %s", err)
 		}
