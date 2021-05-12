@@ -234,7 +234,7 @@ func (a *AMQPClient) Close() {
 	}
 
 	if a.connection != nil {
-		logger.WithField("vhost", a.Vhost).Info("Closing AMQP connection")
+		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
 		LoggedCloser(a.connection)
 	}
 }
