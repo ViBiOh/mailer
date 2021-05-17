@@ -75,7 +75,7 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err
 		exchangeName: exchangeName,
 	}
 
-	logger.Info("Dialing AMQP with 10seconds timeout...")
+	logger.Info("Dialing AMQP with 10 seconds timeout...")
 
 	client.connection, err = amqp.DialConfig(uri, amqp.Config{
 		Heartbeat: 10 * time.Second,
