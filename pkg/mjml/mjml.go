@@ -90,8 +90,8 @@ func (a app) Render(ctx context.Context, template string) (string, error) {
 	}
 
 	var response mjmlResponse
-	if err := httpjson.Read(resp, &response, "mjml response"); err != nil {
-		return "", err
+	if err := httpjson.Read(resp, &response); err != nil {
+		return "", fmt.Errorf("unable to read mjml response: %s", err)
 	}
 
 	return response.HTML, nil
