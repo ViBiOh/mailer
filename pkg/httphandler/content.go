@@ -1,6 +1,7 @@
 package httphandler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
@@ -17,5 +18,9 @@ func (a app) getContent(r *http.Request, name string) (map[string]interface{}, e
 	}
 
 	var content map[string]interface{}
-	return content, httpjson.Parse(r, &content, "content")
+	if err := httpjson.Parse(r, &content); err != nil {
+		return nil, fmt.Errorf("unable to parse content: %s", err)
+	}
+
+	return content, nil
 }
