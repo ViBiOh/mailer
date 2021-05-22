@@ -21,6 +21,26 @@
       "version": {
         "name": "1.0.1"
       }
+    },
+    {
+      "repository": {
+        "name": "golang",
+        "kind": 2
+      },
+      "pattern": "^1.0",
+      "version": {
+        "name": "1.16.4"
+      }
+    },
+    {
+      "repository": {
+        "name": "vibioh/ketchup",
+        "kind": 2
+      },
+      "pattern": "stable",
+      "version": {
+        "name": "1.2.3"
+      }
     }
   ]
 }

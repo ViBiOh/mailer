@@ -71,6 +71,9 @@ func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
 			"split": func(s string) []string {
 				return strings.Split(s, "\n")
 			},
+			"contains": func(s, substr string) bool {
+				return strings.Contains(s, substr)
+			},
 		}).ParseFiles(appTemplates...)),
 
 		mjmlApp:   mjmlApp,

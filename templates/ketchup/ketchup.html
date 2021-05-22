@@ -11,7 +11,19 @@
       {{- if eq .repository.kind 0.0 }}
         <a style="color: #6495ed" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
       {{ else }}
-        <span style="color: #6495ed">{{ .version.name }}</a>
+        {{ if eq .repository.kind 2.0 }}
+
+        {{ $path := "" }}
+        {{ if contains .repository.name "/" }}
+          {{ $path = printf "r/%s/tags?page=1&ordering=last_updated&name=%s" .repository.name .version.name }}
+        {{ else }}
+          {{ $path = printf "_/%s?tab=tags&page=1&ordering=last_updated&name=%s" .repository.name .version.name }}
+        {{ end }}
+
+          <a style="color: #6495ed" href="https://hub.docker.com/{{ $path }}">{{ .version.name }}</a>
+        {{ else }}
+          <span style="color: #6495ed">{{ .version.name }}</a>
+        {{- end }}
       {{- end }}
     </strong>
   </mj-text>
