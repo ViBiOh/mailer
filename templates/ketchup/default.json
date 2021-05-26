@@ -41,6 +41,16 @@
       "version": {
         "name": "1.2.3"
       }
+    },
+    {
+      "repository": {
+        "name": "funtch",
+        "kind": 3
+      },
+      "pattern": "stable",
+      "version": {
+        "name": "2.5.3"
+      }
     }
   ]
 }

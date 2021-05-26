@@ -22,7 +22,11 @@
 
           <a style="color: #6495ed" href="https://hub.docker.com/{{ $path }}">{{ .version.name }}</a>
         {{ else }}
-          <span style="color: #6495ed">{{ .version.name }}</a>
+          {{ if eq .repository.kind 3.0 }}
+            <a style="color: #6495ed" href="https://www.npmjs.com/package/{{ .repository.name }}/v/{{ .version.name }}">{{ .version.name }}</a>
+          {{ else }}
+            <span style="color: #6495ed">{{ .version.name }}</a>
+          {{- end }}
         {{- end }}
       {{- end }}
     </strong>
