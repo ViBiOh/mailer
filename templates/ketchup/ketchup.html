@@ -8,27 +8,7 @@
     new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
 
     <strong>
-      {{- if eq .repository.kind 0.0 }}
-        <a style="color: #6495ed" href="https://github.com/{{ .repository.name }}/releases/tag/{{ .version.name }}">{{ .version.name }}</a>
-      {{ else }}
-        {{ if eq .repository.kind 2.0 }}
-
-        {{ $path := "" }}
-        {{ if contains .repository.name "/" }}
-          {{ $path = printf "r/%s/tags?page=1&ordering=last_updated&name=%s" .repository.name .version.name }}
-        {{ else }}
-          {{ $path = printf "_/%s?tab=tags&page=1&ordering=last_updated&name=%s" .repository.name .version.name }}
-        {{ end }}
-
-          <a style="color: #6495ed" href="https://hub.docker.com/{{ $path }}">{{ .version.name }}</a>
-        {{ else }}
-          {{ if eq .repository.kind 3.0 }}
-            <a style="color: #6495ed" href="https://www.npmjs.com/package/{{ .repository.name }}/v/{{ .version.name }}">{{ .version.name }}</a>
-          {{ else }}
-            <span style="color: #6495ed">{{ .version.name }}</a>
-          {{- end }}
-        {{- end }}
-      {{- end }}
+      <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
     </strong>
   </mj-text>
 {{- end -}}

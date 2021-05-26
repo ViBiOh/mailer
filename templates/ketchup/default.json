@@ -7,6 +7,7 @@
         "kind": 0
       },
       "pattern": "stable",
+      "url": "http://duckduckgo.com",
       "version": {
         "name": "1.2.1"
       }
@@ -18,18 +19,9 @@
         "kind": 1
       },
       "pattern": "stable",
+      "url": "http://duckduckgo.com",
       "version": {
         "name": "1.0.1"
-      }
-    },
-    {
-      "repository": {
-        "name": "golang",
-        "kind": 2
-      },
-      "pattern": "^1.0",
-      "version": {
-        "name": "1.16.4"
       }
     },
     {
@@ -38,6 +30,7 @@
         "kind": 2
       },
       "pattern": "stable",
+      "url": "http://duckduckgo.com",
       "version": {
         "name": "1.2.3"
       }
