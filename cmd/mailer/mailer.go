@@ -69,9 +69,9 @@ func main() {
 
 	appHandler := httphandler.New(mailerApp).Handler()
 
+	go pprofServer.Start("pprof", healthApp.End(), http.DefaultServeMux)
 	go promServer.Start("prometheus", healthApp.End(), prometheusApp.Handler())
 	go appServer.Start("http", healthApp.End(), httputils.Handler(appHandler, healthApp, recoverer.Middleware, prometheusApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
-	go pprofServer.Start("pprof", healthApp.End(), http.DefaultServeMux)
 
 	healthApp.WaitForTermination(appServer.Done())
 	server.GracefulWait(appServer.Done(), promServer.Done())
