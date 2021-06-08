@@ -8,9 +8,18 @@ import (
 	"io"
 	"net/smtp"
 	"strings"
+	"sync"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/mailer/pkg/model"
+)
+
+var (
+	bufferPool = sync.Pool{
+		New: func() interface{} {
+			return bytes.NewBuffer(nil)
+		},
+	}
 )
 
 // App of package
@@ -57,7 +66,9 @@ func New(config Config) App {
 }
 
 func (a app) Send(_ context.Context, mail model.Mail) error {
-	body := bytes.NewBuffer(nil)
+	body := bufferPool.Get().(*bytes.Buffer)
+	defer bufferPool.Put(body)
+	body.Reset()
 
 	content, err := io.ReadAll(mail.Content)
 	if err != nil {

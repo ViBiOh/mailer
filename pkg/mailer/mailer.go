@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
@@ -20,6 +21,14 @@ import (
 const (
 	templateExtension = ".html"
 	jsonExtension     = ".json"
+)
+
+var (
+	bufferPool = sync.Pool{
+		New: func() interface{} {
+			return bytes.NewBuffer(nil)
+		},
+	}
 )
 
 // App of package
@@ -87,7 +96,10 @@ func (a app) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 		return nil, httpModel.ErrNotFound
 	}
 
-	buffer := bytes.NewBuffer(nil)
+	buffer := bufferPool.Get().(*bytes.Buffer)
+	defer bufferPool.Put(buffer)
+	buffer.Reset()
+
 	if err := tpl.Execute(buffer, mailRequest.Payload); err != nil {
 		return nil, err
 	}
