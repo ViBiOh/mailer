@@ -1,16 +1,26 @@
 package httphandler
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/ViBiOh/httputils/v4/pkg/httperror"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
 	"github.com/ViBiOh/httputils/v4/pkg/query"
 	"github.com/ViBiOh/mailer/pkg/model"
+)
+
+var (
+	bufferPool = sync.Pool{
+		New: func() interface{} {
+			return bytes.NewBuffer(make([]byte, 32*1024))
+		},
+	}
 )
 
 func (a app) renderHandler() http.Handler {
@@ -59,7 +69,10 @@ func writeOutput(w http.ResponseWriter, output io.Reader) {
 	w.Header().Set("X-UA-Compatible", "ie=edge")
 	w.WriteHeader(http.StatusOK)
 
-	if _, err := io.Copy(w, output); err != nil {
+	buffer := bufferPool.Get().(*bytes.Buffer)
+	defer bufferPool.Put(buffer)
+
+	if _, err := io.CopyBuffer(w, output, buffer.Bytes()); err != nil {
 		httperror.InternalServerError(w, err)
 	}
 }
