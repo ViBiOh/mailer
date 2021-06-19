@@ -14,13 +14,13 @@ defaults:
     shell: bash
 
 jobs:
-  publish:
-    name: Publish
+  tag:
+    name: Tag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Publish
+      - name: Tag
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
