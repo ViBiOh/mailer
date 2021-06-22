@@ -79,11 +79,11 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 }
 
 func (a app) Start(done <-chan struct{}) {
-	defer a.Close()
-
 	if a.mailerApp == nil || a.amqpClient.Ping() != nil {
 		return
 	}
+
+	defer a.Close()
 
 	messages, err := a.amqpClient.Listen()
 	if err != nil {
