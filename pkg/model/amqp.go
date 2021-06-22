@@ -201,19 +201,6 @@ func (a *AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
 	return a.channel.Get(a.deadLetterQueue.Name, false)
 }
 
-// Close closes opened ressources
-func (a *AMQPClient) Close() {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
-
-	a.closeChannel()
-
-	if a.connection != nil {
-		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
-		LoggedCloser(a.connection)
-	}
-}
-
 // LoggedAck ack a message with error handling
 func (a *AMQPClient) LoggedAck(message amqp.Delivery) {
 	err := a.handleClosed(func() error {
@@ -240,6 +227,19 @@ func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
 
 	if err != nil {
 		logger.Error("unable to reject message: %s", err)
+	}
+}
+
+// Close closes opened ressources
+func (a *AMQPClient) Close() {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
+	a.closeChannel()
+
+	if a.connection != nil {
+		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
+		LoggedCloser(a.connection)
 	}
 }
 

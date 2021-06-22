@@ -57,7 +57,6 @@ func main() {
 	if err != nil {
 		logger.Error("unable to create amqp: %s", err)
 	}
-	defer amqpApp.Close()
 
 	healthApp := health.New(healthConfig, amqpApp.Ping)
 

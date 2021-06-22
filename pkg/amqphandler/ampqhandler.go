@@ -79,6 +79,8 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 }
 
 func (a app) Start(done <-chan struct{}) {
+	defer a.Close()
+
 	if a.mailerApp == nil || a.amqpClient.Ping() != nil {
 		return
 	}
@@ -88,7 +90,6 @@ func (a app) Start(done <-chan struct{}) {
 		logger.Error("unable to listen on queue: %s", err)
 		return
 	}
-	defer a.amqpClient.Close()
 
 	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
 
