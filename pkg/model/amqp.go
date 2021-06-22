@@ -167,27 +167,12 @@ func (a *AMQPClient) Vhost() string {
 
 // Send sends payload to the underlying exchange and queue
 func (a *AMQPClient) Send(payload amqp.Publishing) error {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
+	err := a.handleClosed(func() error {
+		a.mutex.RLock()
+		defer a.mutex.RUnlock()
 
-	var err error
-
-	if err = a.channel.Publish(a.exchangeName, "", false, false, payload); err == amqp.ErrClosed {
-		logger.Warn("Channel was closed, trying to reopen...")
-
-		var newChannel *amqp.Channel
-		newChannel, err = a.connection.Channel()
-		if err != nil {
-			return fmt.Errorf("unable to reopen closed channel: %s", err)
-		}
-
-		a.mutex.Lock()
-		a.channel = newChannel
-		a.mutex.Unlock()
-
-		err = a.channel.Publish(a.exchangeName, "", false, false, payload)
-	}
-
+		return a.channel.Publish(a.exchangeName, "", false, false, payload)
+	})
 	if err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
 	}
@@ -195,7 +180,7 @@ func (a *AMQPClient) Send(payload amqp.Publishing) error {
 	return nil
 }
 
-// Listen listen to queue
+// Listen listens to queue
 func (a *AMQPClient) Listen() (<-chan amqp.Delivery, error) {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
@@ -221,17 +206,7 @@ func (a *AMQPClient) Close() {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
 
-	if a.channel != nil {
-		if len(a.queue.Name) != 0 {
-			logger.WithField("name", a.clientName).Info("Canceling AMQP channel")
-			if err := a.channel.Cancel(a.clientName, false); err != nil {
-				logger.WithField("name", a.clientName).Error("unable to cancel consumer: %s", err)
-			}
-		}
-
-		logger.Info("Closing AMQP channel")
-		LoggedCloser(a.channel)
-	}
+	a.closeChannel()
 
 	if a.connection != nil {
 		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
@@ -241,24 +216,68 @@ func (a *AMQPClient) Close() {
 
 // LoggedAck ack a message with error handling
 func (a *AMQPClient) LoggedAck(message amqp.Delivery) {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
+	err := a.handleClosed(func() error {
+		a.mutex.RLock()
+		defer a.mutex.RUnlock()
 
-	message.Acknowledger = a.channel
-	if err := message.Ack(false); err != nil {
+		message.Acknowledger = a.channel
+		return message.Ack(false)
+	})
+	if err != nil {
 		logger.Error("unable to ack message: %s", err)
 	}
 }
 
 // LoggedReject reject a message with error handling
 func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
+	err := a.handleClosed(func() error {
+		a.mutex.RLock()
+		defer a.mutex.RUnlock()
 
-	message.Acknowledger = a.channel
-	if err := message.Reject(requeue); err != nil {
+		message.Acknowledger = a.channel
+		return message.Reject(requeue)
+	})
+
+	if err != nil {
 		logger.Error("unable to reject message: %s", err)
 	}
+}
+
+func (a *AMQPClient) closeChannel() {
+	if a.channel == nil {
+		return
+	}
+
+	if len(a.queue.Name) != 0 {
+		logger.WithField("name", a.clientName).Info("Canceling AMQP channel")
+		if err := a.channel.Cancel(a.clientName, false); err != nil {
+			logger.WithField("name", a.clientName).Error("unable to cancel consumer: %s", err)
+		}
+	}
+
+	logger.Info("Closing AMQP channel")
+	LoggedCloser(a.channel)
+}
+
+func (a *AMQPClient) handleClosed(action func() error) error {
+	err := action()
+	if err != amqp.ErrClosed {
+		return err
+	}
+
+	logger.Warn("Channel was closed, closing first and trying to reopen...")
+	a.closeChannel()
+
+	newChannel, openErr := a.connection.Channel()
+	if openErr != nil {
+		return fmt.Errorf("unable to reopen closed channel: %s: %w", openErr, err)
+	}
+
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	a.channel = newChannel
+
+	return action()
 }
 
 // ConvertDeliveryToPublishing convert a delivery to a publishing, for requeuing
