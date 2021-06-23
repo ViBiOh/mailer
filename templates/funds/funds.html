@@ -1,4 +1,4 @@
-{{- define "funds" -}}
+{{ define "funds" }}
   <mj-table color="#c0c0c0">
     <tr>
       <th scope="col" width="140px">ISIN</th>
@@ -6,35 +6,35 @@
       <th scope="col" width="80px">Score</th>
     </tr>
 
-    {{- range $index, $fund := . -}}
+    {{ range $index, $fund := . }}
       <tr {{- if odd $index }} style="background-color: #272727"{{- end -}}>
         <th scope="row" align="center">
-          <a style="color: #6495ed" href="https://funds.vibioh.fr/?isin={{ $fund.isin }}">{{- $fund.isin -}}</a>
+          <a style="color: #6495ed" href="https://funds.vibioh.fr/?isin={{ $fund.isin }}">{{ $fund.isin }}</a>
         </th>
-        <td>{{- $fund.label -}}</td>
+        <td>{{ $fund.label }}</td>
         <td align="center">{{ $fund.score }}</td>
       </tr>
-    {{- end -}}
+    {{ end }}
   </mj-table>
-{{- end -}}
+{{ end }}
 
 <mjml>
   <mj-body background-color="#3b3b3b">
-    {{- template "header" "Funds" -}}
+    {{ template "header" "Funds" }}
 
     <mj-section background-color="#3b3b3b">
       <mj-column>
         <mj-text color="#c0c0c0">Bonjour,</mj-text>
 
-        {{- if len .aboveFunds -}}
-          <mj-text color="#32cd32">Les fonds suivants viennent de dépasser le score de <strong>{{- .score -}}</strong>.</mj-text>
-          {{- template "funds" .aboveFunds -}}
-        {{- end -}}
+        {{ if len .aboveFunds }}
+          <mj-text color="#32cd32">Les fonds suivants viennent de dépasser le score de <strong>{{ .score }}</strong>.</mj-text>
+          {{ template "funds" .aboveFunds }}
+        {{ end }}
 
-        {{- if len .belowFunds -}}
+        {{ if len .belowFunds }}
           <mj-text color="#fa8072">Les fonds suivants viennent de repasser sous leur seuil initial d'alerte.</mj-text>
-          {{ template "funds" .belowFunds -}}
-        {{- end -}}
+          {{ template "funds" .belowFunds }}
+        {{ end }}
 
         <mj-text color="#c0c0c0">Pour plus d'informations, n'hésitez pas à consulter <a style="color: #6495ed" href="https://funds.vibioh.fr/?o=score">notre site</a></mj-text>
 
@@ -46,6 +46,6 @@
       </mj-column>
     </mj-section>
 
-    {{- template "footer" -}}
+    {{ template "footer" }}
   </mj-body>
 </mjml>

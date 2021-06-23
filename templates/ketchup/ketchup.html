@@ -1,8 +1,8 @@
-{{- define "release" -}}
+{{ define "release" }}
   <mj-text color="#c0c0c0">
-    {{- if eq .repository.kind 1.0 }}
+    {{ if eq .repository.kind 1.0 }}
       <strong>{{ .repository.part }} @ </strong>
-    {{- end }}
+    {{ end }}
 
     <strong>{{ .repository.name }}</strong>
     new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
@@ -11,18 +11,18 @@
       <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
     </strong>
   </mj-text>
-{{- end -}}
+{{ end }}
 
 <mjml>
   <mj-body background-color="#3b3b3b">
-    {{- template "header" "Ketchup" -}}
+    {{ template "header" "Ketchup" }}
 
-    {{- $kind := -1.0 -}}
+    {{ $kind := -1.0 }}
 
     <mj-section background-color="#3b3b3b">
       <mj-column>
-        {{- range $index, $release := .releases -}}
-          {{- if ne .repository.kind $kind }}
+        {{ range $index, $release := .releases }}
+          {{ if ne .repository.kind $kind }}
             {{ if eq .repository.kind 0.0 }}
               <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/github?fill=grey" />
             {{ end }}
@@ -39,13 +39,13 @@
               <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/pypi?fill=grey" />
             {{ end }}
 
-            {{- $kind = .repository.kind }}
-          {{- end }}
+            {{ $kind = .repository.kind }}
+          {{ end }}
           {{ template "release" $release }}
-        {{- end -}}
+        {{ end }}
       </mj-column>
     </mj-section>
 
-    {{- template "footer" -}}
+    {{ template "footer" }}
   </mj-body>
 </mjml>

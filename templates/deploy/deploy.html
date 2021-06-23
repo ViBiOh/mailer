@@ -1,20 +1,20 @@
 <mjml>
   <mj-body background-color="#3b3b3b">
-    {{- template "header" "deploy" -}}
+    {{ template "header" "deploy" }}
 
     <mj-section background-color="#3b3b3b" padding="0">
       <mj-column>
         <mj-text color="#c0c0c0" align="center">
           <h1>
-            deploy of <strong>{{- .app -}}</strong>
+            deploy of <strong>{{ .app }}</strong>
           </h1>
 
           <h2>
-            {{- if .success -}}
+            {{ if .success }}
               <span style="color: #32cd32;">Successful</span>
-            {{- else -}}
+            {{ else }}
               <span style="color: #fa8072;">Failed</span>
-            {{- end -}}
+            {{ end }}
           </h2>
         </mj-text>
       </mj-column>
@@ -22,14 +22,14 @@
 
     <mj-section background-color="#3b3b3b" padding="10">
       <mj-column>
-        {{- range $line := .output -}}
+        {{ range $line := .output }}
           <mj-text color="{{- if $line.color -}}{{- $line.color -}}{{- else -}}#c0c0c0{{- end -}}" padding="0" font-size="10px" font-family="Courier new">
-            {{- $line.value -}}</br>
+            {{ $line.value }}</br>
           </mj-text>
-        {{- end -}}
+        {{ end }}
       </mj-column>
     </mj-section>
 
-    {{- template "footer" -}}
+    {{ template "footer" }}
   </mj-body>
 </mjml>

@@ -1,32 +1,32 @@
 <mjml>
   <mj-body background-color="#3b3b3b">
-    {{- template "header" "AlertManager" -}}
+    {{ template "header" "AlertManager" }}
 
     <mj-section background-color="#3b3b3b" padding="0">
       <mj-column>
         <mj-text color="#c0c0c0" align="center">
           <h1>
-            {{- with.commonLabels.severity -}}
-              {{- if eq . "info" -}}
+            {{ with.commonLabels.severity }}
+              {{ if eq . "info" }}
                 ℹ️
-              {{- end -}}
-              {{- if eq . "warning" -}}
+              {{ end }}
+              {{ if eq . "warning" }}
                 ⚠️
-              {{- end -}}
-              {{- if eq . "critical" -}}
+              {{ end }}
+              {{ if eq . "critical" }}
                 🚨
-              {{- end -}}
-              {{- " " -}}
-            {{- end -}}
+              {{ end }}
+              {{ " " }}
+            {{ end }}
             {{ .commonLabels.alertname }}
           </h1>
 
           <h2>
-            {{- if eq .status "resolved" -}}
+            {{ if eq .status "resolved" }}
               <span style="color: #32cd32;">Resolved</span>
-            {{- else -}}
+            {{ else }}
               <span style="color: #fa8072;">Firing</span>
-            {{- end -}}
+            {{ end }}
           </h2>
         </mj-text>
 
@@ -50,6 +50,6 @@
       </mj-column>
     </mj-section>
 
-    {{- template "footer" -}}
+    {{ template "footer" }}
   </mj-body>
 </mjml>
