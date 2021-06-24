@@ -71,7 +71,7 @@ func New(config Config) App {
 
 // IsMJML determines if provided content is a MJML template or not
 func IsMJML(content []byte) bool {
-	return bytes.HasPrefix(content, prefix)
+	return bytes.HasPrefix(bytes.TrimSpace(content), prefix)
 }
 
 func (a app) isReady() bool {
