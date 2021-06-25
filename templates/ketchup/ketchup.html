@@ -24,19 +24,19 @@
         {{ range $index, $release := .releases }}
           {{ if ne .repository.kind $kind }}
             {{ if eq .repository.kind 0.0 }}
-              <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/github?fill=grey" />
+              <mj-image alt="GitHub Logo" width="50px" src="https://ketchup.vibioh.fr/svg/github?fill=grey" />
             {{ end }}
             {{ if eq .repository.kind 1.0 }}
-              <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/helm?fill=grey" />
+              <mj-image alt="Helm Logo" width="50px" src="https://ketchup.vibioh.fr/svg/helm?fill=grey" />
             {{ end }}
             {{ if eq .repository.kind 2.0 }}
-              <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/docker?fill=grey" />
+              <mj-image alt="Docker Logo" width="50px" src="https://ketchup.vibioh.fr/svg/docker?fill=grey" />
             {{ end }}
             {{ if eq .repository.kind 3.0 }}
-              <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/npm?fill=grey" />
+              <mj-image alt="NPM Logo" width="50px" src="https://ketchup.vibioh.fr/svg/npm?fill=grey" />
             {{ end }}
             {{ if eq .repository.kind 4.0 }}
-              <mj-image width="50px" src="https://ketchup.vibioh.fr/svg/pypi?fill=grey" />
+              <mj-image alt="Pypi Logo" width="50px" src="https://ketchup.vibioh.fr/svg/pypi?fill=grey" />
             {{ end }}
 
             {{ $kind = .repository.kind }}
