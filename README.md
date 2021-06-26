@@ -91,7 +91,7 @@ Usage of mailer:
   -corsOrigin string
         [cors] Access-Control-Allow-Origin {MAILER_CORS_ORIGIN} (default "*")
   -csp string
-        [owasp] Content-Security-Policy {MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com")
+        [owasp] Content-Security-Policy {MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/")
   -frameOptions string
         [owasp] X-Frame-Options {MAILER_FRAME_OPTIONS} (default "deny")
   -graceDuration string
