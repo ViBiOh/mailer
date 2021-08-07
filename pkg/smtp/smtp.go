@@ -23,8 +23,9 @@ var (
 )
 
 // App of package
-type App interface {
-	Send(ctx context.Context, mail model.Mail) error
+type App struct {
+	auth    smtp.Auth
+	address string
 }
 
 // Config of package
@@ -33,11 +34,6 @@ type Config struct {
 	username *string
 	password *string
 	host     *string
-}
-
-type app struct {
-	auth    smtp.Auth
-	address string
 }
 
 // Flags adds flags for configuring package
@@ -59,13 +55,14 @@ func New(config Config) App {
 		auth = smtp.PlainAuth("", user, strings.TrimSpace(*config.password), strings.TrimSpace(*config.host))
 	}
 
-	return &app{
+	return App{
 		address: strings.TrimSpace(*config.address),
 		auth:    auth,
 	}
 }
 
-func (a app) Send(_ context.Context, mail model.Mail) error {
+// Send email by smtp
+func (a App) Send(_ context.Context, mail model.Mail) error {
 	body := bufferPool.Get().(*bytes.Buffer)
 	defer bufferPool.Put(body)
 	body.Reset()

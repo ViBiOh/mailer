@@ -26,8 +26,10 @@ type mjmlResponse struct {
 }
 
 // App of package
-type App interface {
-	Render(context.Context, string) (string, error)
+type App struct {
+	url      string
+	username string
+	password string
 }
 
 // Config of package
@@ -35,12 +37,6 @@ type Config struct {
 	url      *string
 	username *string
 	password *string
-}
-
-type app struct {
-	url      string
-	username string
-	password string
 }
 
 // Flags adds flags for configuring package
@@ -57,10 +53,10 @@ func New(config Config) App {
 	converter := strings.TrimSpace(*config.url)
 
 	if converter == "" {
-		return app{}
+		return App{}
 	}
 
-	app := app{
+	app := App{
 		url:      converter,
 		username: strings.TrimSpace(*config.username),
 		password: strings.TrimSpace(*config.password),
@@ -74,13 +70,14 @@ func IsMJML(content []byte) bool {
 	return bytes.HasPrefix(bytes.TrimSpace(content), prefix)
 }
 
-func (a app) isReady() bool {
+// Enabled checks if requirements are met
+func (a App) Enabled() bool {
 	return a.url != ""
 }
 
 // Render MJML template
-func (a app) Render(ctx context.Context, template string) (string, error) {
-	if !a.isReady() {
+func (a App) Render(ctx context.Context, template string) (string, error) {
+	if !a.Enabled() {
 		return template, nil
 	}
 

@@ -23,7 +23,7 @@ var (
 	}
 )
 
-func (a app) renderHandler() http.Handler {
+func (a App) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if query.IsRoot(r) {
 			if r.Method != http.MethodGet {
@@ -64,9 +64,9 @@ func (a app) renderHandler() http.Handler {
 }
 
 func writeOutput(w http.ResponseWriter, output io.Reader) {
-	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("X-UA-Compatible", "ie=edge")
+	w.Header().Add("Content-Type", "text/html; charset=UTF-8")
+	w.Header().Add("Cache-Control", "no-cache")
+	w.Header().Add("X-UA-Compatible", "ie=edge")
 	w.WriteHeader(http.StatusOK)
 
 	buffer := bufferPool.Get().(*bytes.Buffer)
@@ -77,7 +77,7 @@ func writeOutput(w http.ResponseWriter, output io.Reader) {
 	}
 }
 
-func (a app) sendOutput(ctx context.Context, w http.ResponseWriter, mailRequest *model.MailRequest, output io.Reader) {
+func (a App) sendOutput(ctx context.Context, w http.ResponseWriter, mailRequest *model.MailRequest, output io.Reader) {
 	if err := mailRequest.Check(); err != nil {
 		httperror.HandleError(w, httpModel.WrapInvalid(err))
 		return

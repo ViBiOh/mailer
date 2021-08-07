@@ -10,11 +10,11 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/model"
 )
 
-func (a app) getTemplatePath(templateName string) string {
+func (a App) getTemplatePath(templateName string) string {
 	return path.Join(a.templatesDir, templateName)
 }
 
-func (a app) getFixturePath(templateName, fixtureName string) string {
+func (a App) getFixturePath(templateName, fixtureName string) string {
 	return path.Join(a.templatesDir, templateName, fmt.Sprintf("%s%s", fixtureName, jsonExtension))
 }
 
@@ -31,7 +31,8 @@ func isExists(path string, directory bool) error {
 	return nil
 }
 
-func (a app) ListFixtures(name string) ([]string, error) {
+// ListFixtures for a given template names
+func (a App) ListFixtures(name string) ([]string, error) {
 	templatePath := a.getTemplatePath(name)
 	if err := isExists(templatePath, true); err != nil {
 		return nil, err
@@ -52,7 +53,8 @@ func (a app) ListFixtures(name string) ([]string, error) {
 	return fixtureList, nil
 }
 
-func (a app) GetFixture(name, fixture string) (map[string]interface{}, error) {
+// GetFixture for a template and a given name
+func (a App) GetFixture(name, fixture string) (map[string]interface{}, error) {
 	templatePath := a.getTemplatePath(name)
 	if err := isExists(templatePath, true); err != nil {
 		return nil, err

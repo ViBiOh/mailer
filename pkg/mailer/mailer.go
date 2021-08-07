@@ -32,26 +32,18 @@ var (
 )
 
 // App of package
-type App interface {
-	Render(context.Context, model.MailRequest) (io.Reader, error)
-	Send(context.Context, model.Mail) error
-	ListTemplates() []string
-	ListFixtures(string) ([]string, error)
-	GetFixture(string, string) (map[string]interface{}, error)
-}
-
-// Config of package
-type Config struct {
-	templatesDir *string
-}
-
-type app struct {
+type App struct {
 	tpl *template.Template
 
 	mjmlApp   mjml.App
 	senderApp model.Sender
 
 	templatesDir string
+}
+
+// Config of package
+type Config struct {
+	templatesDir *string
 }
 
 // Flags adds flags for configuring package
@@ -71,7 +63,7 @@ func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
 		logger.Error("%s", err)
 	}
 
-	return &app{
+	return App{
 		templatesDir: templatesDir,
 		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
 			"odd": func(i int) bool {
@@ -90,7 +82,13 @@ func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
 	}
 }
 
-func (a app) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
+// Enabled checks if requirements are met
+func (a App) Enabled() bool {
+	return a.tpl != nil
+}
+
+// Render email
+func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
 		return nil, httpModel.ErrNotFound
@@ -111,11 +109,13 @@ func (a app) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 	return buffer, nil
 }
 
-func (a app) Send(ctx context.Context, mail model.Mail) error {
+// Send email
+func (a App) Send(ctx context.Context, mail model.Mail) error {
 	return a.senderApp.Send(ctx, mail)
 }
 
-func (a app) ListTemplates() []string {
+// ListTemplates availables to render
+func (a App) ListTemplates() []string {
 	var templatesList []string
 
 	for _, tpl := range a.tpl.Templates() {
@@ -127,8 +127,8 @@ func (a app) ListTemplates() []string {
 	return templatesList
 }
 
-func (a app) convertMjml(ctx context.Context, content *bytes.Buffer) error {
-	if a.mjmlApp == nil {
+func (a App) convertMjml(ctx context.Context, content *bytes.Buffer) error {
+	if !a.mjmlApp.Enabled() {
 		return nil
 	}
 

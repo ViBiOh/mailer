@@ -14,23 +14,19 @@ const (
 )
 
 // App of package
-type App interface {
-	Handler() http.Handler
-}
-
-type app struct {
+type App struct {
 	mailerApp mailer.App
 }
 
 // New creates new App
 func New(mailerApp mailer.App) App {
-	return app{
+	return App{
 		mailerApp: mailerApp,
 	}
 }
 
 // Handler for Render request. Should be use with net/http
-func (a app) Handler() http.Handler {
+func (a App) Handler() http.Handler {
 	renderHandler := http.StripPrefix(renderPath, a.renderHandler())
 	fixtureHandler := http.StripPrefix(fixturesPath, a.fixturesHandler())
 

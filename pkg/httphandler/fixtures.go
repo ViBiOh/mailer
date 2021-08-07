@@ -8,7 +8,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 )
 
-func (a app) fixturesHandler() http.Handler {
+func (a App) fixturesHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		query := strings.Trim(r.URL.Path, "/")
 		if len(query) == 0 {

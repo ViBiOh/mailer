@@ -20,10 +20,11 @@ import (
 )
 
 // App of package
-type App interface {
-	Start(<-chan struct{})
-	Ping() error
-	Close()
+type App struct {
+	mailerApp     mailer.App
+	amqpClient    *model.AMQPClient
+	retryInterval time.Duration
+	maxRetry      int64
 }
 
 // Config of package
@@ -33,13 +34,6 @@ type Config struct {
 	exchange      *string
 	retryInterval *string
 	maxRetry      *int
-}
-
-type app struct {
-	mailerApp     mailer.App
-	amqpClient    *model.AMQPClient
-	retryInterval time.Duration
-	maxRetry      int64
 }
 
 // Flags adds flags for configuring package
@@ -57,20 +51,20 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config, mailerApp mailer.App) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
-		return app{}, nil
+		return App{}, nil
 	}
 
 	retryInterval, err := time.ParseDuration(strings.TrimSpace(*config.retryInterval))
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse retry duration: %s", err)
+		return App{}, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
 
 	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.queue))
 	if err != nil {
-		return nil, fmt.Errorf("unable to create amqp client: %s", err)
+		return App{}, fmt.Errorf("unable to create amqp client: %s", err)
 	}
 
-	return app{
+	return App{
 		retryInterval: retryInterval,
 		maxRetry:      int64(*config.maxRetry),
 		mailerApp:     mailerApp,
@@ -78,8 +72,9 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 	}, nil
 }
 
-func (a app) Start(done <-chan struct{}) {
-	if a.mailerApp == nil || a.amqpClient.Ping() != nil {
+// Start amqp handler
+func (a App) Start(done <-chan struct{}) {
+	if !a.mailerApp.Enabled() || a.amqpClient.Ping() != nil {
 		return
 	}
 
@@ -111,7 +106,7 @@ func (a app) Start(done <-chan struct{}) {
 	}
 }
 
-func (a app) sendEmail(payload []byte) error {
+func (a App) sendEmail(payload []byte) error {
 	ctx := context.Background()
 
 	var mailRequest model.MailRequest
@@ -127,7 +122,7 @@ func (a app) sendEmail(payload []byte) error {
 	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
-func (a app) startGarbageCollector(done <-chan struct{}) {
+func (a App) startGarbageCollector(done <-chan struct{}) {
 	logger.Info("Launching garbage collector every %s", a.retryInterval)
 	defer logger.Info("Garbage collector cron is off")
 
@@ -156,7 +151,7 @@ func (a app) startGarbageCollector(done <-chan struct{}) {
 	}
 }
 
-func (a app) garbageCollector(done <-chan struct{}) error {
+func (a App) garbageCollector(done <-chan struct{}) error {
 	isDone := func() bool {
 		select {
 		case <-done:
@@ -228,10 +223,12 @@ func getDeathCount(table amqp.Table) (int64, error) {
 	return count, nil
 }
 
-func (a app) Ping() error {
+// Ping amqp
+func (a App) Ping() error {
 	return a.amqpClient.Ping()
 }
 
-func (a app) Close() {
+// Close amqp
+func (a App) Close() {
 	a.amqpClient.Close()
 }

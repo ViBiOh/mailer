@@ -86,7 +86,7 @@ func (a app) String() string {
 		return "not enabled"
 	}
 
-	if a.amqpClient == nil {
+	if !a.amqpClient.Enabled() {
 		return fmt.Sprintf("Sending emails via HTTP to `%s`.", a.url)
 	}
 

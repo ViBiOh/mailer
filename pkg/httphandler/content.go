@@ -7,7 +7,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 )
 
-func (a app) getContent(r *http.Request, name string) (map[string]interface{}, error) {
+func (a App) getContent(r *http.Request, name string) (map[string]interface{}, error) {
 	if r.Method == http.MethodGet {
 		fixtureName := r.URL.Query().Get("fixture")
 		if fixtureName == "" {
