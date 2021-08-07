@@ -21,8 +21,8 @@ import (
 
 // App of package
 type App struct {
-	mailerApp     mailer.App
 	amqpClient    *model.AMQPClient
+	mailerApp     mailer.App
 	retryInterval time.Duration
 	maxRetry      int64
 }

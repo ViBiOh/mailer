@@ -16,18 +16,19 @@ import (
 )
 
 var (
-	_ fmt.Stringer = app{}
+	_ fmt.Stringer = App{}
 
 	// ErrNotEnabled occurs when no configuration is provided
 	ErrNotEnabled = errors.New("mailer not enabled")
 )
 
 // App of package
-type App interface {
-	Enabled() bool
-	Send(context.Context, model.MailRequest) error
-	Close()
-	String() string
+type App struct {
+	amqpClient *model.AMQPClient
+
+	url      string
+	name     string
+	password string
 }
 
 // Config of package
@@ -35,14 +36,6 @@ type Config struct {
 	url      *string
 	name     *string
 	password *string
-}
-
-type app struct {
-	amqpClient *model.AMQPClient
-
-	url      string
-	name     string
-	password string
 }
 
 // Flags adds flags for configuring package
@@ -58,7 +51,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
-		return app{}, nil
+		return App{}, nil
 	}
 
 	name := strings.TrimSpace(*config.name)
@@ -66,22 +59,22 @@ func New(config Config) (App, error) {
 	if strings.HasPrefix(url, "amqp") {
 		client, err := model.GetAMQPClient(url, name, "")
 		if err != nil {
-			return nil, err
+			return App{}, err
 		}
 
-		return app{
+		return App{
 			amqpClient: client,
 		}, nil
 	}
 
-	return app{
+	return App{
 		url:      url,
 		name:     name,
 		password: strings.TrimSpace(*config.password),
 	}, nil
 }
 
-func (a app) String() string {
+func (a App) String() string {
 	if !a.Enabled() {
 		return "not enabled"
 	}
@@ -93,16 +86,17 @@ func (a app) String() string {
 	return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.amqpClient.ExchangeName(), a.amqpClient.Vhost())
 }
 
-func (a app) Enabled() bool {
+// Enabled checks if requirements are met
+func (a App) Enabled() bool {
 	return len(a.url) != 0 || a.amqpEnabled()
 }
 
-func (a app) amqpEnabled() bool {
+func (a App) amqpEnabled() bool {
 	return a.amqpClient != nil && a.amqpClient.Enabled()
 }
 
 // Send sends emails with Mailer for defined parameters
-func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
+func (a App) Send(ctx context.Context, mailRequest model.MailRequest) error {
 	if !a.Enabled() {
 		return ErrNotEnabled
 	}
@@ -117,13 +111,14 @@ func (a app) Send(ctx context.Context, mailRequest model.MailRequest) error {
 	return a.httpSend(ctx, mailRequest)
 }
 
-func (a app) Close() {
+// Close client
+func (a App) Close() {
 	if a.amqpEnabled() {
 		a.amqpClient.Close()
 	}
 }
 
-func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
+func (a App) httpSend(ctx context.Context, mail model.MailRequest) error {
 	recipients := strings.Join(mail.Recipients, ",")
 
 	url := fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(mail.Tpl), url.QueryEscape(mail.FromEmail), url.QueryEscape(mail.Sender), url.QueryEscape(recipients), url.QueryEscape(mail.Subject))
@@ -137,7 +132,7 @@ func (a app) httpSend(ctx context.Context, mail model.MailRequest) error {
 	return err
 }
 
-func (a app) amqpSend(ctx context.Context, mailRequest model.MailRequest) error {
+func (a App) amqpSend(ctx context.Context, mailRequest model.MailRequest) error {
 	payload, err := json.Marshal(mailRequest)
 	if err != nil {
 		return fmt.Errorf("unable to marshal mail: %s", err)

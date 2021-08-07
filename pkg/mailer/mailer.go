@@ -18,6 +18,10 @@ import (
 	"github.com/ViBiOh/mailer/pkg/model"
 )
 
+type sender interface {
+	Send(ctx context.Context, mail model.Mail) error
+}
+
 const (
 	templateExtension = ".html"
 	jsonExtension     = ".json"
@@ -36,7 +40,7 @@ type App struct {
 	tpl *template.Template
 
 	mjmlApp   mjml.App
-	senderApp model.Sender
+	senderApp sender
 
 	templatesDir string
 }
@@ -54,7 +58,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp model.Sender) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")

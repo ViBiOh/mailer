@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -15,11 +14,6 @@ var (
 	// EmptyMailRequest for not found case
 	EmptyMailRequest = MailRequest{}
 )
-
-// Sender send given email
-type Sender interface {
-	Send(ctx context.Context, mail Mail) error
-}
 
 // MailRequest describes an email to be sent
 type MailRequest struct {

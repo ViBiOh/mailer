@@ -14,17 +14,17 @@ import (
 func TestEnabled(t *testing.T) {
 	var cases = []struct {
 		intention string
-		instance  app
+		instance  App
 		want      bool
 	}{
 		{
 			"empty",
-			app{},
+			App{},
 			false,
 		},
 		{
 			"simple",
-			app{
+			App{
 				url: "http://mailer",
 			},
 			true,
@@ -55,13 +55,13 @@ func TestSend(t *testing.T) {
 
 	var cases = []struct {
 		intention string
-		instance  app
+		instance  App
 		args      args
 		wantErr   error
 	}{
 		{
 			"not enabled",
-			app{},
+			App{},
 			args{
 				mailRequest: *model.NewMailRequest(),
 			},
@@ -69,7 +69,7 @@ func TestSend(t *testing.T) {
 		},
 		{
 			"invalid request",
-			app{
+			App{
 				url: "http://mailer",
 			},
 			args{
@@ -79,7 +79,7 @@ func TestSend(t *testing.T) {
 		},
 		{
 			"invalid http",
-			app{
+			App{
 				url: testServer.URL,
 			},
 			args{
@@ -89,7 +89,7 @@ func TestSend(t *testing.T) {
 		},
 		{
 			"http",
-			app{
+			App{
 				url:      testServer.URL,
 				name:     "admin",
 				password: "password",
