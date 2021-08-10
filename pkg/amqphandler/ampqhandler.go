@@ -76,13 +76,15 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 
 // Start amqp handler
 func (a App) Start(done <-chan struct{}) {
-	defer close(a.done)
-
-	if !a.mailerApp.Enabled() || a.amqpClient.Ping() != nil {
+	if !a.mailerApp.Enabled() || a.amqpClient == nil {
 		return
 	}
 
-	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
+	defer close(a.done)
+
+	if a.amqpClient.Ping() != nil {
+		return
+	}
 
 	go a.startListener()
 	go a.startGarbageCollector()
@@ -117,6 +119,8 @@ func (a App) sendEmail(payload []byte) error {
 
 func (a App) startListener() {
 	defer a.Close()
+
+	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
 
 	messages, err := a.listen()
 	if err != nil {
