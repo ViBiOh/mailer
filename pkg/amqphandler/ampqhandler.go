@@ -80,9 +80,9 @@ func (a App) Start(done <-chan struct{}) {
 
 	defer a.Close()
 
-	messages, err := a.amqpClient.Listen()
+	messages, err := a.listen()
 	if err != nil {
-		logger.Error("unable to listen on queue: %s", err)
+		logger.Error("%s", err)
 		return
 	}
 
@@ -94,7 +94,20 @@ func (a App) Start(done <-chan struct{}) {
 		select {
 		case <-done:
 			return
-		case message := <-messages:
+		case message, ok := <-messages:
+			if !ok {
+				if newMessages, err := a.reconnect(); err != nil {
+					logger.Error("unable to reconnect: %s", err)
+
+					logger.Info("Waiting one minute before attempting to reconnect again...")
+					time.Sleep(time.Minute)
+				} else {
+					messages = newMessages
+				}
+
+				continue
+			}
+
 			if err := a.sendEmail(message.Body); err != nil {
 				logger.Error("unable to send email: %s", err)
 				a.amqpClient.LoggedReject(message, false)
@@ -104,6 +117,28 @@ func (a App) Start(done <-chan struct{}) {
 			a.amqpClient.LoggedAck(message)
 		}
 	}
+}
+
+func (a App) reconnect() (<-chan amqp.Delivery, error) {
+	if err := a.amqpClient.Reconnect(); err != nil {
+		return nil, fmt.Errorf("unable to reconnect listener: %s", err)
+	}
+
+	messages, err := a.listen()
+	if err != nil {
+		logger.Error("unable to reopen listener: %s", err)
+	}
+
+	return messages, nil
+}
+
+func (a App) listen() (<-chan amqp.Delivery, error) {
+	messages, err := a.amqpClient.Listen()
+	if err != nil {
+		return nil, fmt.Errorf("unable to listen on queue: %s", err)
+	}
+
+	return messages, nil
 }
 
 func (a App) sendEmail(payload []byte) error {

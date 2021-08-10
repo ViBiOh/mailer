@@ -243,6 +243,14 @@ func (a *AMQPClient) Close() {
 	}
 }
 
+// Reconnect to amqp
+func (a *AMQPClient) Reconnect() error {
+	if err := a.close(true); err != nil {
+		return fmt.Errorf("unabel to reconnect: %s", err)
+	}
+	return nil
+}
+
 func (a *AMQPClient) close(reconnect bool) error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
@@ -299,8 +307,8 @@ func (a *AMQPClient) handleClosed(action func() error) error {
 		return err
 	}
 
-	logger.Warn("Channel was closed, closing and trying to reopen...")
-	if err := a.close(true); err != nil {
+	logger.Warn("Channel was closed, trying to reconnect...")
+	if err := a.Reconnect(); err != nil {
 		logger.Error("unabel to close and reconnect: %s", err)
 	}
 
