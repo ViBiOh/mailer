@@ -16,6 +16,7 @@ type AMQPClient struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
+	uri          string
 	exchangeName string
 	clientName   string
 
@@ -72,16 +73,11 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err
 
 	client = &AMQPClient{
 		mutex:        sync.RWMutex{},
+		uri:          uri,
 		exchangeName: exchangeName,
 	}
 
-	logger.Info("Dialing AMQP with 10 seconds timeout...")
-
-	client.connection, err = amqp.DialConfig(uri, amqp.Config{
-		Heartbeat: 10 * time.Second,
-		Locale:    "en_US",
-		Dial:      amqp.DefaultDial(10 * time.Second),
-	})
+	client.connection, err = connect(uri)
 	if err != nil {
 		err = fmt.Errorf("unable to connect to amqp: %s", err)
 		return
@@ -121,6 +117,16 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err
 	}
 
 	return client, nil
+}
+
+func connect(uri string) (*amqp.Connection, error) {
+	logger.Info("Dialing AMQP with 10 seconds timeout...")
+
+	return amqp.DialConfig(uri, amqp.Config{
+		Heartbeat: 10 * time.Second,
+		Locale:    "en_US",
+		Dial:      amqp.DefaultDial(10 * time.Second),
+	})
 }
 
 // Enabled checks if connection is setup
@@ -232,15 +238,36 @@ func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
 
 // Close closes opened ressources
 func (a *AMQPClient) Close() {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
+	if err := a.close(false); err != nil {
+		logger.Error("unabel to close: %s", err)
+	}
+}
+
+func (a *AMQPClient) close(reconnect bool) error {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
 
 	a.closeChannel()
+	a.closeConnection()
 
-	if a.connection != nil {
-		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
-		LoggedCloser(a.connection)
+	if !reconnect {
+		return nil
 	}
+
+	newConnection, err := connect(a.uri)
+	if err != nil {
+		return fmt.Errorf("unable to reopen connection: %s", err)
+	}
+
+	newChannel, err := a.connection.Channel()
+	if err != nil {
+		return fmt.Errorf("unable to reopen channel: %s", err)
+	}
+
+	a.connection = newConnection
+	a.channel = newChannel
+
+	return nil
 }
 
 func (a *AMQPClient) closeChannel() {
@@ -259,23 +286,23 @@ func (a *AMQPClient) closeChannel() {
 	LoggedCloser(a.channel)
 }
 
+func (a *AMQPClient) closeConnection() {
+	if a.connection != nil {
+		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
+		LoggedCloser(a.connection)
+	}
+}
+
 func (a *AMQPClient) handleClosed(action func() error) error {
 	err := action()
 	if err != amqp.ErrClosed {
 		return err
 	}
 
-	logger.Warn("Channel was closed, closing first and trying to reopen...")
-	a.closeChannel()
-
-	newChannel, openErr := a.connection.Channel()
-	if openErr != nil {
-		return fmt.Errorf("unable to reopen closed channel: %s: %w", openErr, err)
+	logger.Warn("Channel was closed, closing and trying to reopen...")
+	if err := a.close(true); err != nil {
+		logger.Error("unabel to close and reconnect: %s", err)
 	}
-
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	a.channel = newChannel
 
 	return action()
 }
