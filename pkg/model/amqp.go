@@ -16,41 +16,13 @@ type AMQPClient struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
-	uri          string
-	exchangeName string
-	clientName   string
-
-	queue           amqp.Queue
-	deadLetterQueue amqp.Queue
+	uri            string
+	exchangeName   string
+	clientName     string
+	queueName      string
+	deadLetterName string
 
 	mutex sync.RWMutex
-}
-
-func createClientName() string {
-	raw := make([]byte, 4)
-	if _, err := rand.Read(raw); err != nil {
-		logger.Fatal(err)
-		return "mailer"
-	}
-
-	return fmt.Sprintf("%x", raw)
-}
-
-func createExchangeAndQueue(channel *amqp.Channel, exchangeName, queueName string, internal bool, args amqp.Table) (amqp.Queue, error) {
-	if err := channel.ExchangeDeclare(exchangeName, "direct", true, false, false, internal, nil); err != nil {
-		return amqp.Queue{}, fmt.Errorf("unable to declare exchange `%s`: %s", queueName, err)
-	}
-
-	queue, err := channel.QueueDeclare(queueName, true, false, false, false, args)
-	if err != nil {
-		return amqp.Queue{}, fmt.Errorf("unable to declare queue `%s`: %s", queueName, err)
-	}
-
-	if err := channel.QueueBind(queue.Name, "", exchangeName, false, nil); err != nil {
-		return queue, fmt.Errorf("unable to bind queue `%s` to `%s`: %s", queueName, exchangeName, err)
-	}
-
-	return queue, nil
 }
 
 // GetAMQPClient inits AMQP connection, channel and queue
@@ -102,13 +74,13 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err
 
 	deadLetterExchange := fmt.Sprintf("%s-garbage", exchangeName)
 	deadLetterQueue := fmt.Sprintf("%s-garbage", queueName)
-	client.deadLetterQueue, err = createExchangeAndQueue(client.channel, deadLetterExchange, deadLetterQueue, true, nil)
+	client.deadLetterName, err = createExchangeAndQueue(client.channel, deadLetterExchange, deadLetterQueue, true, nil)
 	if err != nil {
 		err = fmt.Errorf("unable to create dead letter: %s", err)
 		return
 	}
 
-	client.queue, err = createExchangeAndQueue(client.channel, exchangeName, queueName, false, map[string]interface{}{
+	client.queueName, err = createExchangeAndQueue(client.channel, exchangeName, queueName, false, map[string]interface{}{
 		"x-dead-letter-exchange": deadLetterExchange,
 	})
 	if err != nil {
@@ -127,6 +99,33 @@ func connect(uri string) (*amqp.Connection, error) {
 		Locale:    "en_US",
 		Dial:      amqp.DefaultDial(10 * time.Second),
 	})
+}
+
+func createClientName() string {
+	raw := make([]byte, 4)
+	if _, err := rand.Read(raw); err != nil {
+		logger.Fatal(err)
+		return "mailer"
+	}
+
+	return fmt.Sprintf("%x", raw)
+}
+
+func createExchangeAndQueue(channel *amqp.Channel, exchangeName, queueName string, internal bool, args amqp.Table) (string, error) {
+	if err := channel.ExchangeDeclare(exchangeName, "direct", true, false, false, internal, nil); err != nil {
+		return "", fmt.Errorf("unable to declare exchange `%s`: %s", queueName, err)
+	}
+
+	queue, err := channel.QueueDeclare(queueName, true, false, false, false, args)
+	if err != nil {
+		return "", fmt.Errorf("unable to declare queue `%s`: %s", queueName, err)
+	}
+
+	if err := channel.QueueBind(queue.Name, "", exchangeName, false, nil); err != nil {
+		return queue.Name, fmt.Errorf("unable to bind queue `%s` to `%s`: %s", queueName, exchangeName, err)
+	}
+
+	return queue.Name, nil
 }
 
 // Enabled checks if connection is setup
@@ -149,7 +148,7 @@ func (a *AMQPClient) Ping() error {
 
 // QueueName returns queue name
 func (a *AMQPClient) QueueName() string {
-	return a.queue.Name
+	return a.queueName
 }
 
 // ExchangeName returns exchange name
@@ -191,9 +190,9 @@ func (a *AMQPClient) Listen() (<-chan amqp.Delivery, error) {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
 
-	messages, err := a.channel.Consume(a.queue.Name, a.clientName, false, false, false, false, nil)
+	messages, err := a.channel.Consume(a.queueName, a.clientName, false, false, false, false, nil)
 	if err != nil {
-		return nil, fmt.Errorf("unable to consume queue `%s`: %s", a.queue.Name, err)
+		return nil, fmt.Errorf("unable to consume queue `%s`: %s", a.queueName, err)
 	}
 
 	return messages, nil
@@ -204,7 +203,7 @@ func (a *AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
 
-	return a.channel.Get(a.deadLetterQueue.Name, false)
+	return a.channel.Get(a.deadLetterName, false)
 }
 
 // LoggedAck ack a message with error handling
@@ -283,7 +282,7 @@ func (a *AMQPClient) closeChannel() {
 		return
 	}
 
-	if len(a.queue.Name) != 0 {
+	if len(a.queueName) != 0 {
 		logger.WithField("name", a.clientName).Info("Canceling AMQP channel")
 		if err := a.channel.Cancel(a.clientName, false); err != nil {
 			logger.WithField("name", a.clientName).Error("unable to cancel consumer: %s", err)

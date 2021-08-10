@@ -22,6 +22,7 @@ import (
 // App of package
 type App struct {
 	amqpClient    *model.AMQPClient
+	done          chan struct{}
 	mailerApp     mailer.App
 	retryInterval time.Duration
 	maxRetry      int64
@@ -69,67 +70,24 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		maxRetry:      int64(*config.maxRetry),
 		mailerApp:     mailerApp,
 		amqpClient:    client,
+		done:          make(chan struct{}),
 	}, nil
 }
 
 // Start amqp handler
 func (a App) Start(done <-chan struct{}) {
+	defer close(a.done)
+
 	if !a.mailerApp.Enabled() || a.amqpClient.Ping() != nil {
-		return
-	}
-
-	defer a.Close()
-
-	messages, err := a.listen()
-	if err != nil {
-		logger.Error("%s", err)
 		return
 	}
 
 	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
 
-	go a.startGarbageCollector(done)
+	go a.startListener()
+	go a.startGarbageCollector()
 
-	for {
-		select {
-		case <-done:
-			return
-		case message, ok := <-messages:
-			if !ok {
-				if newMessages, err := a.reconnect(); err != nil {
-					logger.Error("unable to reconnect: %s", err)
-
-					logger.Info("Waiting one minute before attempting to reconnect again...")
-					time.Sleep(time.Minute)
-				} else {
-					messages = newMessages
-				}
-
-				continue
-			}
-
-			if err := a.sendEmail(message.Body); err != nil {
-				logger.Error("unable to send email: %s", err)
-				a.amqpClient.LoggedReject(message, false)
-				continue
-			}
-
-			a.amqpClient.LoggedAck(message)
-		}
-	}
-}
-
-func (a App) reconnect() (<-chan amqp.Delivery, error) {
-	if err := a.amqpClient.Reconnect(); err != nil {
-		return nil, fmt.Errorf("unable to reconnect listener: %s", err)
-	}
-
-	messages, err := a.listen()
-	if err != nil {
-		logger.Error("unable to reopen listener: %s", err)
-	}
-
-	return messages, nil
+	<-done
 }
 
 func (a App) listen() (<-chan amqp.Delivery, error) {
@@ -157,7 +115,59 @@ func (a App) sendEmail(payload []byte) error {
 	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
-func (a App) startGarbageCollector(done <-chan struct{}) {
+func (a App) startListener() {
+	defer a.Close()
+
+	messages, err := a.listen()
+	if err != nil {
+		logger.Error("%s", err)
+		return
+	}
+
+listener:
+	for message := range messages {
+		if err := a.sendEmail(message.Body); err != nil {
+			logger.Error("unable to send email: %s", err)
+			a.amqpClient.LoggedReject(message, false)
+			continue
+		}
+
+		a.amqpClient.LoggedAck(message)
+	}
+
+	select {
+	case <-a.done:
+		return
+	default:
+	}
+
+	for {
+		if newMessages, err := a.reconnect(); err != nil {
+			logger.Error("unable to reconnect: %s", err)
+
+			logger.Info("Waiting one minute before attempting to reconnect again...")
+			time.Sleep(time.Minute)
+		} else {
+			messages = newMessages
+			goto listener
+		}
+	}
+}
+
+func (a App) reconnect() (<-chan amqp.Delivery, error) {
+	if err := a.amqpClient.Reconnect(); err != nil {
+		return nil, fmt.Errorf("unable to reconnect to amqp: %s", err)
+	}
+
+	messages, err := a.listen()
+	if err != nil {
+		return nil, fmt.Errorf("unable to reopen listener: %s", err)
+	}
+
+	return messages, nil
+}
+
+func (a App) startGarbageCollector() {
 	logger.Info("Launching garbage collector every %s", a.retryInterval)
 	defer logger.Info("Garbage collector cron is off")
 
@@ -167,8 +177,8 @@ func (a App) startGarbageCollector(done <-chan struct{}) {
 	defer garbageCron.Shutdown()
 
 	go garbageCron.Start(func(_ context.Context) error {
-		return a.garbageCollector(done)
-	}, done)
+		return a.garbageCollector(a.done)
+	}, a.done)
 
 	signals := make(chan os.Signal, 1)
 	defer close(signals)
@@ -178,7 +188,7 @@ func (a App) startGarbageCollector(done <-chan struct{}) {
 
 	for {
 		select {
-		case <-done:
+		case <-a.done:
 			return
 		case <-signals:
 			garbageCron.Now()
