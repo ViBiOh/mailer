@@ -125,7 +125,7 @@ func (a App) httpSend(ctx context.Context, mail model.MailRequest) error {
 
 	req := request.New().Post(url)
 	if a.password != "" {
-		req.BasicAuth(a.name, a.password)
+		req = req.BasicAuth(a.name, a.password)
 	}
 
 	_, err := req.JSON(ctx, mail.Payload)
