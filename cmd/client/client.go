@@ -27,7 +27,7 @@ func main() {
 
 	log.Printf("Mailer Client: %s\n", client)
 
-	if err := client.Send(context.Background(), *model.NewMailRequest().From("mailer@vibioh.fr").As("Client").To("customer@vibioh.fr").Template("hello")); err != nil {
+	if err := client.Send(context.Background(), model.NewMailRequest().From("mailer@vibioh.fr").As("Client").To("customer@vibioh.fr").Template("hello")); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -26,40 +26,40 @@ type MailRequest struct {
 }
 
 // NewMailRequest create a new email
-func NewMailRequest() *MailRequest {
-	return &MailRequest{}
+func NewMailRequest() MailRequest {
+	return MailRequest{}
 }
 
 // Template set template
-func (mr *MailRequest) Template(Tpl string) *MailRequest {
+func (mr MailRequest) Template(Tpl string) MailRequest {
 	mr.Tpl = Tpl
 
 	return mr
 }
 
 // From set from
-func (mr *MailRequest) From(fromEmail string) *MailRequest {
+func (mr MailRequest) From(fromEmail string) MailRequest {
 	mr.FromEmail = fromEmail
 
 	return mr
 }
 
 // As set sender
-func (mr *MailRequest) As(sender string) *MailRequest {
+func (mr MailRequest) As(sender string) MailRequest {
 	mr.Sender = sender
 
 	return mr
 }
 
 // WithSubject set subject
-func (mr *MailRequest) WithSubject(subject string) *MailRequest {
+func (mr MailRequest) WithSubject(subject string) MailRequest {
 	mr.Subject = subject
 
 	return mr
 }
 
 // To add recipients to list
-func (mr *MailRequest) To(recipients ...string) *MailRequest {
+func (mr MailRequest) To(recipients ...string) MailRequest {
 	if len(mr.Recipients) == 0 {
 		mr.Recipients = recipients
 	} else {
@@ -70,14 +70,14 @@ func (mr *MailRequest) To(recipients ...string) *MailRequest {
 }
 
 // Data set payload
-func (mr *MailRequest) Data(payload interface{}) *MailRequest {
+func (mr MailRequest) Data(payload interface{}) MailRequest {
 	mr.Payload = payload
 
 	return mr
 }
 
 // Check checks if current instance is valid
-func (mr *MailRequest) Check() error {
+func (mr MailRequest) Check() error {
 	if len(strings.TrimSpace(mr.FromEmail)) == 0 {
 		return errors.New("from email is required")
 	}
@@ -117,7 +117,7 @@ func getSubject(subject string, payload interface{}) string {
 }
 
 // ConvertToMail convert mail request to Mail with given content
-func (mr *MailRequest) ConvertToMail(content io.Reader) Mail {
+func (mr MailRequest) ConvertToMail(content io.Reader) Mail {
 
 	return Mail{
 		From:    mr.FromEmail,

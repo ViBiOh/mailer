@@ -40,16 +40,16 @@ func (a App) renderHandler() http.Handler {
 			return
 		}
 
-		mailRequest := parseMailRequest(r)
+		mr := parseMailRequest(r)
 
-		content, err := a.getContent(r, mailRequest.Tpl)
+		content, err := a.getContent(r, mr.Tpl)
 		if err != nil {
 			httperror.InternalServerError(w, err)
 			return
 		}
 
-		mailRequest.Data(content)
-		output, err := a.mailerApp.Render(r.Context(), *mailRequest)
+		mr = mr.Data(content)
+		output, err := a.mailerApp.Render(r.Context(), mr)
 		if httperror.HandleError(w, err) {
 			return
 		}
@@ -59,7 +59,7 @@ func (a App) renderHandler() http.Handler {
 			return
 		}
 
-		a.sendOutput(r.Context(), w, mailRequest, output)
+		a.sendOutput(r.Context(), w, mr, output)
 	})
 }
 
@@ -77,31 +77,31 @@ func writeOutput(w http.ResponseWriter, output io.Reader) {
 	}
 }
 
-func (a App) sendOutput(ctx context.Context, w http.ResponseWriter, mailRequest *model.MailRequest, output io.Reader) {
-	if err := mailRequest.Check(); err != nil {
+func (a App) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.MailRequest, output io.Reader) {
+	if err := mr.Check(); err != nil {
 		httperror.HandleError(w, httpModel.WrapInvalid(err))
 		return
 	}
 
-	if httperror.HandleError(w, a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))) {
+	if httperror.HandleError(w, a.mailerApp.Send(ctx, mr.ConvertToMail(output))) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
 
-func parseMailRequest(r *http.Request) *model.MailRequest {
-	mailRequest := model.NewMailRequest()
+func parseMailRequest(r *http.Request) model.MailRequest {
+	mr := model.NewMailRequest()
 
-	mailRequest.Template(strings.Trim(r.URL.Path, "/"))
-	mailRequest.From(strings.TrimSpace(r.URL.Query().Get("from")))
-	mailRequest.As(strings.TrimSpace(r.URL.Query().Get("sender")))
-	mailRequest.WithSubject(strings.TrimSpace(r.URL.Query().Get("subject")))
+	mr = mr.Template(strings.Trim(r.URL.Path, "/"))
+	mr = mr.From(strings.TrimSpace(r.URL.Query().Get("from")))
+	mr = mr.As(strings.TrimSpace(r.URL.Query().Get("sender")))
+	mr = mr.WithSubject(strings.TrimSpace(r.URL.Query().Get("subject")))
 
 	for _, rawTo := range strings.Split(r.URL.Query().Get("to"), ",") {
 		if cleanTo := strings.TrimSpace(rawTo); cleanTo != "" {
-			mailRequest.To(cleanTo)
+			mr = mr.To(cleanTo)
 		}
 	}
 
-	return mailRequest
+	return mr
 }

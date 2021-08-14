@@ -63,7 +63,7 @@ func TestSend(t *testing.T) {
 			"not enabled",
 			App{},
 			args{
-				mailRequest: *model.NewMailRequest(),
+				mailRequest: model.NewMailRequest(),
 			},
 			ErrNotEnabled,
 		},
@@ -73,7 +73,7 @@ func TestSend(t *testing.T) {
 				url: "http://mailer",
 			},
 			args{
-				mailRequest: *model.NewMailRequest(),
+				mailRequest: model.NewMailRequest(),
 			},
 			errors.New("from email is required"),
 		},
@@ -83,7 +83,7 @@ func TestSend(t *testing.T) {
 				url: testServer.URL,
 			},
 			args{
-				mailRequest: *model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
+				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
 			},
 			errors.New("HTTP/401"),
 		},
@@ -95,7 +95,7 @@ func TestSend(t *testing.T) {
 				password: "password",
 			},
 			args{
-				mailRequest: *model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
+				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
 			},
 			nil,
 		},
