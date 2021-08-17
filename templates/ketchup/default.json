@@ -4,7 +4,7 @@
       "repository": {
         "name": "vibioh/viws",
         "version": "1.2.1",
-        "kind": 0
+        "kind": "github"
       },
       "pattern": "stable",
       "url": "http://duckduckgo.com",
@@ -16,7 +16,7 @@
       "repository": {
         "name": "https://charts.vibioh.fr",
         "part": "app",
-        "kind": 1
+        "kind": "helm"
       },
       "pattern": "stable",
       "url": "http://duckduckgo.com",
@@ -27,7 +27,7 @@
     {
       "repository": {
         "name": "vibioh/ketchup",
-        "kind": 2
+        "kind": "docker"
       },
       "pattern": "stable",
       "url": "http://duckduckgo.com",
@@ -38,7 +38,7 @@
     {
       "repository": {
         "name": "funtch",
-        "kind": 3
+        "kind": "npm"
       },
       "pattern": "stable",
       "version": {

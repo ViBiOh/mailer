@@ -1,6 +1,6 @@
 {{ define "release" }}
   <mj-text color="#c0c0c0">
-    {{ if eq .repository.kind 1.0 }}
+    {{ if eq .repository.kind "helm" }}
       <strong>{{ .repository.part }} @ </strong>
     {{ end }}
 
@@ -17,25 +17,25 @@
   <mj-body background-color="#3b3b3b">
     {{ template "header" "Ketchup" }}
 
-    {{ $kind := -1.0 }}
+    {{ $kind := "" }}
 
     <mj-section background-color="#3b3b3b">
       <mj-column>
         {{ range $index, $release := .releases }}
           {{ if ne .repository.kind $kind }}
-            {{ if eq .repository.kind 0.0 }}
+            {{ if eq .repository.kind "github" }}
               <mj-image alt="GitHub Logo" width="50px" src="https://ketchup.vibioh.fr/images/github.png" />
             {{ end }}
-            {{ if eq .repository.kind 1.0 }}
+            {{ if eq .repository.kind "helm" }}
               <mj-image alt="Helm Logo" width="50px" src="https://ketchup.vibioh.fr/images/helm.png" />
             {{ end }}
-            {{ if eq .repository.kind 2.0 }}
+            {{ if eq .repository.kind "docker" }}
               <mj-image alt="Docker Logo" width="50px" src="https://ketchup.vibioh.fr/images/docker.png" />
             {{ end }}
-            {{ if eq .repository.kind 3.0 }}
+            {{ if eq .repository.kind "npm" }}
               <mj-image alt="NPM Logo" width="50px" src="https://ketchup.vibioh.fr/images/npm.png" />
             {{ end }}
-            {{ if eq .repository.kind 4.0 }}
+            {{ if eq .repository.kind "pypi" }}
               <mj-image alt="Pypi Logo" width="50px" src="https://ketchup.vibioh.fr/images/pypi.png" />
             {{ end }}
 
