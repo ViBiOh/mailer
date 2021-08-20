@@ -53,7 +53,7 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		templatesDir: flags.New(prefix, "mailer").Name("Templates").Default("./templates/").Label("Templates directory").ToString(fs),
+		templatesDir: flags.New(prefix, "mailer", "Templates").Default("./templates/", nil).Label("Templates directory").ToString(fs),
 	}
 }
 

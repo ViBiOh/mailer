@@ -40,11 +40,11 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:           flags.New(prefix, "amqp").Name("URL").Default("").Label("Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost>").ToString(fs),
-		exchange:      flags.New(prefix, "amqp").Name("Exchange").Default("mailer").Label("Exchange name").ToString(fs),
-		queue:         flags.New(prefix, "amqp").Name("Queue").Default("mailer").Label("Queue name").ToString(fs),
-		retryInterval: flags.New(prefix, "amqp").Name("RetryInterval").Default("1h").Label("Interval duration when send fails").ToString(fs),
-		maxRetry:      flags.New(prefix, "amqp").Name("MaxRetry").Default(3).Label("Max send retries").ToInt(fs),
+		url:           flags.New(prefix, "amqp", "URL").Default("", nil).Label("Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost>").ToString(fs),
+		exchange:      flags.New(prefix, "amqp", "Exchange").Default("mailer", nil).Label("Exchange name").ToString(fs),
+		queue:         flags.New(prefix, "amqp", "Queue").Default("mailer", nil).Label("Queue name").ToString(fs),
+		retryInterval: flags.New(prefix, "amqp", "RetryInterval").Default("1h", nil).Label("Interval duration when send fails").ToString(fs),
+		maxRetry:      flags.New(prefix, "amqp", "MaxRetry").Default(3, nil).Label("Max send retries").ToInt(fs),
 	}
 }
 
