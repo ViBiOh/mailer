@@ -33,7 +33,6 @@ type Config struct {
 	exchange      *string
 	retryInterval *string
 	maxRetry      *int
-	failOnStart   *bool
 }
 
 // Flags adds flags for configuring package
