@@ -10,11 +10,6 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 )
 
-var (
-	// EmptyMailRequest for not found case
-	EmptyMailRequest = MailRequest{}
-)
-
 // MailRequest describes an email to be sent
 type MailRequest struct {
 	Payload    interface{}
