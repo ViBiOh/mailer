@@ -68,5 +68,5 @@ func main() {
 	go appServer.Start("http", healthApp.End(), httputils.Handler(appHandler, healthApp, recoverer.Middleware, prometheusApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
 	healthApp.WaitForTermination(appServer.Done())
-	server.GracefulWait(appServer.Done(), promServer.Done())
+	server.GracefulWait(appServer.Done(), promServer.Done(), amqpApp.Done())
 }

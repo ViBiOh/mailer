@@ -79,11 +79,10 @@ func (a App) String() string {
 		return "not enabled"
 	}
 
-	if !a.amqpClient.Enabled() {
-		return fmt.Sprintf("Sending emails via HTTP to `%s`.", a.url)
+	if a.amqpEnabled() {
+		return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.amqpClient.ExchangeName(), a.amqpClient.Vhost())
 	}
-
-	return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.amqpClient.ExchangeName(), a.amqpClient.Vhost())
+	return fmt.Sprintf("Sending emails via HTTP to `%s`.", a.url)
 }
 
 // Enabled checks if requirements are met

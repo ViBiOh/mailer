@@ -277,6 +277,18 @@ func (a *AMQPClient) close(reconnect bool) error {
 	return nil
 }
 
+// StopChannel cancel existing channel
+func (a *AMQPClient) StopChannel() {
+	if a.channel == nil {
+		return
+	}
+
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+
+	a.closeChannel()
+}
+
 func (a *AMQPClient) closeChannel() {
 	if a.channel == nil {
 		return
@@ -291,13 +303,19 @@ func (a *AMQPClient) closeChannel() {
 
 	logger.Info("Closing AMQP channel")
 	LoggedCloser(a.channel)
+
+	a.channel = nil
 }
 
 func (a *AMQPClient) closeConnection() {
-	if a.connection != nil {
-		logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
-		LoggedCloser(a.connection)
+	if a.connection == nil {
+		return
 	}
+
+	logger.WithField("vhost", a.Vhost()).Info("Closing AMQP connection")
+	LoggedCloser(a.connection)
+
+	a.connection = nil
 }
 
 func (a *AMQPClient) handleClosed(action func() error) error {
