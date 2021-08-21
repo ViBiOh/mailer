@@ -33,6 +33,7 @@ type Config struct {
 	exchange      *string
 	retryInterval *string
 	maxRetry      *int
+	failOnStart   *bool
 }
 
 // Flags adds flags for configuring package
@@ -50,21 +51,29 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 func New(config Config, mailerApp mailer.App) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
-		return App{}, nil
+		return App{
+			done: make(chan struct{}),
+		}, nil
 	}
 
 	retryInterval, err := time.ParseDuration(strings.TrimSpace(*config.retryInterval))
 	if err != nil {
-		return App{}, fmt.Errorf("unable to parse retry duration: %s", err)
+		return App{
+			done: make(chan struct{}),
+		}, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
 
 	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.queue))
 	if err != nil {
-		return App{}, fmt.Errorf("unable to create amqp client: %s", err)
+		return App{
+			done: make(chan struct{}),
+		}, fmt.Errorf("unable to create amqp client: %s", err)
 	}
 
 	if err := client.Ping(); err != nil {
-		return App{}, fmt.Errorf("unable to ping amqp: %s", err)
+		return App{
+			done: make(chan struct{}),
+		}, fmt.Errorf("unable to ping amqp: %s", err)
 	}
 
 	return App{
@@ -74,6 +83,11 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		amqpClient:    client,
 		done:          make(chan struct{}),
 	}, nil
+}
+
+// Enabled checks if requirements are met
+func (a App) Enabled() bool {
+	return a.amqpClient != nil
 }
 
 // Done returns the chan used for synchronization
