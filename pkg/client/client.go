@@ -57,7 +57,7 @@ func New(config Config) (App, error) {
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := model.GetAMQPClient(url, name, "")
+		client, err := model.GetAMQPClient(url, name, "", 0)
 		if err != nil {
 			return App{}, err
 		}
