@@ -272,12 +272,13 @@ func (a *AMQPClient) close(reconnect bool) error {
 		return fmt.Errorf("unable to reopen connection: %s", err)
 	}
 
+	a.connection = newConnection
+
 	newChannel, err := a.connection.Channel()
 	if err != nil {
 		return fmt.Errorf("unable to reopen channel: %s", err)
 	}
 
-	a.connection = newConnection
 	a.channel = newChannel
 
 	return nil
