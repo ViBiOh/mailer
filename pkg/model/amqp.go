@@ -16,17 +16,16 @@ type AMQPClient struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
-	uri            string
-	exchangeName   string
-	clientName     string
-	queueName      string
-	deadLetterName string
+	uri          string
+	exchangeName string
+	clientName   string
+	queueName    string
 
 	mutex sync.RWMutex
 }
 
 // GetAMQPClient inits AMQP connection, channel and queue
-func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err error) {
+func GetAMQPClient(uri, exchangeName, queueName string, delay time.Duration) (client *AMQPClient, err error) {
 	defer func() {
 		if err != nil {
 			client.Close()
@@ -72,23 +71,28 @@ func GetAMQPClient(uri, exchangeName, queueName string) (client *AMQPClient, err
 		return client, nil
 	}
 
-	deadLetterExchange := fmt.Sprintf("%s-garbage", exchangeName)
-	deadLetterQueue := fmt.Sprintf("%s-garbage", queueName)
-	client.deadLetterName, err = createExchangeAndQueue(client.channel, deadLetterExchange, deadLetterQueue, true, nil)
+	client.queueName, err = createExchangeAndQueue(client.channel, exchangeName, queueName, true, nil)
 	if err != nil {
-		err = fmt.Errorf("unable to create dead letter: %s", err)
+		err = fmt.Errorf("unable to create exchange and queue: %s", err)
 		return
 	}
 
-	client.queueName, err = createExchangeAndQueue(client.channel, exchangeName, queueName, false, map[string]interface{}{
-		"x-dead-letter-exchange": deadLetterExchange,
-	})
-	if err != nil {
-		err = fmt.Errorf("unable to create queue: %s", err)
-		return
+	if delay != 0 {
+		_, err = createExchangeAndQueue(client.channel, getDelayedExchangeName(exchangeName), fmt.Sprintf("%s-delay", queueName), false, map[string]interface{}{
+			"x-dead-letter-exchange": exchangeName,
+			"x-message-ttl":          delay.Milliseconds(),
+		})
+		if err != nil {
+			err = fmt.Errorf("unable to create delayed exchange and queue: %s", err)
+			return
+		}
 	}
 
 	return client, nil
+}
+
+func getDelayedExchangeName(exchangeName string) string {
+	return fmt.Sprintf("%s-delay", exchangeName)
 }
 
 func connect(uri string) (*amqp.Connection, error) {
@@ -156,6 +160,11 @@ func (a *AMQPClient) ExchangeName() string {
 	return a.exchangeName
 }
 
+// DelayedExchangeName returns delayed exchange name
+func (a *AMQPClient) DelayedExchangeName() string {
+	return getDelayedExchangeName(a.exchangeName)
+}
+
 // ClientName returns client name
 func (a *AMQPClient) ClientName() string {
 	return a.clientName
@@ -172,11 +181,16 @@ func (a *AMQPClient) Vhost() string {
 
 // Send sends payload to the underlying exchange and queue
 func (a *AMQPClient) Send(payload amqp.Publishing) error {
+	return a.SendExchange(payload, a.exchangeName)
+}
+
+// SendExchange sends payload to the given exchange
+func (a *AMQPClient) SendExchange(payload amqp.Publishing, exchangeName string) error {
 	err := a.handleClosed(func() error {
 		a.mutex.RLock()
 		defer a.mutex.RUnlock()
 
-		return a.channel.Publish(a.exchangeName, "", false, false, payload)
+		return a.channel.Publish(exchangeName, "", false, false, payload)
 	})
 	if err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
@@ -196,14 +210,6 @@ func (a *AMQPClient) Listen() (<-chan amqp.Delivery, error) {
 	}
 
 	return messages, nil
-}
-
-// GetGarbage get a message from the garbage
-func (a *AMQPClient) GetGarbage() (amqp.Delivery, bool, error) {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
-
-	return a.channel.Get(a.deadLetterName, false)
 }
 
 // LoggedAck ack a message with error handling

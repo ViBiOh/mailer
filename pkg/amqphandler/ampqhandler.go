@@ -2,19 +2,24 @@ package amqphandler
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
-	"syscall"
 	"time"
 
-	"github.com/ViBiOh/httputils/v4/pkg/cron"
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/streadway/amqp"
+)
+
+var (
+	errNoDeathCount = errors.New("no death count")
 )
 
 // App of package
@@ -62,7 +67,7 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		}, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
 
-	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.queue))
+	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.queue), retryInterval)
 	if err != nil {
 		return App{
 			done: make(chan struct{}),
@@ -114,8 +119,6 @@ func (a App) Start(done <-chan struct{}) {
 		a.amqpClient.StopChannel()
 	}()
 
-	go a.startGarbageCollector(done)
-
 	a.startListener(done, messages)
 }
 
@@ -135,11 +138,10 @@ listener:
 	for message := range messages {
 		if err := a.sendEmail(message.Body); err != nil {
 			logger.Error("unable to send email: %s", err)
-			a.amqpClient.LoggedReject(message, false)
-			continue
+			a.handleError(message)
+		} else {
+			a.amqpClient.LoggedAck(message)
 		}
-
-		a.amqpClient.LoggedAck(message)
 	}
 
 	select {
@@ -177,6 +179,39 @@ func (a App) sendEmail(payload []byte) error {
 	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
+func (a App) handleError(message amqp.Delivery) {
+	count, err := getDeathCount(message.Headers)
+	if err != nil {
+		if errors.Is(err, errNoDeathCount) {
+			a.delayMessage(message)
+			return
+		}
+
+		logger.Error("unable to get death count from message: %s", err)
+		a.amqpClient.LoggedReject(message, false)
+		return
+	}
+
+	if count >= a.maxRetry {
+		logger.Error("message %s was rejected %d times, content was `%s`", sha(message.Body), a.maxRetry, message.Body)
+		a.amqpClient.LoggedAck(message)
+		return
+	}
+
+	a.delayMessage(message)
+}
+
+func (a App) delayMessage(message amqp.Delivery) {
+	logger.Info("Delaying message treatment for %s...", sha(message.Body))
+
+	if err := a.amqpClient.SendExchange(model.ConvertDeliveryToPublishing(message), a.amqpClient.DelayedExchangeName()); err != nil {
+		logger.Error("unable to re-send garbage message: %s", err)
+		a.amqpClient.LoggedReject(message, true)
+	}
+
+	a.amqpClient.LoggedAck(message)
+}
+
 func (a App) reconnect() (<-chan amqp.Delivery, error) {
 	if err := a.amqpClient.Reconnect(); err != nil {
 		return nil, fmt.Errorf("unable to reconnect to amqp: %s", err)
@@ -190,75 +225,12 @@ func (a App) reconnect() (<-chan amqp.Delivery, error) {
 	return messages, nil
 }
 
-func (a App) startGarbageCollector(done <-chan struct{}) {
-	logger.Info("Launching garbage collector every %s", a.retryInterval)
-	defer logger.Info("Garbage collector cron is off")
-
-	garbageCron := cron.New().OnSignal(syscall.SIGUSR1).Each(a.retryInterval).Now().OnError(func(err error) {
-		logger.Error("error while running garbage collector: %s", err)
-	})
-	defer garbageCron.Shutdown()
-
-	go garbageCron.Start(func(_ context.Context) error {
-		return a.garbageCollector(done)
-	}, done)
-
-	<-done
-}
-
-func (a App) garbageCollector(done <-chan struct{}) error {
-	isDone := func() bool {
-		select {
-		case <-done:
-			return true
-		default:
-			return false
-		}
-	}
-
-	for !isDone() {
-		garbage, ok, err := a.amqpClient.GetGarbage()
-		if err != nil {
-			return fmt.Errorf("unable to get garbage message: %s", err)
-		}
-
-		if !ok {
-			return nil
-		}
-
-		count, err := getDeathCount(garbage.Headers)
-		if err != nil {
-			logger.Error("unable to get count from garbage: %s", err)
-			a.amqpClient.LoggedReject(garbage, false)
-			continue
-		}
-
-		if count > a.maxRetry {
-			logger.Error("message was rejected %d times, content was `%s`", a.maxRetry, garbage.Body)
-			a.amqpClient.LoggedAck(garbage)
-			continue
-		}
-
-		logger.Info("Requeuing message from garbage with payload=`%s`", garbage.Body)
-
-		if err := a.amqpClient.Send(model.ConvertDeliveryToPublishing(garbage)); err != nil {
-			logger.Error("unable to re-send garbage message: %s", err)
-			a.amqpClient.LoggedReject(garbage, true)
-			continue
-		}
-
-		a.amqpClient.LoggedAck(garbage)
-	}
-
-	return nil
-}
-
 func getDeathCount(table amqp.Table) (int64, error) {
 	rawDeath := table["x-death"]
 
 	death, ok := rawDeath.([]interface{})
 	if !ok {
-		return 0, fmt.Errorf("`x-death` header in not an array")
+		return 0, fmt.Errorf("`x-death` header in not an array: %w", errNoDeathCount)
 	}
 
 	if len(death) == 0 {
@@ -294,4 +266,14 @@ func (a App) Close() {
 	}
 
 	a.amqpClient.Close()
+}
+
+// New get sha1 value of given interface
+func sha(o interface{}) string {
+	hasher := sha1.New()
+
+	// no err check https://golang.org/pkg/hash/#Hash
+	_, _ = fmt.Fprintf(hasher, "%#v", o)
+
+	return hex.EncodeToString(hasher.Sum(nil))
 }
