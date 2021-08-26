@@ -281,6 +281,8 @@ func (a *AMQPClient) close(reconnect bool) error {
 
 	a.channel = newChannel
 
+	logger.Info("Connection reopened.")
+
 	return nil
 }
 

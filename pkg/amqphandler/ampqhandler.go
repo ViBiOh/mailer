@@ -128,12 +128,12 @@ func (a App) listen() (<-chan amqp.Delivery, error) {
 		return nil, fmt.Errorf("unable to listen on queue: %s", err)
 	}
 
+	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
+
 	return messages, nil
 }
 
 func (a App) startListener(done <-chan struct{}, messages <-chan amqp.Delivery) {
-	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
-
 listener:
 	for message := range messages {
 		if err := a.sendEmail(message.Body); err != nil {
