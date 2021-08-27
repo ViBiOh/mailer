@@ -6,6 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"text/template"
@@ -13,7 +16,6 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
-	"github.com/ViBiOh/httputils/v4/pkg/templates"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
 )
@@ -62,7 +64,7 @@ func New(config Config, mjmlApp mjml.App, senderApp sender) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")
-	appTemplates, err := templates.GetTemplates(templatesDir, templateExtension)
+	appTemplates, err := getTemplates(templatesDir, templateExtension)
 	if err != nil {
 		logger.Error("%s", err)
 	}
@@ -129,6 +131,22 @@ func (a App) ListTemplates() []string {
 	}
 
 	return templatesList
+}
+
+func getTemplates(dir, extension string) ([]string, error) {
+	var templates []string
+
+	return templates, filepath.Walk(dir, func(filename string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if path.Ext(filename) == extension {
+			templates = append(templates, filename)
+		}
+
+		return nil
+	})
 }
 
 func (a App) convertMjml(ctx context.Context, content *bytes.Buffer) error {

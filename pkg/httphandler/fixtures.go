@@ -24,7 +24,7 @@ func (a App) fixturesHandler() http.Handler {
 				return
 			}
 
-			httpjson.WriteArray(w, http.StatusOK, fixturesList, httpjson.IsPretty(r))
+			httpjson.WriteArray(w, http.StatusOK, fixturesList)
 			return
 		}
 
@@ -34,7 +34,7 @@ func (a App) fixturesHandler() http.Handler {
 				return
 			}
 
-			httpjson.Write(w, http.StatusOK, content, httpjson.IsPretty(r))
+			httpjson.Write(w, http.StatusOK, content)
 		}
 
 		httperror.NotFound(w)
