@@ -2,8 +2,6 @@ package amqphandler
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -13,6 +11,7 @@ import (
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
+	"github.com/ViBiOh/httputils/v4/pkg/sha"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/streadway/amqp"
@@ -193,7 +192,7 @@ func (a App) handleError(message amqp.Delivery) {
 	}
 
 	if count >= a.maxRetry {
-		logger.Error("message %s was rejected %d times, content was `%s`", sha(message.Body), a.maxRetry, message.Body)
+		logger.Error("message %s was rejected %d times, content was `%s`", sha.New(message.Body), a.maxRetry, message.Body)
 		a.amqpClient.LoggedAck(message)
 		return
 	}
@@ -202,7 +201,7 @@ func (a App) handleError(message amqp.Delivery) {
 }
 
 func (a App) delayMessage(message amqp.Delivery) {
-	logger.Info("Delaying message treatment for %s...", sha(message.Body))
+	logger.Info("Delaying message treatment for %s...", sha.New(message.Body))
 
 	if err := a.amqpClient.SendExchange(model.ConvertDeliveryToPublishing(message), a.amqpClient.DelayedExchangeName()); err != nil {
 		logger.Error("unable to re-send garbage message: %s", err)
@@ -266,14 +265,4 @@ func (a App) Close() {
 	}
 
 	a.amqpClient.Close()
-}
-
-// New get sha1 value of given interface
-func sha(o interface{}) string {
-	hasher := sha1.New()
-
-	// no err check https://golang.org/pkg/hash/#Hash
-	_, _ = fmt.Fprintf(hasher, "%#v", o)
-
-	return hex.EncodeToString(hasher.Sum(nil))
 }
