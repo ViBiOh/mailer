@@ -17,6 +17,7 @@ type AMQPClient struct {
 	channel    *amqp.Channel
 
 	uri          string
+	vhost        string
 	clientName   string
 	exchangeName string
 	queueName    string
@@ -40,6 +41,7 @@ func GetAMQPClient(uri string) (client *AMQPClient, err error) {
 		uri:        uri,
 		connection: connection,
 		channel:    channel,
+		vhost:      connection.Config.Vhost,
 	}, nil
 }
 
@@ -180,14 +182,7 @@ func (a *AMQPClient) ClientName() string {
 
 // Vhost returns connection Vhost
 func (a *AMQPClient) Vhost() string {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
-
-	if a.connection == nil {
-		return ""
-	}
-
-	return a.connection.Config.Vhost
+	return a.vhost
 }
 
 // Publish sends payload to the underlying exchange
@@ -285,6 +280,7 @@ func (a *AMQPClient) close(reconnect bool) error {
 
 	a.connection = newConnection
 	a.channel = newChannel
+	a.vhost = newConnection.Config.Vhost
 
 	logger.Info("Connection reopened.")
 
