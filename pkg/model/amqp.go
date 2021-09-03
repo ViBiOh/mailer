@@ -1,9 +1,9 @@
 package model
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -17,92 +17,116 @@ type AMQPClient struct {
 	channel    *amqp.Channel
 
 	uri          string
-	exchangeName string
 	clientName   string
+	exchangeName string
 	queueName    string
 
 	mutex sync.RWMutex
 }
 
 // GetAMQPClient inits AMQP connection, channel and queue
-func GetAMQPClient(uri, exchangeName, queueName string, delay time.Duration) (client *AMQPClient, err error) {
-	defer func() {
-		if err != nil {
-			client.Close()
-		}
-	}()
-
+func GetAMQPClient(uri string) (client *AMQPClient, err error) {
 	if len(uri) == 0 {
-		err = errors.New("URI is required")
-		return
+		return nil, errors.New("URI is required")
 	}
 
-	if len(exchangeName) == 0 {
-		err = errors.New("exchange name is required")
-		return
-	}
-
-	client = &AMQPClient{
-		mutex:        sync.RWMutex{},
-		uri:          uri,
-		exchangeName: exchangeName,
-	}
-
-	client.connection, err = connect(uri)
+	connection, channel, err := connect(uri)
 	if err != nil {
-		err = fmt.Errorf("unable to connect to amqp: %s", err)
-		return
+		return nil, fmt.Errorf("unable to connect to amqp: %s", err)
 	}
 
-	client.channel, err = client.connection.Channel()
-	if err != nil {
-		err = fmt.Errorf("unable to open communication channel: %s", err)
-		return
-	}
-
-	if len(queueName) == 0 {
-		return client, nil
-	}
-
-	client.clientName = createClientName()
-
-	if err = client.channel.Qos(1, 0, false); err != nil {
-		err = fmt.Errorf("unable to configure QoS on channel: %s", err)
-		return client, nil
-	}
-
-	client.queueName, err = createExchangeAndQueue(client.channel, exchangeName, queueName, true, nil)
-	if err != nil {
-		err = fmt.Errorf("unable to create exchange and queue: %s", err)
-		return
-	}
-
-	if delay != 0 {
-		_, err = createExchangeAndQueue(client.channel, getDelayedExchangeName(exchangeName), fmt.Sprintf("%s-delay", queueName), false, map[string]interface{}{
-			"x-dead-letter-exchange": exchangeName,
-			"x-message-ttl":          delay.Milliseconds(),
-		})
-		if err != nil {
-			err = fmt.Errorf("unable to create delayed exchange and queue: %s", err)
-			return
-		}
-	}
-
-	return client, nil
+	return &AMQPClient{
+		mutex:      sync.RWMutex{},
+		uri:        uri,
+		connection: connection,
+		channel:    channel,
+	}, nil
 }
 
-func getDelayedExchangeName(exchangeName string) string {
-	return fmt.Sprintf("%s-delay", exchangeName)
-}
-
-func connect(uri string) (*amqp.Connection, error) {
+func connect(uri string) (*amqp.Connection, *amqp.Channel, error) {
 	logger.Info("Dialing AMQP with 10 seconds timeout...")
 
-	return amqp.DialConfig(uri, amqp.Config{
+	connection, err := amqp.DialConfig(uri, amqp.Config{
 		Heartbeat: 10 * time.Second,
 		Locale:    "en_US",
 		Dial:      amqp.DefaultDial(10 * time.Second),
 	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to connect to amqp: %s", err)
+	}
+
+	channel, err := connection.Channel()
+	if err != nil {
+		err := fmt.Errorf("unable to open communication channel: %s", err)
+
+		if closeErr := connection.Close(); closeErr != nil {
+			err = fmt.Errorf("%s: %w", err, closeErr)
+		}
+
+		return nil, nil, err
+	}
+
+	if err := channel.Qos(1, 0, false); err != nil {
+		err := fmt.Errorf("unable to configure QoS on channel: %s", err)
+
+		if closeErr := channel.Close(); closeErr != nil {
+			err = fmt.Errorf("%s: %w", err, closeErr)
+		}
+
+		if closeErr := connection.Close(); closeErr != nil {
+			err = fmt.Errorf("%s: %w", err, closeErr)
+		}
+
+		return nil, nil, err
+	}
+
+	return connection, channel, nil
+}
+
+// Publisher configures client for publishing to given exchange
+func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Table) error {
+	if err := a.channel.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, args); err != nil {
+		return fmt.Errorf("unable to declare exchange `%s`: %s", exchangeName, err)
+	}
+
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	a.exchangeName = exchangeName
+
+	return nil
+}
+
+// Consumer configures client for consumming from given queue, bind to given exchange
+func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay time.Duration) error {
+	queue, err := a.channel.QueueDeclare(queueName, true, false, false, false, nil)
+	if err != nil {
+		return fmt.Errorf("unable to declare queue: %s", err)
+	}
+
+	if err := a.channel.QueueBind(queue.Name, topic, exchangeName, false, nil); err != nil {
+		return fmt.Errorf("unable to bind queue `%s` to `%s`: %s", queue.Name, exchangeName, err)
+	}
+
+	if retryDelay != 0 {
+		err := a.Publisher(getDelayedExchangeName(exchangeName), "direct", map[string]interface{}{
+			"x-dead-letter-exchange": exchangeName,
+			"x-message-ttl":          retryDelay.Milliseconds(),
+		})
+		if err != nil {
+			return fmt.Errorf("unable to declare delayed exchange: %s", getDelayedExchangeName(exchangeName))
+		}
+	}
+
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	a.queueName = queue.Name
+	a.clientName = createClientName()
+
+	return nil
+}
+
+func getDelayedExchangeName(exchangeName string) string {
+	return fmt.Sprintf("%s-delay", exchangeName)
 }
 
 func createClientName() string {
@@ -115,25 +139,11 @@ func createClientName() string {
 	return fmt.Sprintf("%x", raw)
 }
 
-func createExchangeAndQueue(channel *amqp.Channel, exchangeName, queueName string, internal bool, args amqp.Table) (string, error) {
-	if err := channel.ExchangeDeclare(exchangeName, "direct", true, false, false, internal, nil); err != nil {
-		return "", fmt.Errorf("unable to declare exchange `%s`: %s", queueName, err)
-	}
-
-	queue, err := channel.QueueDeclare(queueName, true, false, false, false, args)
-	if err != nil {
-		return "", fmt.Errorf("unable to declare queue `%s`: %s", queueName, err)
-	}
-
-	if err := channel.QueueBind(queue.Name, "", exchangeName, false, nil); err != nil {
-		return queue.Name, fmt.Errorf("unable to bind queue `%s` to `%s`: %s", queueName, exchangeName, err)
-	}
-
-	return queue.Name, nil
-}
-
 // Enabled checks if connection is setup
 func (a *AMQPClient) Enabled() bool {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
 	return a.connection != nil
 }
 
@@ -142,6 +152,9 @@ func (a *AMQPClient) Ping() error {
 	if !a.Enabled() {
 		return errors.New("amqp client disabled")
 	}
+
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
 
 	if a.connection.IsClosed() {
 		return errors.New("amqp client closed")
@@ -160,11 +173,6 @@ func (a *AMQPClient) ExchangeName() string {
 	return a.exchangeName
 }
 
-// DelayedExchangeName returns delayed exchange name
-func (a *AMQPClient) DelayedExchangeName() string {
-	return getDelayedExchangeName(a.exchangeName)
-}
-
 // ClientName returns client name
 func (a *AMQPClient) ClientName() string {
 	return a.clientName
@@ -172,6 +180,9 @@ func (a *AMQPClient) ClientName() string {
 
 // Vhost returns connection Vhost
 func (a *AMQPClient) Vhost() string {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
 	if a.connection == nil {
 		return ""
 	}
@@ -179,8 +190,8 @@ func (a *AMQPClient) Vhost() string {
 	return a.connection.Config.Vhost
 }
 
-// Send sends payload to the underlying exchange and queue
-func (a *AMQPClient) Send(payload amqp.Publishing) error {
+// Publish sends payload to the underlying exchange
+func (a *AMQPClient) Publish(payload amqp.Publishing) error {
 	return a.SendExchange(payload, a.exchangeName)
 }
 
@@ -199,14 +210,14 @@ func (a *AMQPClient) SendExchange(payload amqp.Publishing, exchangeName string) 
 	return nil
 }
 
-// Listen listens to queue
+// Listen listens to configured queue
 func (a *AMQPClient) Listen() (<-chan amqp.Delivery, error) {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
 
 	messages, err := a.channel.Consume(a.queueName, a.clientName, false, false, false, false, nil)
 	if err != nil {
-		return nil, fmt.Errorf("unable to consume queue `%s`: %s", a.queueName, err)
+		return nil, fmt.Errorf("unable to consume queue: %s", err)
 	}
 
 	return messages, nil
@@ -244,14 +255,14 @@ func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
 // Close closes opened ressources
 func (a *AMQPClient) Close() {
 	if err := a.close(false); err != nil {
-		logger.Error("unabel to close: %s", err)
+		logger.Error("unable to close: %s", err)
 	}
 }
 
 // Reconnect to amqp
 func (a *AMQPClient) Reconnect() error {
 	if err := a.close(true); err != nil {
-		return fmt.Errorf("unabel to reconnect: %s", err)
+		return fmt.Errorf("unable to reconnect: %s", err)
 	}
 	return nil
 }
@@ -267,18 +278,12 @@ func (a *AMQPClient) close(reconnect bool) error {
 		return nil
 	}
 
-	newConnection, err := connect(a.uri)
+	newConnection, newChannel, err := connect(a.uri)
 	if err != nil {
-		return fmt.Errorf("unable to reopen connection: %s", err)
+		return fmt.Errorf("unable to reconnect to amqp: %s", err)
 	}
 
 	a.connection = newConnection
-
-	newChannel, err := a.connection.Channel()
-	if err != nil {
-		return fmt.Errorf("unable to reopen channel: %s", err)
-	}
-
 	a.channel = newChannel
 
 	logger.Info("Connection reopened.")
@@ -304,9 +309,11 @@ func (a *AMQPClient) closeChannel() {
 	}
 
 	if len(a.queueName) != 0 {
-		logger.WithField("name", a.clientName).Info("Canceling AMQP channel")
+		log := logger.WithField("name", a.clientName)
+
+		log.Info("Canceling AMQP channel")
 		if err := a.channel.Cancel(a.clientName, false); err != nil {
-			logger.WithField("name", a.clientName).Error("unable to cancel consumer: %s", err)
+			log.Error("unable to cancel consumer: %s", err)
 		}
 	}
 
@@ -335,7 +342,7 @@ func (a *AMQPClient) handleClosed(action func() error) error {
 
 	logger.Warn("Channel was closed, trying to reconnect...")
 	if err := a.Reconnect(); err != nil {
-		logger.Error("unabel to close and reconnect: %s", err)
+		logger.Error("unable to reconnect: %s", err)
 	}
 
 	return action()

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
@@ -52,40 +51,40 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 
 // New creates new App from Config
 func New(config Config, mailerApp mailer.App) (App, error) {
-	url := strings.TrimSpace(*config.url)
-	if len(url) == 0 {
-		return App{
-			done: make(chan struct{}),
-		}, nil
+	app := App{
+		done:      make(chan struct{}),
+		mailerApp: mailerApp,
+		maxRetry:  int64(*config.maxRetry),
 	}
 
-	retryInterval, err := time.ParseDuration(strings.TrimSpace(*config.retryInterval))
-	if err != nil {
-		return App{
-			done: make(chan struct{}),
-		}, fmt.Errorf("unable to parse retry duration: %s", err)
+	if len(*config.url) == 0 {
+		return app, nil
 	}
 
-	client, err := model.GetAMQPClient(url, strings.TrimSpace(*config.exchange), strings.TrimSpace(*config.queue), retryInterval)
+	retryInterval, err := time.ParseDuration(*config.retryInterval)
 	if err != nil {
-		return App{
-			done: make(chan struct{}),
-		}, fmt.Errorf("unable to create amqp client: %s", err)
+		return app, fmt.Errorf("unable to parse retry duration: %s", err)
+	}
+
+	client, err := model.GetAMQPClient(*config.url)
+	if err != nil {
+		return app, fmt.Errorf("unable to create amqp client: %s", err)
+	}
+
+	if err := client.Consumer(*config.queue, "", *config.exchange, retryInterval); err != nil {
+		client.Close()
+		return app, fmt.Errorf("unable to configure consumer amqp: %s", err)
 	}
 
 	if err := client.Ping(); err != nil {
-		return App{
-			done: make(chan struct{}),
-		}, fmt.Errorf("unable to ping amqp: %s", err)
+		client.Close()
+		return app, fmt.Errorf("unable to ping amqp: %s", err)
 	}
 
-	return App{
-		retryInterval: retryInterval,
-		maxRetry:      int64(*config.maxRetry),
-		mailerApp:     mailerApp,
-		amqpClient:    client,
-		done:          make(chan struct{}),
-	}, nil
+	app.amqpClient = client
+	app.retryInterval = retryInterval
+
+	return app, nil
 }
 
 // Enabled checks if requirements are met
@@ -179,6 +178,12 @@ func (a App) sendEmail(payload []byte) error {
 }
 
 func (a App) handleError(message amqp.Delivery) {
+	if a.retryInterval == 0 {
+		logger.Error("message %s was rejected, content was `%s`", sha.New(message.Body), message.Body)
+		a.amqpClient.LoggedAck(message)
+		return
+	}
+
 	count, err := getDeathCount(message.Headers)
 	if err != nil {
 		if errors.Is(err, errNoDeathCount) {
@@ -203,7 +208,7 @@ func (a App) handleError(message amqp.Delivery) {
 func (a App) delayMessage(message amqp.Delivery) {
 	logger.Info("Delaying message treatment for %s...", sha.New(message.Body))
 
-	if err := a.amqpClient.SendExchange(model.ConvertDeliveryToPublishing(message), a.amqpClient.DelayedExchangeName()); err != nil {
+	if err := a.amqpClient.Publish(model.ConvertDeliveryToPublishing(message)); err != nil {
 		logger.Error("unable to re-send garbage message: %s", err)
 		a.amqpClient.LoggedReject(message, true)
 	}

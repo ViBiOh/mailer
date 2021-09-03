@@ -57,9 +57,13 @@ func New(config Config) (App, error) {
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := model.GetAMQPClient(url, name, "", 0)
+		client, err := model.GetAMQPClient(url)
 		if err != nil {
-			return App{}, err
+			return App{}, fmt.Errorf("unable to create amqp client: %s", err)
+		}
+
+		if err := client.Publisher(name, "direct", nil); err != nil {
+			return App{}, fmt.Errorf("unable to configure amqp producer: %s", err)
 		}
 
 		return App{
@@ -68,9 +72,9 @@ func New(config Config) (App, error) {
 	}
 
 	return App{
-		url:      url,
+		url:      *config.url,
 		name:     name,
-		password: strings.TrimSpace(*config.password),
+		password: *config.password,
 	}, nil
 }
 
@@ -137,7 +141,7 @@ func (a App) amqpSend(ctx context.Context, mailRequest model.MailRequest) error 
 		return fmt.Errorf("unable to marshal mail: %s", err)
 	}
 
-	return a.amqpClient.Send(amqp.Publishing{
+	return a.amqpClient.Publish(amqp.Publishing{
 		ContentType: "application/json",
 		Body:        payload,
 	})
