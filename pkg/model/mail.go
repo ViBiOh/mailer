@@ -73,7 +73,7 @@ func (mr MailRequest) Data(payload interface{}) MailRequest {
 
 // Check checks if current instance is valid
 func (mr MailRequest) Check() error {
-	if len(strings.TrimSpace(mr.FromEmail)) == 0 {
+	if len(mr.FromEmail) == 0 {
 		return errors.New("from email is required")
 	}
 
@@ -82,7 +82,7 @@ func (mr MailRequest) Check() error {
 	}
 
 	for index, recipient := range mr.Recipients {
-		if len(strings.TrimSpace(recipient)) == 0 {
+		if len(recipient) == 0 {
 			return fmt.Errorf("recipient at index %d is empty", index)
 		}
 	}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
@@ -57,7 +58,8 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		maxRetry:  int64(*config.maxRetry),
 	}
 
-	if len(*config.url) == 0 {
+	url := strings.TrimSpace(*config.url)
+	if len(url) == 0 {
 		return app, nil
 	}
 
@@ -66,12 +68,14 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		return app, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
 
-	client, err := model.GetAMQPClient(*config.url)
+	client, err := model.GetAMQPClient(url)
 	if err != nil {
 		return app, fmt.Errorf("unable to create amqp client: %s", err)
 	}
 
-	if err := client.Consumer(*config.queue, "", *config.exchange, retryInterval); err != nil {
+	queue := strings.TrimSpace(*config.queue)
+	exchange := strings.TrimSpace(*config.exchange)
+	if err := client.Consumer(queue, "", exchange, retryInterval); err != nil {
 		client.Close()
 		return app, fmt.Errorf("unable to configure consumer amqp: %s", err)
 	}

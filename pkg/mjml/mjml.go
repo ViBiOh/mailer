@@ -27,9 +27,7 @@ type mjmlResponse struct {
 
 // App of package
 type App struct {
-	url      string
-	username string
-	password string
+	req request.Request
 }
 
 // Config of package
@@ -50,19 +48,14 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 
 // New creates new App from Config
 func New(config Config) App {
-	converter := strings.TrimSpace(*config.url)
-
-	if converter == "" {
+	url := strings.TrimSpace(*config.url)
+	if len(url) == 0 {
 		return App{}
 	}
 
-	app := App{
-		url:      converter,
-		username: strings.TrimSpace(*config.username),
-		password: strings.TrimSpace(*config.password),
+	return App{
+		req: request.New().Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
 	}
-
-	return app
 }
 
 // IsMJML determines if provided content is a MJML template or not
@@ -72,7 +65,7 @@ func IsMJML(content []byte) bool {
 
 // Enabled checks if requirements are met
 func (a App) Enabled() bool {
-	return a.url != ""
+	return !a.req.IsZero()
 }
 
 // Render MJML template
@@ -81,7 +74,7 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
-	resp, err := request.New().Post(a.url).BasicAuth(a.username, a.password).JSON(ctx, mjmlRequest{template})
+	resp, err := a.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {
 		return "", fmt.Errorf("unable to render mjml template: %s", err)
 	}

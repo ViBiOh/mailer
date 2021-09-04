@@ -52,7 +52,7 @@ func New(config Config) App {
 
 	user := strings.TrimSpace(*config.username)
 	if len(user) > 0 {
-		auth = smtp.PlainAuth("", user, strings.TrimSpace(*config.password), strings.TrimSpace(*config.host))
+		auth = smtp.PlainAuth("", user, *config.password, strings.TrimSpace(*config.host))
 	}
 
 	return App{
@@ -67,16 +67,17 @@ func (a App) Send(_ context.Context, mail model.Mail) error {
 	defer bufferPool.Put(body)
 	body.Reset()
 
-	content, err := io.ReadAll(mail.Content)
-	if err != nil {
-		return fmt.Errorf("unable to read content: %s", err)
+	fmt.Fprintf(body, "From: %s <%s>\r\n", mail.Sender, mail.From)
+	fmt.Fprintf(body, "To: %s\r\n", strings.Join(mail.To, ","))
+	fmt.Fprintf(body, "Subject: %s\r\n", mail.Subject)
+	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
+	body.WriteString("\r\n")
+
+	if _, err := io.Copy(body, mail.Content); err != nil {
+		return fmt.Errorf("unable to read mail content: %s", err)
 	}
 
-	body.WriteString(fmt.Sprintf("From: %s <%s>\r\n", mail.Sender, mail.From))
-	body.WriteString(fmt.Sprintf("To: %s\r\n", strings.Join(mail.To, ",")))
-	body.WriteString(fmt.Sprintf("Subject: %s\r\n", mail.Subject))
-	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
-	body.WriteString(fmt.Sprintf("\r\n%s\r\n", content))
+	body.WriteString("\r\n")
 
 	return smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
 }

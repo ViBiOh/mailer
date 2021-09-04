@@ -72,7 +72,7 @@ func New(config Config) (App, error) {
 	}
 
 	return App{
-		url:      *config.url,
+		url:      url,
 		name:     name,
 		password: *config.password,
 	}, nil
