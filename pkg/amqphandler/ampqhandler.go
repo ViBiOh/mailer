@@ -23,11 +23,13 @@ var (
 
 // App of package
 type App struct {
-	amqpClient    *model.AMQPClient
-	done          chan struct{}
-	mailerApp     mailer.App
-	retryInterval time.Duration
-	maxRetry      int64
+	amqpClient *model.AMQPClient
+	done       chan struct{}
+	queue      string
+	exchange   string
+	mailerApp  mailer.App
+	maxRetry   int64
+	retry      bool
 }
 
 // Config of package
@@ -86,7 +88,9 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 	}
 
 	app.amqpClient = client
-	app.retryInterval = retryInterval
+	app.queue = queue
+	app.exchange = exchange
+	app.retry = retryInterval != 0
 
 	return app, nil
 }
@@ -125,12 +129,12 @@ func (a App) Start(done <-chan struct{}) {
 }
 
 func (a App) listen() (<-chan amqp.Delivery, error) {
-	messages, err := a.amqpClient.Listen()
+	messages, err := a.amqpClient.Listen(a.queue)
 	if err != nil {
 		return nil, fmt.Errorf("unable to listen on queue: %s", err)
 	}
 
-	logger.WithField("queue", a.amqpClient.QueueName()).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
+	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
 
 	return messages, nil
 }
@@ -182,7 +186,7 @@ func (a App) sendEmail(payload []byte) error {
 }
 
 func (a App) handleError(message amqp.Delivery) {
-	if a.retryInterval == 0 {
+	if !a.retry {
 		logger.Error("message %s was rejected, content was `%s`", sha.New(message.Body), message.Body)
 		a.amqpClient.LoggedAck(message)
 		return
@@ -212,7 +216,7 @@ func (a App) handleError(message amqp.Delivery) {
 func (a App) delayMessage(message amqp.Delivery) {
 	logger.Info("Delaying message treatment for %s...", sha.New(message.Body))
 
-	if err := a.amqpClient.Publish(model.ConvertDeliveryToPublishing(message)); err != nil {
+	if err := a.amqpClient.Publish(model.ConvertDeliveryToPublishing(message), a.exchange); err != nil {
 		logger.Error("unable to re-send garbage message: %s", err)
 		a.amqpClient.LoggedReject(message, true)
 	}

@@ -16,11 +16,9 @@ type AMQPClient struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
-	uri          string
-	vhost        string
-	clientName   string
-	exchangeName string
-	queueName    string
+	uri        string
+	vhost      string
+	clientName string
 
 	mutex sync.RWMutex
 }
@@ -91,10 +89,6 @@ func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Tabl
 		return fmt.Errorf("unable to declare exchange `%s`: %s", exchangeName, err)
 	}
 
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	a.exchangeName = exchangeName
-
 	return nil
 }
 
@@ -119,10 +113,7 @@ func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay 
 		}
 	}
 
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	a.queueName = queue.Name
-	a.clientName = createClientName()
+	a.ensureClientName()
 
 	return nil
 }
@@ -131,14 +122,21 @@ func getDelayedExchangeName(exchangeName string) string {
 	return fmt.Sprintf("%s-delay", exchangeName)
 }
 
-func createClientName() string {
+func (a *AMQPClient) ensureClientName() {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+
+	if len(a.clientName) != 0 {
+		return
+	}
+
 	raw := make([]byte, 4)
 	if _, err := rand.Read(raw); err != nil {
 		logger.Fatal(err)
-		return "mailer"
+		a.clientName = "mailer"
 	}
 
-	return fmt.Sprintf("%x", raw)
+	a.clientName = fmt.Sprintf("%x", raw)
 }
 
 // Enabled checks if connection is setup
@@ -165,16 +163,6 @@ func (a *AMQPClient) Ping() error {
 	return nil
 }
 
-// QueueName returns queue name
-func (a *AMQPClient) QueueName() string {
-	return a.queueName
-}
-
-// ExchangeName returns exchange name
-func (a *AMQPClient) ExchangeName() string {
-	return a.exchangeName
-}
-
 // ClientName returns client name
 func (a *AMQPClient) ClientName() string {
 	return a.clientName
@@ -186,17 +174,12 @@ func (a *AMQPClient) Vhost() string {
 }
 
 // Publish sends payload to the underlying exchange
-func (a *AMQPClient) Publish(payload amqp.Publishing) error {
-	return a.SendExchange(payload, a.exchangeName)
-}
-
-// SendExchange sends payload to the given exchange
-func (a *AMQPClient) SendExchange(payload amqp.Publishing, exchangeName string) error {
+func (a *AMQPClient) Publish(payload amqp.Publishing, exchange string) error {
 	err := a.handleClosed(func() error {
 		a.mutex.RLock()
 		defer a.mutex.RUnlock()
 
-		return a.channel.Publish(exchangeName, "", false, false, payload)
+		return a.channel.Publish(exchange, "", false, false, payload)
 	})
 	if err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
@@ -206,11 +189,13 @@ func (a *AMQPClient) SendExchange(payload amqp.Publishing, exchangeName string) 
 }
 
 // Listen listens to configured queue
-func (a *AMQPClient) Listen() (<-chan amqp.Delivery, error) {
+func (a *AMQPClient) Listen(queue string) (<-chan amqp.Delivery, error) {
+	a.ensureClientName()
+
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
 
-	messages, err := a.channel.Consume(a.queueName, a.clientName, false, false, false, false, nil)
+	messages, err := a.channel.Consume(queue, a.clientName, false, false, false, false, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to consume queue: %s", err)
 	}
@@ -289,12 +274,12 @@ func (a *AMQPClient) close(reconnect bool) error {
 
 // StopChannel cancel existing channel
 func (a *AMQPClient) StopChannel() {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+
 	if a.channel == nil {
 		return
 	}
-
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
 
 	a.closeChannel()
 }
@@ -304,7 +289,7 @@ func (a *AMQPClient) closeChannel() {
 		return
 	}
 
-	if len(a.queueName) != 0 {
+	if len(a.clientName) != 0 {
 		log := logger.WithField("name", a.clientName)
 
 		log.Info("Canceling AMQP channel")

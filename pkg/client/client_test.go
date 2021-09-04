@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
 )
 
@@ -25,7 +26,7 @@ func TestEnabled(t *testing.T) {
 		{
 			"simple",
 			App{
-				url: "http://mailer",
+				req: request.New().Post("http://mailer"),
 			},
 			true,
 		},
@@ -70,7 +71,7 @@ func TestSend(t *testing.T) {
 		{
 			"invalid request",
 			App{
-				url: "http://mailer",
+				req: request.New().Post("http://mailer"),
 			},
 			args{
 				mailRequest: model.NewMailRequest(),
@@ -80,7 +81,7 @@ func TestSend(t *testing.T) {
 		{
 			"invalid http",
 			App{
-				url: testServer.URL,
+				req: request.New().Post(testServer.URL),
 			},
 			args{
 				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
@@ -90,9 +91,7 @@ func TestSend(t *testing.T) {
 		{
 			"http",
 			App{
-				url:      testServer.URL,
-				name:     "admin",
-				password: "password",
+				req: request.New().Post(testServer.URL).BasicAuth("admin", "password"),
 			},
 			args{
 				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost"),

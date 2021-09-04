@@ -25,10 +25,8 @@ var (
 // App of package
 type App struct {
 	amqpClient *model.AMQPClient
-
-	url      string
-	name     string
-	password string
+	exchange   string
+	req        request.Request
 }
 
 // Config of package
@@ -68,13 +66,12 @@ func New(config Config) (App, error) {
 
 		return App{
 			amqpClient: client,
+			exchange:   name,
 		}, nil
 	}
 
 	return App{
-		url:      url,
-		name:     name,
-		password: *config.password,
+		req: request.New().Post(url).BasicAuth(name, *config.password),
 	}, nil
 }
 
@@ -84,14 +81,14 @@ func (a App) String() string {
 	}
 
 	if a.amqpEnabled() {
-		return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.amqpClient.ExchangeName(), a.amqpClient.Vhost())
+		return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.exchange, a.amqpClient.Vhost())
 	}
-	return fmt.Sprintf("Sending emails via HTTP to `%s`.", a.url)
+	return fmt.Sprintf("Sending emails via HTTP to `%v`.", a.req)
 }
 
 // Enabled checks if requirements are met
 func (a App) Enabled() bool {
-	return len(a.url) != 0 || a.amqpEnabled()
+	return !a.req.IsZero() || a.amqpEnabled()
 }
 
 func (a App) amqpEnabled() bool {
@@ -124,14 +121,9 @@ func (a App) Close() {
 func (a App) httpSend(ctx context.Context, mail model.MailRequest) error {
 	recipients := strings.Join(mail.Recipients, ",")
 
-	url := fmt.Sprintf("%s/render/%s?from=%s&sender=%s&to=%s&subject=%s", a.url, url.QueryEscape(mail.Tpl), url.QueryEscape(mail.FromEmail), url.QueryEscape(mail.Sender), url.QueryEscape(recipients), url.QueryEscape(mail.Subject))
+	queryPath := fmt.Sprintf("/render/%s?from=%s&sender=%s&to=%s&subject=%s", url.QueryEscape(mail.Tpl), url.QueryEscape(mail.FromEmail), url.QueryEscape(mail.Sender), url.QueryEscape(recipients), url.QueryEscape(mail.Subject))
 
-	req := request.New().Post(url)
-	if a.password != "" {
-		req = req.BasicAuth(a.name, a.password)
-	}
-
-	_, err := req.JSON(ctx, mail.Payload)
+	_, err := a.req.Path(queryPath).JSON(ctx, mail.Payload)
 	return err
 }
 
@@ -144,5 +136,5 @@ func (a App) amqpSend(ctx context.Context, mailRequest model.MailRequest) error 
 	return a.amqpClient.Publish(amqp.Publishing{
 		ContentType: "application/json",
 		Body:        payload,
-	})
+	}, a.exchange)
 }

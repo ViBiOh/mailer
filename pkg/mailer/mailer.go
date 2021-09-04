@@ -39,12 +39,10 @@ var (
 
 // App of package
 type App struct {
-	tpl *template.Template
-
-	mjmlApp   mjml.App
-	senderApp sender
-
+	senderApp    sender
+	tpl          *template.Template
 	templatesDir string
+	mjmlApp      mjml.App
 }
 
 // Config of package
