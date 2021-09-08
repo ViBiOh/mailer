@@ -31,21 +31,23 @@ func GetAMQPClient(uri string) (*AMQPClient, error) {
 		return nil, errors.New("URI is required")
 	}
 
-	connection, channel, err := connect(uri)
+	client := &AMQPClient{
+		uri: uri,
+	}
+
+	connection, channel, err := connect(uri, client.onClose)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to amqp: %s", err)
 	}
 
-	return &AMQPClient{
-		mutex:      sync.RWMutex{},
-		uri:        uri,
-		connection: connection,
-		channel:    channel,
-		vhost:      connection.Config.Vhost,
-	}, nil
+	client.connection = connection
+	client.channel = channel
+	client.vhost = connection.Config.Vhost
+
+	return client, nil
 }
 
-func connect(uri string) (*amqp.Connection, *amqp.Channel, error) {
+func connect(uri string, onClose func()) (*amqp.Connection, *amqp.Channel, error) {
 	logger.Info("Dialing AMQP with 10 seconds timeout...")
 
 	connection, err := amqp.DialConfig(uri, amqp.Config{
@@ -81,6 +83,12 @@ func connect(uri string) (*amqp.Connection, *amqp.Channel, error) {
 
 		return nil, nil, err
 	}
+
+	go func() {
+		for range connection.NotifyClose(make(chan *amqp.Error)) {
+			onClose()
+		}
+	}()
 
 	return connection, channel, nil
 }
@@ -264,6 +272,19 @@ func (a *AMQPClient) Close() {
 	}
 }
 
+func (a *AMQPClient) onClose() {
+	for {
+		if err := a.close(true); err != nil {
+			logger.Error("unable to reconnect: %s", err)
+
+			logger.Info("Waiting one minute before attempting to reconnect again...")
+			time.Sleep(time.Minute)
+		} else {
+			return
+		}
+	}
+}
+
 // Reconnect to amqp
 func (a *AMQPClient) Reconnect() error {
 	if err := a.close(true); err != nil {
@@ -284,7 +305,7 @@ func (a *AMQPClient) close(reconnect bool) error {
 		return nil
 	}
 
-	newConnection, newChannel, err := connect(a.uri)
+	newConnection, newChannel, err := connect(a.uri, a.onClose)
 	if err != nil {
 		return fmt.Errorf("unable to reconnect to amqp: %s", err)
 	}

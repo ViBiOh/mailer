@@ -140,6 +140,8 @@ func (a App) listen() (<-chan amqp.Delivery, error) {
 }
 
 func (a App) startListener(done <-chan struct{}, messages <-chan amqp.Delivery) {
+	reconnectListener := a.amqpClient.ListenReconnect()
+
 listener:
 	for message := range messages {
 		if err := a.sendEmail(message.Body); err != nil {
@@ -150,18 +152,23 @@ listener:
 		}
 	}
 
+	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening stopped")
+
 	select {
 	case <-done:
 		return
-	default:
+	case _, ok := <-reconnectListener:
+		if !ok {
+			return
+		}
 	}
 
 	for {
-		if newMessages, err := a.reconnect(); err != nil {
-			logger.Error("unable to reconnect: %s", err)
+		if newMessages, err := a.listen(); err != nil {
+			logger.Error("unable to reopen listener: %s", err)
 
-			logger.Info("Waiting one minute before attempting to reconnect again...")
-			time.Sleep(time.Minute)
+			logger.Info("Waiting 30 seconds before attempting to listen again...")
+			time.Sleep(time.Second * 30)
 		} else {
 			messages = newMessages
 			goto listener
@@ -222,19 +229,6 @@ func (a App) delayMessage(message amqp.Delivery) {
 	}
 
 	a.amqpClient.LoggedAck(message)
-}
-
-func (a App) reconnect() (<-chan amqp.Delivery, error) {
-	if err := a.amqpClient.Reconnect(); err != nil {
-		return nil, fmt.Errorf("unable to reconnect to amqp: %s", err)
-	}
-
-	messages, err := a.listen()
-	if err != nil {
-		return nil, fmt.Errorf("unable to reopen listener: %s", err)
-	}
-
-	return messages, nil
 }
 
 func getDeathCount(table amqp.Table) (int64, error) {
