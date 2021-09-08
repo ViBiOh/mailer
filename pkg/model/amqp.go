@@ -16,6 +16,8 @@ type AMQPClient struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
+	reconnectListeners []chan bool
+
 	uri        string
 	vhost      string
 	clientName string
@@ -24,7 +26,7 @@ type AMQPClient struct {
 }
 
 // GetAMQPClient inits AMQP connection, channel and queue
-func GetAMQPClient(uri string) (client *AMQPClient, err error) {
+func GetAMQPClient(uri string) (*AMQPClient, error) {
 	if len(uri) == 0 {
 		return nil, errors.New("URI is required")
 	}
@@ -81,6 +83,29 @@ func connect(uri string) (*amqp.Connection, *amqp.Channel, error) {
 	}
 
 	return connection, channel, nil
+}
+
+// ListenReconnect creates a chan notifier with a boolean when doing reconnection
+func (a *AMQPClient) ListenReconnect() <-chan bool {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+
+	listener := make(chan bool)
+	a.reconnectListeners = append(a.reconnectListeners, listener)
+
+	return listener
+}
+
+func (a *AMQPClient) closeListeners() {
+	for _, listener := range a.reconnectListeners {
+		close(listener)
+	}
+}
+
+func (a *AMQPClient) notifyListeners() {
+	for _, listener := range a.reconnectListeners {
+		listener <- true
+	}
 }
 
 // Publisher configures client for publishing to given exchange
@@ -255,6 +280,7 @@ func (a *AMQPClient) close(reconnect bool) error {
 	a.closeConnection()
 
 	if !reconnect {
+		a.closeListeners()
 		return nil
 	}
 
@@ -268,6 +294,8 @@ func (a *AMQPClient) close(reconnect bool) error {
 	a.vhost = newConnection.Config.Vhost
 
 	logger.Info("Connection reopened.")
+
+	go a.notifyListeners()
 
 	return nil
 }
