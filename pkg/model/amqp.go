@@ -119,18 +119,6 @@ func (a *AMQPClient) notifyListeners() {
 	}
 }
 
-// Publisher configures client for publishing to given exchange
-func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Table) error {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
-
-	if err := a.channel.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, args); err != nil {
-		return fmt.Errorf("unable to declare exchange `%s`: %s", exchangeName, err)
-	}
-
-	return nil
-}
-
 // Consumer configures client for consumming from given queue, bind to given exchange
 func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay time.Duration) error {
 	a.mutex.Lock()
@@ -146,16 +134,35 @@ func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay 
 	}
 
 	if retryDelay != 0 {
-		err := a.Publisher(getDelayedExchangeName(exchangeName), "direct", map[string]interface{}{
+		err := a.publisher(getDelayedExchangeName(exchangeName), "direct", map[string]interface{}{
 			"x-dead-letter-exchange": exchangeName,
 			"x-message-ttl":          retryDelay.Milliseconds(),
-		})
+		}, false)
 		if err != nil {
 			return fmt.Errorf("unable to declare delayed exchange: %s", getDelayedExchangeName(exchangeName))
 		}
 	}
 
 	a.ensureClientName()
+
+	return nil
+}
+
+// Publisher configures client for publishing to given exchange
+func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Table) error {
+	return a.publisher(exchangeName, exchangeType, args, true)
+}
+
+// Publisher configures client for publishing to given exchange
+func (a *AMQPClient) publisher(exchangeName, exchangeType string, args amqp.Table, lock bool) error {
+	if lock {
+		a.mutex.RLock()
+		defer a.mutex.RUnlock()
+	}
+
+	if err := a.channel.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, args); err != nil {
+		return fmt.Errorf("unable to declare exchange `%s`: %s", exchangeName, err)
+	}
 
 	return nil
 }
