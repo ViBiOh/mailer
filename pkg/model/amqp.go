@@ -35,7 +35,7 @@ func GetAMQPClient(uri string) (*AMQPClient, error) {
 		uri: uri,
 	}
 
-	connection, channel, err := connect(uri, client.onClose)
+	connection, channel, err := connect(uri, client.onDisconnect)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to amqp: %s", err)
 	}
@@ -44,10 +44,12 @@ func GetAMQPClient(uri string) (*AMQPClient, error) {
 	client.channel = channel
 	client.vhost = connection.Config.Vhost
 
+	logger.WithField("vhost", client.vhost).Info("Connected to AMQP!")
+
 	return client, nil
 }
 
-func connect(uri string, onClose func()) (*amqp.Connection, *amqp.Channel, error) {
+func connect(uri string, onDisconnect func()) (*amqp.Connection, *amqp.Channel, error) {
 	logger.Info("Dialing AMQP with 10 seconds timeout...")
 
 	connection, err := amqp.DialConfig(uri, amqp.Config{
@@ -86,7 +88,8 @@ func connect(uri string, onClose func()) (*amqp.Connection, *amqp.Channel, error
 
 	go func() {
 		for range connection.NotifyClose(make(chan *amqp.Error)) {
-			onClose()
+			logger.Warn("Connection closed, trying to reconnect.")
+			onDisconnect()
 		}
 	}()
 
@@ -211,17 +214,10 @@ func (a *AMQPClient) Vhost() string {
 
 // Publish sends payload to the underlying exchange
 func (a *AMQPClient) Publish(payload amqp.Publishing, exchange string) error {
-	err := a.handleClosed(func() error {
-		a.mutex.RLock()
-		defer a.mutex.RUnlock()
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
 
-		return a.channel.Publish(exchange, "", false, false, payload)
-	})
-	if err != nil {
-		return fmt.Errorf("unable to publish message: %s", err)
-	}
-
-	return nil
+	return a.channel.Publish(exchange, "", false, false, payload)
 }
 
 // Listen listens to configured queue
@@ -241,29 +237,22 @@ func (a *AMQPClient) Listen(queue string) (<-chan amqp.Delivery, error) {
 
 // LoggedAck ack a message with error handling
 func (a *AMQPClient) LoggedAck(message amqp.Delivery) {
-	err := a.handleClosed(func() error {
-		a.mutex.RLock()
-		defer a.mutex.RUnlock()
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
 
-		message.Acknowledger = a.channel
-		return message.Ack(false)
-	})
-	if err != nil {
+	message.Acknowledger = a.channel
+	if err := message.Ack(false); err != nil {
 		logger.Error("unable to ack message: %s", err)
 	}
 }
 
 // LoggedReject reject a message with error handling
 func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
-	err := a.handleClosed(func() error {
-		a.mutex.RLock()
-		defer a.mutex.RUnlock()
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
 
-		message.Acknowledger = a.channel
-		return message.Reject(requeue)
-	})
-
-	if err != nil {
+	message.Acknowledger = a.channel
+	if err := message.Reject(requeue); err != nil {
 		logger.Error("unable to reject message: %s", err)
 	}
 }
@@ -273,27 +262,6 @@ func (a *AMQPClient) Close() {
 	if err := a.close(false); err != nil {
 		logger.Error("unable to close: %s", err)
 	}
-}
-
-func (a *AMQPClient) onClose() {
-	for {
-		if err := a.close(true); err != nil {
-			logger.Error("unable to reconnect: %s", err)
-
-			logger.Info("Waiting one minute before attempting to reconnect again...")
-			time.Sleep(time.Minute)
-		} else {
-			return
-		}
-	}
-}
-
-// Reconnect to amqp
-func (a *AMQPClient) Reconnect() error {
-	if err := a.close(true); err != nil {
-		return fmt.Errorf("unable to reconnect: %s", err)
-	}
-	return nil
 }
 
 func (a *AMQPClient) close(reconnect bool) error {
@@ -308,7 +276,7 @@ func (a *AMQPClient) close(reconnect bool) error {
 		return nil
 	}
 
-	newConnection, newChannel, err := connect(a.uri, a.onClose)
+	newConnection, newChannel, err := connect(a.uri, a.onDisconnect)
 	if err != nil {
 		return fmt.Errorf("unable to reconnect to amqp: %s", err)
 	}
@@ -322,6 +290,19 @@ func (a *AMQPClient) close(reconnect bool) error {
 	go a.notifyListeners()
 
 	return nil
+}
+
+func (a *AMQPClient) onDisconnect() {
+	for {
+		if err := a.close(true); err != nil {
+			logger.Error("unable to reconnect: %s", err)
+
+			logger.Info("Waiting one minute before attempting to reconnect again...")
+			time.Sleep(time.Minute)
+		} else {
+			return
+		}
+	}
 }
 
 // StopChannel cancel existing channel
@@ -365,20 +346,6 @@ func (a *AMQPClient) closeConnection() {
 	LoggedCloser(a.connection)
 
 	a.connection = nil
-}
-
-func (a *AMQPClient) handleClosed(action func() error) error {
-	err := action()
-	if err != amqp.ErrClosed {
-		return err
-	}
-
-	logger.Warn("Channel was closed, trying to reconnect...")
-	if err := a.Reconnect(); err != nil {
-		logger.Error("unable to reconnect: %s", err)
-	}
-
-	return action()
 }
 
 // ConvertDeliveryToPublishing convert a delivery to a publishing, for requeuing
