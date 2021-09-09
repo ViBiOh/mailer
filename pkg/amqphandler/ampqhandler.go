@@ -148,7 +148,7 @@ listener:
 			logger.Error("unable to send email: %s", err)
 			a.handleError(message)
 		} else {
-			a.amqpClient.LoggedAck(message)
+			a.amqpClient.Ack(message)
 		}
 	}
 
@@ -195,7 +195,7 @@ func (a App) sendEmail(payload []byte) error {
 func (a App) handleError(message amqp.Delivery) {
 	if !a.retry {
 		logger.Error("message %s was rejected, content was `%s`", sha.New(message.Body), message.Body)
-		a.amqpClient.LoggedAck(message)
+		a.amqpClient.Ack(message)
 		return
 	}
 
@@ -207,13 +207,13 @@ func (a App) handleError(message amqp.Delivery) {
 		}
 
 		logger.Error("unable to get death count from message: %s", err)
-		a.amqpClient.LoggedReject(message, false)
+		a.amqpClient.Reject(message, false)
 		return
 	}
 
 	if count >= a.maxRetry {
 		logger.Error("message %s was rejected %d times, content was `%s`", sha.New(message.Body), a.maxRetry, message.Body)
-		a.amqpClient.LoggedAck(message)
+		a.amqpClient.Ack(message)
 		return
 	}
 
@@ -225,10 +225,10 @@ func (a App) delayMessage(message amqp.Delivery) {
 
 	if err := a.amqpClient.Publish(model.ConvertDeliveryToPublishing(message), a.exchange); err != nil {
 		logger.Error("unable to re-send garbage message: %s", err)
-		a.amqpClient.LoggedReject(message, true)
+		a.amqpClient.Reject(message, true)
 	}
 
-	a.amqpClient.LoggedAck(message)
+	a.amqpClient.Ack(message)
 }
 
 func getDeathCount(table amqp.Table) (int64, error) {

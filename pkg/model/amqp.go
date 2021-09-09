@@ -87,10 +87,15 @@ func connect(uri string, onDisconnect func()) (*amqp.Connection, *amqp.Channel, 
 	}
 
 	go func() {
+		localAddr := connection.LocalAddr()
+		logger.Warn("Listening close notifications %s", localAddr)
+		defer logger.Warn("Close notifications are over for %s", localAddr)
+
 		for range connection.NotifyClose(make(chan *amqp.Error)) {
 			logger.Warn("Connection closed, trying to reconnect.")
 			onDisconnect()
 		}
+
 	}()
 
 	return connection, channel, nil
@@ -134,7 +139,7 @@ func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay 
 	}
 
 	if retryDelay != 0 {
-		err := a.publisher(getDelayedExchangeName(exchangeName), "direct", map[string]interface{}{
+		err := a.declareExchange(getDelayedExchangeName(exchangeName), "direct", map[string]interface{}{
 			"x-dead-letter-exchange": exchangeName,
 			"x-message-ttl":          retryDelay.Milliseconds(),
 		}, false)
@@ -150,11 +155,11 @@ func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay 
 
 // Publisher configures client for publishing to given exchange
 func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Table) error {
-	return a.publisher(exchangeName, exchangeType, args, true)
+	return a.declareExchange(exchangeName, exchangeType, args, true)
 }
 
 // Publisher configures client for publishing to given exchange
-func (a *AMQPClient) publisher(exchangeName, exchangeType string, args amqp.Table, lock bool) error {
+func (a *AMQPClient) declareExchange(exchangeName, exchangeType string, args amqp.Table, lock bool) error {
 	if lock {
 		a.mutex.RLock()
 		defer a.mutex.RUnlock()
@@ -242,25 +247,46 @@ func (a *AMQPClient) Listen(queue string) (<-chan amqp.Delivery, error) {
 	return messages, nil
 }
 
-// LoggedAck ack a message with error handling
-func (a *AMQPClient) LoggedAck(message amqp.Delivery) {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
-
-	message.Acknowledger = a.channel
-	if err := message.Ack(false); err != nil {
-		logger.Error("unable to ack message: %s", err)
-	}
+// Ack ack a message with error handling
+func (a *AMQPClient) Ack(message amqp.Delivery) {
+	a.loggedConfirm(message, true, false)
 }
 
-// LoggedReject reject a message with error handling
-func (a *AMQPClient) LoggedReject(message amqp.Delivery, requeue bool) {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
+// Reject reject a message with error handling
+func (a *AMQPClient) Reject(message amqp.Delivery, requeue bool) {
+	a.loggedConfirm(message, false, requeue)
+}
 
-	message.Acknowledger = a.channel
-	if err := message.Reject(requeue); err != nil {
-		logger.Error("unable to reject message: %s", err)
+func (a *AMQPClient) loggedConfirm(message amqp.Delivery, ack bool, value bool) {
+	for {
+		var err error
+
+		if ack {
+			err = message.Ack(value)
+		} else {
+			err = message.Reject(value)
+		}
+
+		if err == nil {
+			return
+		}
+
+		if err != amqp.ErrClosed {
+			logger.Error("unable to confirm message: %s", err)
+			return
+		}
+
+		logger.Error("unable to confirm message due to a closed connection")
+
+		logger.Info("Waiting 30 seconds before attempting to confirm message again...")
+		time.Sleep(time.Second * 30)
+
+		func() {
+			a.mutex.RLock()
+			defer a.mutex.RUnlock()
+
+			message.Acknowledger = a.channel
+		}()
 	}
 }
 
@@ -346,6 +372,10 @@ func (a *AMQPClient) closeChannel() {
 
 func (a *AMQPClient) closeConnection() {
 	if a.connection == nil {
+		return
+	}
+
+	if a.connection.IsClosed() {
 		return
 	}
 
