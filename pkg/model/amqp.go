@@ -118,6 +118,9 @@ func (a *AMQPClient) notifyListeners() {
 
 // Publisher configures client for publishing to given exchange
 func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Table) error {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+
 	if err := a.channel.ExchangeDeclare(exchangeName, exchangeType, true, false, false, false, args); err != nil {
 		return fmt.Errorf("unable to declare exchange `%s`: %s", exchangeName, err)
 	}
@@ -127,6 +130,9 @@ func (a *AMQPClient) Publisher(exchangeName, exchangeType string, args amqp.Tabl
 
 // Consumer configures client for consumming from given queue, bind to given exchange
 func (a *AMQPClient) Consumer(queueName, topic, exchangeName string, retryDelay time.Duration) error {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+
 	queue, err := a.channel.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("unable to declare queue: %s", err)
@@ -156,9 +162,6 @@ func getDelayedExchangeName(exchangeName string) string {
 }
 
 func (a *AMQPClient) ensureClientName() {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-
 	if len(a.clientName) != 0 {
 		return
 	}
@@ -223,10 +226,10 @@ func (a *AMQPClient) Publish(payload amqp.Publishing, exchange string) error {
 
 // Listen listens to configured queue
 func (a *AMQPClient) Listen(queue string) (<-chan amqp.Delivery, error) {
-	a.ensureClientName()
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
 
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
+	a.ensureClientName()
 
 	messages, err := a.channel.Consume(queue, a.clientName, false, false, false, false, nil)
 	if err != nil {
