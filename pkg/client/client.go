@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 
+	amqpclient "github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
@@ -24,7 +25,7 @@ var (
 
 // App of package
 type App struct {
-	amqpClient *model.AMQPClient
+	amqpClient *amqpclient.Client
 	exchange   string
 	req        request.Request
 }
@@ -55,7 +56,7 @@ func New(config Config) (App, error) {
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := model.GetAMQPClient(url)
+		client, err := amqpclient.New(url)
 		if err != nil {
 			return App{}, fmt.Errorf("unable to create amqp client: %s", err)
 		}
@@ -119,9 +120,14 @@ func (a App) Close() {
 }
 
 func (a App) httpSend(ctx context.Context, mail model.MailRequest) error {
-	recipients := strings.Join(mail.Recipients, ",")
+	query := url.Values{
+		"from":    []string{mail.FromEmail},
+		"sender":  []string{mail.Sender},
+		"subject": []string{mail.Subject},
+		"to":      mail.Recipients,
+	}
 
-	queryPath := fmt.Sprintf("/render/%s?from=%s&sender=%s&to=%s&subject=%s", url.QueryEscape(mail.Tpl), url.QueryEscape(mail.FromEmail), url.QueryEscape(mail.Sender), url.QueryEscape(recipients), url.QueryEscape(mail.Subject))
+	queryPath := fmt.Sprintf("/render/%s?%s", url.PathEscape(mail.Tpl), query.Encode())
 
 	_, err := a.req.Path(queryPath).JSON(ctx, mail.Payload)
 	return err

@@ -86,6 +86,7 @@ func (a App) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.Mai
 	if httperror.HandleError(w, a.mailerApp.Send(ctx, mr.ConvertToMail(output))) {
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -97,8 +98,8 @@ func parseMailRequest(r *http.Request) model.MailRequest {
 	mr = mr.As(strings.TrimSpace(r.URL.Query().Get("sender")))
 	mr = mr.WithSubject(strings.TrimSpace(r.URL.Query().Get("subject")))
 
-	for _, rawTo := range strings.Split(r.URL.Query().Get("to"), ",") {
-		if cleanTo := strings.TrimSpace(rawTo); cleanTo != "" {
+	for _, rawTo := range r.URL.Query()["to"] {
+		if cleanTo := strings.TrimSpace(rawTo); len(cleanTo) != 0 {
 			mr = mr.To(cleanTo)
 		}
 	}

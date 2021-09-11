@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	amqpclient "github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/sha"
@@ -23,7 +24,7 @@ var (
 
 // App of package
 type App struct {
-	amqpClient *model.AMQPClient
+	amqpClient *amqpclient.Client
 	done       chan struct{}
 	queue      string
 	exchange   string
@@ -70,7 +71,7 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		return app, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
 
-	client, err := model.GetAMQPClient(url)
+	client, err := amqpclient.New(url)
 	if err != nil {
 		return app, fmt.Errorf("unable to create amqp client: %s", err)
 	}
@@ -223,7 +224,7 @@ func (a App) handleError(message amqp.Delivery) {
 func (a App) delayMessage(message amqp.Delivery) {
 	logger.Info("Delaying message treatment for %s...", sha.New(message.Body))
 
-	if err := a.amqpClient.Publish(model.ConvertDeliveryToPublishing(message), a.exchange); err != nil {
+	if err := a.amqpClient.Publish(amqpclient.ConvertDeliveryToPublishing(message), a.exchange); err != nil {
 		logger.Error("unable to re-send garbage message: %s", err)
 		a.amqpClient.Reject(message, true)
 	}
