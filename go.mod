@@ -3,7 +3,7 @@ module github.com/ViBiOh/mailer
 go 1.17
 
 require (
-	github.com/ViBiOh/httputils/v4 v4.23.0
+	github.com/ViBiOh/httputils/v4 v4.23.1
 	github.com/streadway/amqp v1.0.0
 )
 

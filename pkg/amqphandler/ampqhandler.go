@@ -77,8 +77,8 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 	}
 
 	queue := strings.TrimSpace(*config.queue)
-	exchange := strings.TrimSpace(*config.exchange)
-	if err := client.Consumer(queue, "", exchange, retryInterval); err != nil {
+	exchange, err := client.Consumer(queue, "", strings.TrimSpace(*config.exchange), retryInterval)
+	if err != nil {
 		client.Close()
 		return app, fmt.Errorf("unable to configure consumer amqp: %s", err)
 	}
