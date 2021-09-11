@@ -1,0 +1,7 @@
+{
+  "host": "gripoil",
+  "env": {
+    "PAM_TYPE": "open_session",
+    "PAM_RHOST": "localhost"
+  }
+}
