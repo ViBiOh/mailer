@@ -16,8 +16,10 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
+	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type sender interface {
@@ -58,7 +60,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer prometheus.Registerer) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")
@@ -66,6 +68,8 @@ func New(config Config, mjmlApp mjml.App, senderApp sender) App {
 	if err != nil {
 		logger.Error("%s", err)
 	}
+
+	metric.Create(prometheusRegisterer, "render")
 
 	return App{
 		templatesDir: templatesDir,
@@ -103,8 +107,11 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 	buffer.Reset()
 
 	if err := tpl.Execute(buffer, mailRequest.Payload); err != nil {
+		metric.Increase("render", "error")
 		return nil, err
 	}
+
+	metric.Increase("render", "success")
 
 	if err := a.convertMjml(ctx, buffer); err != nil {
 		return nil, err

@@ -10,6 +10,8 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
+	"github.com/ViBiOh/mailer/pkg/metric"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -47,11 +49,13 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config) App {
+func New(config Config, prometheusRegisterer prometheus.Registerer) App {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}
 	}
+
+	metric.Create(prometheusRegisterer, "mjml")
 
 	return App{
 		req: request.New().Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
@@ -81,8 +85,11 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 
 	var response mjmlResponse
 	if err := httpjson.Read(resp, &response); err != nil {
+		metric.Increase("mjml", "error")
 		return "", fmt.Errorf("unable to read mjml response: %s", err)
 	}
+
+	metric.Increase("mjml", "converted")
 
 	return response.HTML, nil
 }

@@ -113,7 +113,6 @@ func getSubject(subject string, payload interface{}) string {
 
 // ConvertToMail convert mail request to Mail with given content
 func (mr MailRequest) ConvertToMail(content io.Reader) Mail {
-
 	return Mail{
 		From:    mr.FromEmail,
 		Sender:  mr.Sender,

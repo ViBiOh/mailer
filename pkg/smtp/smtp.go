@@ -11,7 +11,9 @@ import (
 	"sync"
 
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
+	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -47,13 +49,15 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config) App {
+func New(config Config, prometheusRegisterer prometheus.Registerer) App {
 	var auth smtp.Auth
 
 	user := strings.TrimSpace(*config.username)
 	if len(user) > 0 {
 		auth = smtp.PlainAuth("", user, *config.password, strings.TrimSpace(*config.host))
 	}
+
+	metric.Create(prometheusRegisterer, "smtp")
 
 	return App{
 		address: strings.TrimSpace(*config.address),
@@ -79,5 +83,13 @@ func (a App) Send(_ context.Context, mail model.Mail) error {
 
 	body.WriteString("\r\n")
 
-	return smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
+	err := smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
+
+	if err != nil {
+		metric.Increase("smtp", "error")
+	} else {
+		metric.Increase("smtp", "sent")
+	}
+
+	return err
 }

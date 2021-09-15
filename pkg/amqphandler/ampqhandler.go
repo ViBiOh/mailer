@@ -14,7 +14,9 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/sha"
 	"github.com/ViBiOh/mailer/pkg/mailer"
+	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
 )
 
@@ -54,7 +56,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mailerApp mailer.App) (App, error) {
+func New(config Config, mailerApp mailer.App, prometheusRegisterer prometheus.Registerer) (App, error) {
 	app := App{
 		done:      make(chan struct{}),
 		mailerApp: mailerApp,
@@ -87,6 +89,8 @@ func New(config Config, mailerApp mailer.App) (App, error) {
 		client.Close()
 		return app, fmt.Errorf("unable to ping amqp: %s", err)
 	}
+
+	metric.Create(prometheusRegisterer, "amqp")
 
 	app.amqpClient = client
 	app.queue = queue
@@ -145,10 +149,13 @@ func (a App) startListener(done <-chan struct{}, messages <-chan amqp.Delivery) 
 
 listener:
 	for message := range messages {
+		metric.Increase("amqp", "received")
+
 		if err := a.sendEmail(message.Body); err != nil {
 			logger.Error("unable to send email: %s", err)
 			a.handleError(message)
 		} else {
+			metric.Increase("amqp", "ack")
 			a.amqpClient.Ack(message)
 		}
 	}
@@ -165,6 +172,8 @@ listener:
 	}
 
 	for {
+		metric.Increase("amqp", "reconnect")
+
 		if newMessages, err := a.listen(); err != nil {
 			logger.Error("unable to reopen listener: %s", err)
 
@@ -195,6 +204,7 @@ func (a App) sendEmail(payload []byte) error {
 
 func (a App) handleError(message amqp.Delivery) {
 	if !a.retry {
+		metric.Increase("amqp", "rejected")
 		logger.Error("message %s was rejected, content was `%s`", sha.New(message.Body), message.Body)
 		a.amqpClient.Ack(message)
 		return
@@ -207,12 +217,14 @@ func (a App) handleError(message amqp.Delivery) {
 			return
 		}
 
+		metric.Increase("amqp", "lost")
 		logger.Error("unable to get death count from message: %s", err)
 		a.amqpClient.Reject(message, false)
 		return
 	}
 
 	if count >= a.maxRetry {
+		metric.Increase("amqp", "rejected")
 		logger.Error("message %s was rejected %d times, content was `%s`", sha.New(message.Body), a.maxRetry, message.Body)
 		a.amqpClient.Ack(message)
 		return
@@ -226,8 +238,12 @@ func (a App) delayMessage(message amqp.Delivery) {
 
 	if err := a.amqpClient.Publish(amqpclient.ConvertDeliveryToPublishing(message), a.exchange); err != nil {
 		logger.Error("unable to re-send garbage message: %s", err)
+		metric.Increase("amqp", "error")
 		a.amqpClient.Reject(message, true)
+		return
 	}
+
+	metric.Increase("amqp", "delayed")
 
 	a.amqpClient.Ack(message)
 }

@@ -49,11 +49,11 @@ func main() {
 	promServer := server.New(promServerConfig)
 	prometheusApp := prometheus.New(prometheusConfig)
 
-	mjmlApp := mjml.New(mjmlConfig)
-	senderApp := smtp.New(smtpConfig)
-	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp)
+	mjmlApp := mjml.New(mjmlConfig, prometheusApp.Registerer())
+	senderApp := smtp.New(smtpConfig, prometheusApp.Registerer())
+	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer())
 
-	amqpApp, err := amqphandler.New(amqpConfig, mailerApp)
+	amqpApp, err := amqphandler.New(amqpConfig, mailerApp, prometheusApp.Registerer())
 	if err != nil {
 		logger.Error("unable to create amqp: %s", err)
 	}
