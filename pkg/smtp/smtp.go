@@ -88,7 +88,7 @@ func (a App) Send(_ context.Context, mail model.Mail) error {
 	if err != nil {
 		metric.Increase("smtp", "error")
 	} else {
-		metric.Increase("smtp", "sent")
+		metric.Increase("smtp", "success")
 	}
 
 	return err

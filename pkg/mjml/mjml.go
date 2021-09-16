@@ -80,16 +80,16 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 
 	resp, err := a.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {
+		metric.Increase("mjml", "error")
 		return "", fmt.Errorf("unable to render mjml template: %s", err)
 	}
 
 	var response mjmlResponse
 	if err := httpjson.Read(resp, &response); err != nil {
-		metric.Increase("mjml", "error")
 		return "", fmt.Errorf("unable to read mjml response: %s", err)
 	}
 
-	metric.Increase("mjml", "converted")
+	metric.Increase("mjml", "success")
 
 	return response.HTML, nil
 }

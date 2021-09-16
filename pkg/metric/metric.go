@@ -28,6 +28,8 @@ func Create(prometheusRegisterer prometheus.Registerer, name string) {
 	if err := prometheusRegisterer.Register(counter); err != nil {
 		logger.Error("unable to register `%s` metric: %s", name, err)
 	}
+
+	metrics[name] = counter
 }
 
 // Increase increases the given metric for given state
