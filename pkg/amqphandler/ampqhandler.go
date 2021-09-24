@@ -119,35 +119,19 @@ func (a App) Start(done <-chan struct{}) {
 		return
 	}
 
-	messages, err := a.listen()
+	name, messages, err := a.amqpClient.Listen(a.queue)
 	if err != nil {
 		logger.Error("%s", err)
 		return
 	}
 
+	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", name)
+
 	go func() {
 		<-done
-		a.amqpClient.StopChannel()
+		a.amqpClient.StopListener(name)
 	}()
 
-	a.startListener(done, messages)
-}
-
-func (a App) listen() (<-chan amqp.Delivery, error) {
-	messages, err := a.amqpClient.Listen(a.queue)
-	if err != nil {
-		return nil, fmt.Errorf("unable to listen on queue: %s", err)
-	}
-
-	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", a.amqpClient.ClientName())
-
-	return messages, nil
-}
-
-func (a App) startListener(done <-chan struct{}, messages <-chan amqp.Delivery) {
-	reconnectListener := a.amqpClient.ListenReconnect()
-
-listener:
 	for message := range messages {
 		metric.Increase("amqp", "received")
 
@@ -161,29 +145,6 @@ listener:
 	}
 
 	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening stopped")
-
-	select {
-	case <-done:
-		return
-	case _, ok := <-reconnectListener:
-		if !ok {
-			return
-		}
-	}
-
-	for {
-		metric.Increase("amqp", "reconnect")
-
-		if newMessages, err := a.listen(); err != nil {
-			logger.Error("unable to reopen listener: %s", err)
-
-			logger.Info("Waiting 30 seconds before attempting to listen again...")
-			time.Sleep(time.Second * 30)
-		} else {
-			messages = newMessages
-			goto listener
-		}
-	}
 }
 
 func (a App) sendEmail(payload []byte) error {
