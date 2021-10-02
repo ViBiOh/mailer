@@ -26,13 +26,13 @@ var (
 
 // App of package
 type App struct {
-	amqpClient *amqpclient.Client
-	done       chan struct{}
-	queue      string
-	exchange   string
-	mailerApp  mailer.App
-	maxRetry   int64
-	retry      bool
+	amqpClient    *amqpclient.Client
+	done          chan struct{}
+	queue         string
+	delayExchange string
+	mailerApp     mailer.App
+	maxRetry      int64
+	retry         bool
 }
 
 // Config of package
@@ -72,30 +72,26 @@ func New(config Config, mailerApp mailer.App, prometheusRegisterer prometheus.Re
 	if err != nil {
 		return app, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
+	app.retry = retryInterval != 0
 
-	client, err := amqpclient.New(url)
+	app.amqpClient, err = amqpclient.New(url, prometheusRegisterer)
 	if err != nil {
 		return app, fmt.Errorf("unable to create amqp client: %s", err)
 	}
 
-	queue := strings.TrimSpace(*config.queue)
-	exchange, err := client.Consumer(queue, "", strings.TrimSpace(*config.exchange), retryInterval)
+	app.queue = strings.TrimSpace(*config.queue)
+	app.delayExchange, err = app.amqpClient.Consumer(app.queue, "", strings.TrimSpace(*config.exchange), retryInterval)
 	if err != nil {
-		client.Close()
+		app.amqpClient.Close()
 		return app, fmt.Errorf("unable to configure consumer amqp: %s", err)
 	}
 
-	if err := client.Ping(); err != nil {
-		client.Close()
+	if err = app.amqpClient.Ping(); err != nil {
+		app.amqpClient.Close()
 		return app, fmt.Errorf("unable to ping amqp: %s", err)
 	}
 
 	metric.Create(prometheusRegisterer, "amqp")
-
-	app.amqpClient = client
-	app.queue = queue
-	app.exchange = exchange
-	app.retry = retryInterval != 0
 
 	return app, nil
 }
@@ -119,32 +115,29 @@ func (a App) Start(done <-chan struct{}) {
 		return
 	}
 
-	name, messages, err := a.amqpClient.Listen(a.queue)
+	consumerName, messages, err := a.amqpClient.Listen(a.queue)
 	if err != nil {
-		logger.Error("%s", err)
+		logger.Error("unable to listen `%s`: %s", a.queue, err)
 		return
 	}
 
-	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening as `%s`", name)
-
 	go func() {
 		<-done
-		a.amqpClient.StopListener(name)
+		a.amqpClient.StopListener(consumerName)
 	}()
 
-	for message := range messages {
-		metric.Increase("amqp", "received")
+	log := logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost())
+	log.Info("Listening messages - started")
+	defer log.Info("Listening messages - ended")
 
+	for message := range messages {
 		if err := a.sendEmail(message.Body); err != nil {
 			logger.Error("unable to send email: %s", err)
 			a.handleError(message)
 		} else {
-			metric.Increase("amqp", "ack")
 			a.amqpClient.Ack(message)
 		}
 	}
-
-	logger.WithField("queue", a.queue).WithField("vhost", a.amqpClient.Vhost()).Info("Listening stopped")
 }
 
 func (a App) sendEmail(payload []byte) error {
@@ -195,11 +188,12 @@ func (a App) handleError(message amqp.Delivery) {
 }
 
 func (a App) delayMessage(message amqp.Delivery) {
-	logger.Info("Delaying message treatment for %s...", sha.New(message.Body))
+	messageSha := sha.New(message.Body)
 
-	if err := a.amqpClient.Publish(amqpclient.ConvertDeliveryToPublishing(message), a.exchange); err != nil {
-		logger.Error("unable to re-send garbage message: %s", err)
-		metric.Increase("amqp", "error")
+	logger.Info("Delaying message `%s`...", messageSha)
+
+	if err := a.amqpClient.Publish(amqpclient.ConvertDeliveryToPublishing(message), a.delayExchange); err != nil {
+		logger.Error("unable to delay message `%s`: %s", messageSha, err)
 		a.amqpClient.Reject(message, true)
 		return
 	}
