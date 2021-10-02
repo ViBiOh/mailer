@@ -13,6 +13,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
 )
 
@@ -47,7 +48,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config) (App, error) {
+func New(config Config, prometheusRegister prometheus.Registerer) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}, nil
@@ -56,7 +57,7 @@ func New(config Config) (App, error) {
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := amqpclient.New(url)
+		client, err := amqpclient.New(url, prometheusRegister)
 		if err != nil {
 			return App{}, fmt.Errorf("unable to create amqp client: %s", err)
 		}

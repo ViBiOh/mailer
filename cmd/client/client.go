@@ -8,6 +8,7 @@ import (
 
 	"github.com/ViBiOh/mailer/pkg/client"
 	"github.com/ViBiOh/mailer/pkg/model"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client, err := client.New(mailerConfig)
+	client, err := client.New(mailerConfig, prometheus.DefaultRegisterer)
 	if err != nil {
 		log.Fatal(err)
 	}
