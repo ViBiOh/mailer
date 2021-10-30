@@ -84,7 +84,7 @@ func TestSend(t *testing.T) {
 				req: request.New().Post(testServer.URL),
 			},
 			args{
-				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
+				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost").Template("test"),
 			},
 			errors.New("HTTP/401"),
 		},
@@ -94,7 +94,7 @@ func TestSend(t *testing.T) {
 				req: request.New().Post(testServer.URL).BasicAuth("admin", "password"),
 			},
 			args{
-				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost"),
+				mailRequest: model.NewMailRequest().From("alice@localhost").To("bob@localhost").Template("test"),
 			},
 			nil,
 		},

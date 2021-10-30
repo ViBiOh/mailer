@@ -1,9 +1,67 @@
 package model
 
-import "testing"
+import (
+	"errors"
+	"strings"
+	"testing"
+)
 
 func noop() {
 	// Do nothing
+}
+
+func TestCheck(t *testing.T) {
+	var cases = []struct {
+		intention string
+		instance  MailRequest
+		wantErr   error
+	}{
+		{
+			"empty",
+			NewMailRequest(),
+			errors.New("from email is required"),
+		},
+		{
+			"no recipients",
+			NewMailRequest().From("nobody@localhost.fr"),
+			errors.New("recipients are required"),
+		},
+		{
+			"empty recipients",
+			NewMailRequest().From("nobody@localhost.fr").To("john@doe.fr", "").To("john@john.fr"),
+			errors.New("recipient at index 1 is empty"),
+		},
+		{
+			"empty template",
+			NewMailRequest().From("nobody@localhost.fr").To("john@doe.fr"),
+			errors.New("template name is required"),
+		},
+		{
+			"valid",
+			NewMailRequest().From("nobody@localhost.fr").To("john@doe.fr").WithSubject("test").Template("test"),
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.intention, func(t *testing.T) {
+			gotErr := tc.instance.Check()
+
+			failed := false
+
+			if tc.wantErr == nil && gotErr != nil {
+				failed = true
+			} else if tc.wantErr != nil && gotErr == nil {
+				failed = true
+			} else if tc.wantErr != nil && !strings.Contains(gotErr.Error(), tc.wantErr.Error()) {
+				failed = true
+			}
+
+			if failed {
+				t.Errorf("Check() = `%s`, want `%s`", gotErr, tc.wantErr)
+			}
+		})
+	}
 }
 
 func TestGetSubject(t *testing.T) {

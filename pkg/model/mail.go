@@ -26,8 +26,8 @@ func NewMailRequest() MailRequest {
 }
 
 // Template set template
-func (mr MailRequest) Template(Tpl string) MailRequest {
-	mr.Tpl = Tpl
+func (mr MailRequest) Template(template string) MailRequest {
+	mr.Tpl = template
 
 	return mr
 }
@@ -87,6 +87,10 @@ func (mr MailRequest) Check() error {
 		}
 	}
 
+	if len(mr.Tpl) == 0 {
+		return errors.New("template name is required")
+	}
+
 	return nil
 }
 
@@ -97,14 +101,14 @@ func getSubject(subject string, payload interface{}) string {
 
 	tpl, err := template.New("subject").Parse(subject)
 	if err != nil {
-		logger.Warn("subject `%s` is not a template: %s", subject, err)
+		logger.Warn("cannot parse template subject `%s`: %s", subject, err)
 		return subject
 	}
 
 	subjectOutput := strings.Builder{}
 
 	if err := tpl.Execute(&subjectOutput, payload); err != nil {
-		logger.Warn("subject `%s` template got an error: %s", subject, err)
+		logger.Warn("cannot execute template subject `%s`: %s", subject, err)
 		return subject
 	}
 
