@@ -1,0 +1,62 @@
+{{ define "release_remind" }}
+  <mj-text color="#c0c0c0">
+    {{ if eq .repository.kind "helm" }}
+      <strong>{{ .repository.part }} @ </strong>
+    {{ end }}
+
+    <strong>{{ .repository.name }}</strong>
+    new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
+
+    <strong>
+      <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
+    </strong>
+  </mj-text>
+{{ end -}}
+
+<mjml>
+  <mj-body background-color="#3b3b3b">
+    {{ template "header" "Ketchup" }}
+
+    {{ $kind := "" }}
+
+    <mj-section background-color="#3b3b3b" padding="0">
+      <mj-column>
+        <mj-text color="#c0c0c0" align="center">
+          <h1>It's almost the weekend... 🏖</h1>
+          <h2>But some dependencies have not been updated this week.</h2>
+
+          Today is the ideal date to be up to date
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#3b3b3b">
+      <mj-column>
+        {{ range $index, $release := .releases }}
+          {{ if ne .repository.kind $kind }}
+            {{ if eq .repository.kind "github" }}
+              <mj-image alt="GitHub Logo" width="50px" src="https://ketchup.vibioh.fr/images/github.png" />
+            {{ end }}
+            {{ if eq .repository.kind "helm" }}
+              <mj-image alt="Helm Logo" width="50px" src="https://ketchup.vibioh.fr/images/helm.png" />
+            {{ end }}
+            {{ if eq .repository.kind "docker" }}
+              <mj-image alt="Docker Logo" width="50px" src="https://ketchup.vibioh.fr/images/docker.png" />
+            {{ end }}
+            {{ if eq .repository.kind "npm" }}
+              <mj-image alt="NPM Logo" width="50px" src="https://ketchup.vibioh.fr/images/npm.png" />
+            {{ end }}
+            {{ if eq .repository.kind "pypi" }}
+              <mj-image alt="Pypi Logo" width="50px" src="https://ketchup.vibioh.fr/images/pypi.png" />
+            {{ end }}
+
+            {{ $kind = .repository.kind }}
+          {{ end }}
+          {{ template "release" $release }}
+        {{ end }}
+      </mj-column>
+    </mj-section>
+
+    {{ template "footer" }}
+  </mj-body>
+</mjml>

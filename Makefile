@@ -81,7 +81,7 @@ build:
 .PHONY: run
 run:
 	$(MAIN_RUNNER) \
-		-mjmlURL "http://localhost:3000"
+		-mjmlURL "http://localhost:4000"
 
 ## run-client: Locally run the client
 .PHONY: run-client

@@ -1,0 +1,49 @@
+{
+  "releases": [
+    {
+      "repository": {
+        "name": "vibioh/viws",
+        "version": "1.2.1",
+        "kind": "github"
+      },
+      "pattern": "stable",
+      "url": "http://duckduckgo.com",
+      "version": {
+        "name": "1.2.1"
+      }
+    },
+    {
+      "repository": {
+        "name": "https://charts.vibioh.fr",
+        "part": "app",
+        "kind": "helm"
+      },
+      "pattern": "stable",
+      "url": "http://duckduckgo.com",
+      "version": {
+        "name": "1.0.1"
+      }
+    },
+    {
+      "repository": {
+        "name": "vibioh/ketchup",
+        "kind": "docker"
+      },
+      "pattern": "stable",
+      "url": "http://duckduckgo.com",
+      "version": {
+        "name": "1.2.3"
+      }
+    },
+    {
+      "repository": {
+        "name": "funtch",
+        "kind": "npm"
+      },
+      "pattern": "stable",
+      "version": {
+        "name": "2.5.3"
+      }
+    }
+  ]
+}
