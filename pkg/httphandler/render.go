@@ -15,13 +15,11 @@ import (
 	"github.com/ViBiOh/mailer/pkg/model"
 )
 
-var (
-	bufferPool = sync.Pool{
-		New: func() interface{} {
-			return bytes.NewBuffer(make([]byte, 32*1024))
-		},
-	}
-)
+var bufferPool = sync.Pool{
+	New: func() interface{} {
+		return bytes.NewBuffer(make([]byte, 32*1024))
+	},
+}
 
 func (a App) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

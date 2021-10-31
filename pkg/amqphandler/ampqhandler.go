@@ -20,9 +20,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var (
-	errNoDeathCount = errors.New("no death count")
-)
+var errNoDeathCount = errors.New("no death count")
 
 // App of package
 type App struct {

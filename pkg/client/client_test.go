@@ -13,7 +13,7 @@ import (
 )
 
 func TestEnabled(t *testing.T) {
-	var cases = []struct {
+	cases := []struct {
 		intention string
 		instance  App
 		want      bool
@@ -54,7 +54,7 @@ func TestSend(t *testing.T) {
 		mailRequest model.MailRequest
 	}
 
-	var cases = []struct {
+	cases := []struct {
 		intention string
 		instance  App
 		args      args

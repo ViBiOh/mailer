@@ -31,13 +31,11 @@ const (
 	jsonExtension     = ".json"
 )
 
-var (
-	bufferPool = sync.Pool{
-		New: func() interface{} {
-			return bytes.NewBuffer(nil)
-		},
-	}
-)
+var bufferPool = sync.Pool{
+	New: func() interface{} {
+		return bytes.NewBuffer(nil)
+	},
+}
 
 // App of package
 type App struct {

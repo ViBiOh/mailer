@@ -11,7 +11,7 @@ func noop() {
 }
 
 func TestCheck(t *testing.T) {
-	var cases = []struct {
+	cases := []struct {
 		intention string
 		instance  MailRequest
 		wantErr   error
@@ -70,7 +70,7 @@ func TestGetSubject(t *testing.T) {
 		payload interface{}
 	}
 
-	var cases = []struct {
+	cases := []struct {
 		intention string
 		args      args
 		want      string

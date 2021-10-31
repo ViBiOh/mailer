@@ -14,9 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var (
-	prefix = []byte("<mjml>")
-)
+var prefix = []byte("<mjml>")
 
 type mjmlRequest struct {
 	Mjml string `json:"mjml"`

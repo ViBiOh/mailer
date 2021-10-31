@@ -65,7 +65,7 @@ func (a App) GetFixture(name, fixture string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(fixturePath, os.O_RDONLY, 0600)
+	file, err := os.OpenFile(fixturePath, os.O_RDONLY, 0o600)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file `%s`: %w", fixturePath, err)
 	}

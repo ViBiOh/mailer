@@ -9,9 +9,7 @@ const (
 	namespace = "mailer"
 )
 
-var (
-	metrics = make(map[string]*prometheus.CounterVec)
-)
+var metrics = make(map[string]*prometheus.CounterVec)
 
 // Create creates a metrics for the mailer
 func Create(prometheusRegisterer prometheus.Registerer, name string) {
