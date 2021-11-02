@@ -1,16 +1,26 @@
 {{ define "release" }}
-  <mj-text color="#c0c0c0">
-    {{ if eq .repository.kind "helm" }}
-      <strong>{{ .repository.part }} @ </strong>
-    {{ end }}
+  <mj-section full-width padding="0">
+    <mj-column width="80%" vertical-align="middle">
+      <mj-text color="#c0c0c0">
+        {{ if eq .repository.kind "helm" }}
+          <strong>{{ .repository.part }} @ </strong>
+        {{ end }}
 
-    <strong>{{ .repository.name }}</strong>
-    new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
+        <strong>{{ .repository.name }}</strong>
+        new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
 
-    <strong>
-      <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
-    </strong>
-  </mj-text>
+        <strong>
+          <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
+        </strong>
+      </mj-text>
+    </mj-column>
+
+    <mj-column width="20%" vertical-align="middle">
+      {{ if eq .updated 2.0 }}
+        <mj-image alt="Auto update succeeded" title="Auto update succeeded" width="20px" src="https://ketchup.vibioh.fr/images/update_success.png" />
+      {{ end }}
+    </mj-column>
+  </mj-section>
 {{ end -}}
 
 <mjml>
@@ -19,10 +29,10 @@
 
     {{ $kind := "" }}
 
-    <mj-section background-color="#3b3b3b">
-      <mj-column>
-        {{ range $index, $release := .releases }}
-          {{ if ne .repository.kind $kind }}
+    {{ range $index, $release := .releases }}
+      {{ if ne .repository.kind $kind }}
+        <mj-section full-width background-color="#3b3b3b">
+          <mj-column width="100%">
             {{ if eq .repository.kind "github" }}
               <mj-image alt="GitHub Logo" width="50px" src="https://ketchup.vibioh.fr/images/github.png" />
             {{ end }}
@@ -41,10 +51,13 @@
 
             {{ $kind = .repository.kind }}
           {{ end }}
-          {{ template "release" $release }}
-        {{ end }}
-      </mj-column>
-    </mj-section>
+        </mj-column>
+      </mj-section>
+
+      {{ template "release" $release }}
+    {{ end }}
+
+    <mj-section />
 
     {{ template "footer" }}
   </mj-body>

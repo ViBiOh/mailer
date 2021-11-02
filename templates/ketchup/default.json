@@ -7,9 +7,23 @@
         "kind": "github"
       },
       "pattern": "stable",
+      "updated": 1,
       "url": "http://duckduckgo.com",
       "version": {
         "name": "1.2.1"
+      }
+    },
+    {
+      "repository": {
+        "name": "vibioh/ketchup",
+        "version": "1.2.3",
+        "kind": "github"
+      },
+      "pattern": "stable",
+      "updated": 2,
+      "url": "http://duckduckgo.com",
+      "version": {
+        "name": "1.2.4"
       }
     },
     {
@@ -19,6 +33,7 @@
         "kind": "helm"
       },
       "pattern": "stable",
+      "updated": 1,
       "url": "http://duckduckgo.com",
       "version": {
         "name": "1.0.1"
@@ -30,6 +45,7 @@
         "kind": "docker"
       },
       "pattern": "stable",
+      "updated": 2,
       "url": "http://duckduckgo.com",
       "version": {
         "name": "1.2.3"
@@ -41,6 +57,7 @@
         "kind": "npm"
       },
       "pattern": "stable",
+      "updated": 0,
       "version": {
         "name": "2.5.3"
       }
