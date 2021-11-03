@@ -1,24 +1,31 @@
 {{ define "release" }}
   <mj-section full-width padding="0">
-    <mj-column width="80%" vertical-align="middle">
-      <mj-text color="#c0c0c0">
-        {{ if eq .repository.kind "helm" }}
-          <strong>{{ .repository.part }} @ </strong>
-        {{ end }}
+    <mj-column>
+      <mj-table color="#c0c0c0">
+        <tr>
+          <td style="padding-right: 8px; width: 20px;">
+            {{ if ne .updated 0.0 }}
+              {{ if eq .updated 2.0 }}
+                <img style="vertical-align: middle;" alt="Auto-update failed" title="Auto-update failed" width="20px" src="https://ketchup.vibioh.fr/images/update_success.png" />
+              {{ else }}
+                <img style="vertical-align: middle;" alt="Auto-update succeeded" title="Auto-update succeeded" width="20px" src="https://ketchup.vibioh.fr/images/update_failure.png" />
+              {{ end }}
+            {{ end }}
+          </td>
+          <td>
+            {{ if eq .repository.kind "helm" }}
+              <strong>{{ .repository.part }} @ </strong>
+            {{ end }}
 
-        <strong>{{ .repository.name }}</strong>
-        new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
+            <strong>{{ .repository.name }}</strong>
+            new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
 
-        <strong>
-          <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
-        </strong>
-      </mj-text>
-    </mj-column>
-
-    <mj-column width="20%" vertical-align="middle">
-      {{ if eq .updated 2.0 }}
-        <mj-image alt="Auto update succeeded" title="Auto update succeeded" width="20px" src="https://ketchup.vibioh.fr/images/update_success.png" />
-      {{ end }}
+            <strong>
+              <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
+            </strong>
+          </td>
+        </tr>
+      </mj-table>
     </mj-column>
   </mj-section>
 {{ end -}}
