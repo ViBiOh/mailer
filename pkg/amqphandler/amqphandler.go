@@ -3,7 +3,6 @@ package amqphandler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -18,8 +17,6 @@ import (
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
 )
-
-var errNoDeathCount = errors.New("no death count")
 
 // App of package
 type App struct {
