@@ -17,7 +17,6 @@ import (
 	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/streadway/amqp"
 )
 
 var errNoDeathCount = errors.New("no death count")
@@ -35,7 +34,6 @@ type App struct {
 
 // Config of package
 type Config struct {
-	url           *string
 	queue         *string
 	exchange      *string
 	retryInterval *string
@@ -45,7 +43,6 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:           flags.New(prefix, "amqp", "URL").Default("", nil).Label("Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost>").ToString(fs),
 		exchange:      flags.New(prefix, "amqp", "Exchange").Default("mailer", nil).Label("Exchange name").ToString(fs),
 		queue:         flags.New(prefix, "amqp", "Queue").Default("mailer", nil).Label("Queue name").ToString(fs),
 		retryInterval: flags.New(prefix, "amqp", "RetryInterval").Default("1h", nil).Label("Interval duration when send fails").ToString(fs),
@@ -54,16 +51,12 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mailerApp mailer.App, prometheusRegisterer prometheus.Registerer) (App, error) {
+func New(config Config, mailerApp mailer.App, amqpClient *amqpclient.Client, prometheusRegisterer prometheus.Registerer) (App, error) {
 	app := App{
-		done:      make(chan struct{}),
-		mailerApp: mailerApp,
-		maxRetry:  int64(*config.maxRetry),
-	}
-
-	url := strings.TrimSpace(*config.url)
-	if len(url) == 0 {
-		return app, nil
+		done:       make(chan struct{}),
+		mailerApp:  mailerApp,
+		maxRetry:   int64(*config.maxRetry),
+		amqpClient: amqpClient,
 	}
 
 	retryInterval, err := time.ParseDuration(*config.retryInterval)
@@ -71,11 +64,6 @@ func New(config Config, mailerApp mailer.App, prometheusRegisterer prometheus.Re
 		return app, fmt.Errorf("unable to parse retry duration: %s", err)
 	}
 	app.retry = retryInterval != 0
-
-	app.amqpClient, err = amqpclient.New(url, prometheusRegisterer)
-	if err != nil {
-		return app, fmt.Errorf("unable to create amqp client: %s", err)
-	}
 
 	app.queue = strings.TrimSpace(*config.queue)
 	app.delayExchange, err = app.amqpClient.Consumer(app.queue, "", strings.TrimSpace(*config.exchange), retryInterval)
@@ -131,7 +119,20 @@ func (a App) Start(done <-chan struct{}) {
 	for message := range messages {
 		if err := a.sendEmail(message.Body); err != nil {
 			logger.Error("unable to send email: %s", err)
-			a.handleError(message)
+
+			if status, err := a.amqpClient.Retry(message, a.maxRetry, a.delayExchange); err != nil {
+				logger.Error("unable to retry message: %s", err)
+			} else {
+				messageSha := sha.New(message.Body)
+				switch status {
+				case amqpclient.DeliveryRejected:
+					metric.Increase("amqp", "rejected")
+					logger.Error("message %s was rejected, content was `%s`", messageSha, message.Body)
+				case amqpclient.DeliveryDelayed:
+					metric.Increase("amqp", "delayed")
+					logger.Info("Delaying message `%s`...", messageSha)
+				}
+			}
 		} else {
 			a.amqpClient.Ack(message)
 		}
@@ -152,78 +153,6 @@ func (a App) sendEmail(payload []byte) error {
 	}
 
 	return a.mailerApp.Send(ctx, mailRequest.ConvertToMail(output))
-}
-
-func (a App) handleError(message amqp.Delivery) {
-	if !a.retry {
-		metric.Increase("amqp", "rejected")
-		logger.Error("message %s was rejected, content was `%s`", sha.New(message.Body), message.Body)
-		a.amqpClient.Ack(message)
-		return
-	}
-
-	count, err := getDeathCount(message.Headers)
-	if err != nil {
-		if errors.Is(err, errNoDeathCount) {
-			a.delayMessage(message)
-			return
-		}
-
-		metric.Increase("amqp", "lost")
-		logger.Error("unable to get death count from message: %s", err)
-		a.amqpClient.Reject(message, false)
-		return
-	}
-
-	if count >= a.maxRetry {
-		metric.Increase("amqp", "rejected")
-		logger.Error("message %s was rejected %d times, content was `%s`", sha.New(message.Body), a.maxRetry, message.Body)
-		a.amqpClient.Ack(message)
-		return
-	}
-
-	a.delayMessage(message)
-}
-
-func (a App) delayMessage(message amqp.Delivery) {
-	messageSha := sha.New(message.Body)
-
-	logger.Info("Delaying message `%s`...", messageSha)
-
-	if err := a.amqpClient.Publish(amqpclient.ConvertDeliveryToPublishing(message), a.delayExchange); err != nil {
-		logger.Error("unable to delay message `%s`: %s", messageSha, err)
-		a.amqpClient.Reject(message, true)
-		return
-	}
-
-	metric.Increase("amqp", "delayed")
-
-	a.amqpClient.Ack(message)
-}
-
-func getDeathCount(table amqp.Table) (int64, error) {
-	rawDeath := table["x-death"]
-
-	death, ok := rawDeath.([]interface{})
-	if !ok {
-		return 0, fmt.Errorf("`x-death` header in not an array: %w", errNoDeathCount)
-	}
-
-	if len(death) == 0 {
-		return 0, fmt.Errorf("`x-death` is an empty array")
-	}
-
-	deathData, ok := death[0].(amqp.Table)
-	if !ok {
-		return 0, fmt.Errorf("`x-death` datas are not a map")
-	}
-
-	count, ok := deathData["count"].(int64)
-	if !ok {
-		return 0, fmt.Errorf("`count` is not an int")
-	}
-
-	return count, nil
 }
 
 // Ping amqp

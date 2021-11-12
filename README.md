@@ -80,8 +80,8 @@ Usage of mailer:
         [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
   -amqpRetryInterval string
         [amqp] Interval duration when send fails {MAILER_AMQP_RETRY_INTERVAL} (default "1h")
-  -amqpURL string
-        [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> {MAILER_AMQP_URL}
+  -amqpURI string
+        [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> {MAILER_AMQP_URI}
   -cert string
         [server] Certificate file {MAILER_CERT}
   -corsCredentials

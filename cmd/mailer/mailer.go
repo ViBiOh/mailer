@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/ViBiOh/httputils/v4/pkg/alcotest"
+	"github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/cors"
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/health"
@@ -34,7 +36,8 @@ func main() {
 	owaspConfig := owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/"))
 	corsConfig := cors.Flags(fs, "cors")
 
-	amqpConfig := amqphandler.Flags(fs, "amqp")
+	amqpConfig := amqp.Flags(fs, "amqp")
+	amqHandlerConfig := amqphandler.Flags(fs, "amqp")
 	smtpConfig := smtp.Flags(fs, "smtp")
 	mjmlConfig := mjml.Flags(fs, "mjml")
 	mailerConfig := mailer.Flags(fs, "")
@@ -53,9 +56,14 @@ func main() {
 	senderApp := smtp.New(smtpConfig, prometheusApp.Registerer())
 	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer())
 
-	amqpApp, err := amqphandler.New(amqpConfig, mailerApp, prometheusApp.Registerer())
+	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer())
 	if err != nil {
-		logger.Error("unable to create amqp: %s", err)
+		logger.Fatal(fmt.Errorf("unable to create amqp client: %s", err))
+	}
+
+	amqpApp, err := amqphandler.New(amqHandlerConfig, mailerApp, amqpClient, prometheusApp.Registerer())
+	if err != nil {
+		logger.Error("unable to create amqp handler: %s", err)
 	}
 
 	healthApp := health.New(healthConfig, amqpApp.Ping)
