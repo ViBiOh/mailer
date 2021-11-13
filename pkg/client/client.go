@@ -143,5 +143,5 @@ func (a App) amqpSend(ctx context.Context, mailRequest model.MailRequest) error 
 	return a.amqpClient.Publish(amqp.Publishing{
 		ContentType: "application/json",
 		Body:        payload,
-	}, a.exchange)
+	}, a.exchange, "")
 }
