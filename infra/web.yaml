@@ -25,7 +25,7 @@ spec:
     nameOverride: mailer
     image:
       name: vibioh/mailer
-      tag: "202111131712" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202111131718" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     config:
       MAILER_MJML_URL: http://mjml
       MAILER_LOGGER_JSON: "true"
