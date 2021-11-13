@@ -3,6 +3,7 @@ package mailer
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -20,6 +21,7 @@ import (
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/streadway/amqp"
 )
 
 type sender interface {
@@ -91,6 +93,23 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer
 // Enabled checks if requirements are met
 func (a App) Enabled() bool {
 	return a.tpl != nil
+}
+
+// AmqpHandler handler amqp message
+func (a App) AmqpHandler(message amqp.Delivery) error {
+	ctx := context.Background()
+
+	var mailRequest model.MailRequest
+	if err := json.Unmarshal(message.Body, &mailRequest); err != nil {
+		return fmt.Errorf("unable to parse payload: %s", err)
+	}
+
+	output, err := a.Render(ctx, mailRequest)
+	if err != nil {
+		return fmt.Errorf("unable to render email: %s", err)
+	}
+
+	return a.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
 // Render email

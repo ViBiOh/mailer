@@ -74,12 +74,14 @@ Usage of mailer:
         [server] Listen address {MAILER_ADDRESS}
   -amqpExchange string
         [amqp] Exchange name {MAILER_AMQP_EXCHANGE} (default "mailer")
-  -amqpMaxRetry int
+  -amqpMaxRetry uint
         [amqp] Max send retries {MAILER_AMQP_MAX_RETRY} (default 3)
   -amqpQueue string
         [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
   -amqpRetryInterval string
         [amqp] Interval duration when send fails {MAILER_AMQP_RETRY_INTERVAL} (default "1h")
+  -amqpRoutingKey string
+        [amqp] RoutingKey name {MAILER_AMQP_ROUTING_KEY}
   -amqpURI string
         [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> {MAILER_AMQP_URI}
   -cert string

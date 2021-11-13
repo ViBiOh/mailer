@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	"github.com/ViBiOh/httputils/v4/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v4/pkg/amqp"
+	"github.com/ViBiOh/httputils/v4/pkg/amqphandler"
 	"github.com/ViBiOh/httputils/v4/pkg/cors"
 	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/health"
@@ -16,7 +16,6 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/prometheus"
 	"github.com/ViBiOh/httputils/v4/pkg/recoverer"
 	"github.com/ViBiOh/httputils/v4/pkg/server"
-	"github.com/ViBiOh/mailer/pkg/amqphandler"
 	"github.com/ViBiOh/mailer/pkg/httphandler"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/mjml"
@@ -37,7 +36,7 @@ func main() {
 	corsConfig := cors.Flags(fs, "cors")
 
 	amqpConfig := amqp.Flags(fs, "amqp")
-	amqHandlerConfig := amqphandler.Flags(fs, "amqp")
+	amqHandlerConfig := amqphandler.Flags(fs, "amqp", flags.NewOverride("Exchange", "mailer"), flags.NewOverride("Queue", "mailer"))
 	smtpConfig := smtp.Flags(fs, "smtp")
 	mjmlConfig := mjml.Flags(fs, "mjml")
 	mailerConfig := mailer.Flags(fs, "")
@@ -58,15 +57,15 @@ func main() {
 
 	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer())
 	if err != nil {
-		logger.Fatal(fmt.Errorf("unable to create amqp client: %s", err))
+		logger.Error("unable to create amqp client: %s", err)
 	}
 
-	amqpApp, err := amqphandler.New(amqHandlerConfig, mailerApp, amqpClient, prometheusApp.Registerer())
+	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, mailerApp.AmqpHandler)
 	if err != nil {
 		logger.Error("unable to create amqp handler: %s", err)
 	}
 
-	healthApp := health.New(healthConfig, amqpApp.Ping)
+	healthApp := health.New(healthConfig)
 
 	go amqpApp.Start(healthApp.Done())
 
