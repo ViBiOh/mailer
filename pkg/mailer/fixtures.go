@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/model"
 )
 
@@ -65,13 +66,19 @@ func (a App) GetFixture(name, fixture string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(fixturePath, os.O_RDONLY, 0o600)
+	reader, err := os.OpenFile(fixturePath, os.O_RDONLY, 0o600)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file `%s`: %w", fixturePath, err)
 	}
 
+	defer func() {
+		if closeErr := reader.Close(); closeErr != nil {
+			logger.WithField("fn", "mailer.GetFixture").WithField("item", fixturePath).Error("unable to close: %s", err)
+		}
+	}()
+
 	var content map[string]interface{}
-	if err := json.NewDecoder(file).Decode(&content); err != nil {
+	if err := json.NewDecoder(reader).Decode(&content); err != nil {
 		return nil, fmt.Errorf("unable to parse JSON fixture: %w", err)
 	}
 
