@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/streadway/amqp"
 )
 
 var (
@@ -108,7 +106,7 @@ func (a App) Send(ctx context.Context, mailRequest model.MailRequest) error {
 	}
 
 	if a.amqpEnabled() {
-		return a.amqpSend(ctx, mailRequest)
+		return a.amqpClient.PublishJSON(mailRequest, a.exchange, "")
 	}
 	return a.httpSend(ctx, mailRequest)
 }
@@ -132,16 +130,4 @@ func (a App) httpSend(ctx context.Context, mail model.MailRequest) error {
 
 	_, err := a.req.Path(queryPath).JSON(ctx, mail.Payload)
 	return err
-}
-
-func (a App) amqpSend(ctx context.Context, mailRequest model.MailRequest) error {
-	payload, err := json.Marshal(mailRequest)
-	if err != nil {
-		return fmt.Errorf("unable to marshal mail: %s", err)
-	}
-
-	return a.amqpClient.Publish(amqp.Publishing{
-		ContentType: "application/json",
-		Body:        payload,
-	}, a.exchange, "")
 }
