@@ -74,12 +74,12 @@ func main() {
 	go promServer.Start("prometheus", healthApp.End(), prometheusApp.Handler())
 	go appServer.Start("http", healthApp.End(), httputils.Handler(appHandler, healthApp, recoverer.Middleware, prometheusApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
-	healthApp.WaitForTermination(getDoneChan(appServer.Done(), amqpApp))
+	healthApp.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpApp))
 	server.GracefulWait(appServer.Done(), promServer.Done(), amqpApp.Done())
 }
 
-func getDoneChan(httpDone <-chan struct{}, amqpApp amqphandler.App) <-chan struct{} {
-	if !amqpApp.Enabled() {
+func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpApp amqphandler.App) <-chan struct{} {
+	if amqpClient == nil {
 		return httpDone
 	}
 
