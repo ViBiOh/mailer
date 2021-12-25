@@ -56,7 +56,7 @@ func New(config Config, prometheusRegisterer prometheus.Registerer) App {
 	metric.Create(prometheusRegisterer, "mjml")
 
 	return App{
-		req: request.New().Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
+		req: request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
 	}
 }
 

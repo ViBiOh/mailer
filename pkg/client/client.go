@@ -71,7 +71,7 @@ func New(config Config, prometheusRegister prometheus.Registerer) (App, error) {
 	}
 
 	return App{
-		req: request.New().Post(url).BasicAuth(name, *config.password),
+		req: request.Post(url).BasicAuth(name, *config.password),
 	}, nil
 }
 
