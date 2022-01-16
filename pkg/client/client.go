@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ViBiOh/flags"
 	amqpclient "github.com/ViBiOh/httputils/v4/pkg/amqp"
-	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"

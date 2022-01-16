@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ViBiOh/httputils/v4/pkg/flags"
+	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"

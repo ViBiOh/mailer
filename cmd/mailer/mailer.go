@@ -1,14 +1,16 @@
 package main
 
 import (
+	"errors"
 	"flag"
+	"fmt"
 	"os"
 
+	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/amqphandler"
 	"github.com/ViBiOh/httputils/v4/pkg/cors"
-	"github.com/ViBiOh/httputils/v4/pkg/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/health"
 	"github.com/ViBiOh/httputils/v4/pkg/httputils"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
@@ -56,8 +58,8 @@ func main() {
 	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer())
 
 	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer())
-	if err != nil {
-		logger.Error("unable to create amqp client: %s", err)
+	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
+		logger.Fatal(fmt.Errorf("unable to create amqp client: %s", err))
 	}
 
 	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, mailerApp.AmqpHandler)

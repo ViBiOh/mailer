@@ -14,7 +14,7 @@ import (
 	"sync"
 	"text/template"
 
-	"github.com/ViBiOh/httputils/v4/pkg/flags"
+	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
 	"github.com/ViBiOh/mailer/pkg/metric"
