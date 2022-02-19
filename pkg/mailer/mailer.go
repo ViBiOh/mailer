@@ -17,11 +17,13 @@ import (
 	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
+	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type sender interface {
@@ -44,6 +46,7 @@ type App struct {
 	senderApp    sender
 	tpl          *template.Template
 	templatesDir string
+	tracer       trace.Tracer
 	mjmlApp      mjml.App
 }
 
@@ -60,7 +63,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer prometheus.Registerer) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer prometheus.Registerer, tracerApp tracer.App) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")
@@ -87,6 +90,7 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer
 
 		mjmlApp:   mjmlApp,
 		senderApp: senderApp,
+		tracer:    tracerApp.GetTracer("mailer"),
 	}
 }
 
@@ -114,6 +118,11 @@ func (a App) AmqpHandler(message amqp.Delivery) error {
 
 // Render email
 func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
+	if a.tracer != nil {
+		_, span := a.tracer.Start(ctx, "render", trace.WithSpanKind(trace.SpanKindInternal))
+		defer span.End()
+	}
+
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
 		return nil, httpModel.ErrNotFound
@@ -139,6 +148,11 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 
 // Send email
 func (a App) Send(ctx context.Context, mail model.Mail) error {
+	if a.tracer != nil {
+		_, span := a.tracer.Start(ctx, "send", trace.WithSpanKind(trace.SpanKindInternal))
+		defer span.End()
+	}
+
 	return a.senderApp.Send(ctx, mail)
 }
 

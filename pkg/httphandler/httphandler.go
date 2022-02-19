@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/httputils/v4/pkg/httperror"
+	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/mailer"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -15,13 +17,15 @@ const (
 
 // App of package
 type App struct {
+	tracer    trace.Tracer
 	mailerApp mailer.App
 }
 
 // New creates new App
-func New(mailerApp mailer.App) App {
+func New(mailerApp mailer.App, tracerApp tracer.App) App {
 	return App{
 		mailerApp: mailerApp,
+		tracer:    tracerApp.GetTracer("handler"),
 	}
 }
 
