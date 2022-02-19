@@ -74,8 +74,12 @@ Usage of mailer:
         [server] Listen address {MAILER_ADDRESS}
   -amqpExchange string
         [amqp] Exchange name {MAILER_AMQP_EXCHANGE} (default "mailer")
+  -amqpExclusive
+        [amqp] Queue exclusive mode (for fanout exchange) {MAILER_AMQP_EXCLUSIVE}
   -amqpMaxRetry uint
         [amqp] Max send retries {MAILER_AMQP_MAX_RETRY} (default 3)
+  -amqpPrefetch int
+        [amqp] Prefetch count for QoS {MAILER_AMQP_PREFETCH} (default 1)
   -amqpQueue string
         [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
   -amqpRetryInterval string
@@ -162,6 +166,10 @@ Usage of mailer:
         [smtp] Plain Auth Username {MAILER_SMTP_USERNAME}
   -templates string
         [mailer] Templates directory {MAILER_TEMPLATES} (default "./templates/")
+  -tracerRate string
+        [tracer] Jaeger sample rate, 'always', 'never' or a float value {MAILER_TRACER_RATE} (default "always")
+  -tracerURL string
+        [tracer] Jaeger endpoint URL (e.g. http://jaeger:14268/api/traces) {MAILER_TRACER_URL}
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string

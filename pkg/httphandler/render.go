@@ -46,8 +46,10 @@ func (a App) renderHandler() http.Handler {
 			return
 		}
 
+		ctx := r.Context()
+
 		mr = mr.Data(content)
-		output, err := a.mailerApp.Render(r.Context(), mr)
+		output, err := a.mailerApp.Render(ctx, mr)
 		if httperror.HandleError(w, err) {
 			return
 		}
@@ -57,7 +59,7 @@ func (a App) renderHandler() http.Handler {
 			return
 		}
 
-		a.sendOutput(r.Context(), w, mr, output)
+		a.sendOutput(ctx, w, mr, output)
 	})
 }
 
