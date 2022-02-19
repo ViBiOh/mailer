@@ -119,7 +119,8 @@ func (a App) AmqpHandler(message amqp.Delivery) error {
 // Render email
 func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
 	if a.tracer != nil {
-		_, span := a.tracer.Start(ctx, "render", trace.WithSpanKind(trace.SpanKindInternal))
+		var span trace.Span
+		ctx, span = a.tracer.Start(ctx, "render", trace.WithSpanKind(trace.SpanKindInternal))
 		defer span.End()
 	}
 
@@ -149,7 +150,8 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 // Send email
 func (a App) Send(ctx context.Context, mail model.Mail) error {
 	if a.tracer != nil {
-		_, span := a.tracer.Start(ctx, "send", trace.WithSpanKind(trace.SpanKindInternal))
+		var span trace.Span
+		ctx, span = a.tracer.Start(ctx, "send", trace.WithSpanKind(trace.SpanKindInternal))
 		defer span.End()
 	}
 
