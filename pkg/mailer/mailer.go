@@ -103,6 +103,12 @@ func (a App) Enabled() bool {
 func (a App) AmqpHandler(message amqp.Delivery) error {
 	ctx := context.Background()
 
+	if a.tracer != nil {
+		var span trace.Span
+		ctx, span = a.tracer.Start(ctx, "amqp")
+		defer span.End()
+	}
+
 	var mailRequest model.MailRequest
 	if err := json.Unmarshal(message.Body, &mailRequest); err != nil {
 		return fmt.Errorf("unable to parse payload: %s", err)
