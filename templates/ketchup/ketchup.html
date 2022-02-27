@@ -21,7 +21,7 @@
             new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
 
             <strong>
-              <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
+              <a style="color: #6495ed" href="{{ .url }}" rel="noreferrer noopener">{{ .version.name }}</a>
             </strong>
           </td>
         </tr>
@@ -32,7 +32,7 @@
 
 <mjml>
   <mj-body background-color="#3b3b3b">
-    {{ template "header" "Ketchup" }}
+    {{ template "header" "Ketchup|https://ketchup.vibioh.fr/app/" }}
 
     {{ $kind := "" }}
 

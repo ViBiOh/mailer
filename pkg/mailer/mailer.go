@@ -80,8 +80,8 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer
 			"odd": func(i int) bool {
 				return i%2 == 0
 			},
-			"split": func(s string) []string {
-				return strings.Split(s, "\n")
+			"split": func(s, separator string) []string {
+				return strings.Split(s, separator)
 			},
 			"contains": func(s, substr string) bool {
 				return strings.Contains(s, substr)
