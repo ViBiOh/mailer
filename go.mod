@@ -28,5 +28,5 @@ require (
 	go.opentelemetry.io/otel/metric v0.27.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.4.1 // indirect
 	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.26.0 // indirect
 )
