@@ -55,7 +55,7 @@ func (a App) ListFixtures(name string) ([]string, error) {
 }
 
 // GetFixture for a template and a given name
-func (a App) GetFixture(name, fixture string) (map[string]interface{}, error) {
+func (a App) GetFixture(name, fixture string) (map[string]any, error) {
 	templatePath := a.getTemplatePath(name)
 	if err := isExists(templatePath, true); err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (a App) GetFixture(name, fixture string) (map[string]interface{}, error) {
 		}
 	}()
 
-	var content map[string]interface{}
+	var content map[string]any
 	if err := json.NewDecoder(reader).Decode(&content); err != nil {
 		return nil, fmt.Errorf("unable to parse JSON fixture: %w", err)
 	}

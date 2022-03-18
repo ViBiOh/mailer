@@ -1,6 +1,6 @@
 module github.com/ViBiOh/mailer
 
-go 1.17
+go 1.18
 
 require (
 	github.com/ViBiOh/flags v0.0.1

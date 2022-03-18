@@ -67,7 +67,7 @@ func TestCheck(t *testing.T) {
 func TestGetSubject(t *testing.T) {
 	type args struct {
 		subject string
-		payload interface{}
+		payload any
 	}
 
 	cases := []struct {
@@ -79,7 +79,7 @@ func TestGetSubject(t *testing.T) {
 			"simple",
 			args{
 				subject: "All is fine",
-				payload: map[string]interface{}{
+				payload: map[string]any{
 					"Name": noop,
 				},
 			},
@@ -89,7 +89,7 @@ func TestGetSubject(t *testing.T) {
 			"invalid template",
 			args{
 				subject: "All is fine {{-. toto}",
-				payload: map[string]interface{}{
+				payload: map[string]any{
 					"Name": noop,
 				},
 			},
@@ -99,7 +99,7 @@ func TestGetSubject(t *testing.T) {
 			"invalid exec",
 			args{
 				subject: "All is fine Mr {{ .Name.Test }}",
-				payload: map[string]interface{}{
+				payload: map[string]any{
 					"Name": noop,
 				},
 			},
@@ -109,7 +109,7 @@ func TestGetSubject(t *testing.T) {
 			"valid exec",
 			args{
 				subject: "All is fine Mr {{ .Name }}",
-				payload: map[string]interface{}{
+				payload: map[string]any{
 					"Name": "Test",
 				},
 			},

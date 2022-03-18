@@ -12,7 +12,7 @@ import (
 
 // MailRequest describes an email to be sent
 type MailRequest struct {
-	Payload    interface{}
+	Payload    any
 	Tpl        string
 	FromEmail  string
 	Sender     string
@@ -65,7 +65,7 @@ func (mr MailRequest) To(recipients ...string) MailRequest {
 }
 
 // Data set payload
-func (mr MailRequest) Data(payload interface{}) MailRequest {
+func (mr MailRequest) Data(payload any) MailRequest {
 	mr.Payload = payload
 
 	return mr
@@ -94,7 +94,7 @@ func (mr MailRequest) Check() error {
 	return nil
 }
 
-func getSubject(subject string, payload interface{}) string {
+func getSubject(subject string, payload any) string {
 	if !strings.Contains(subject, "{{") {
 		return subject
 	}
