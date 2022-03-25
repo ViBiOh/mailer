@@ -11,40 +11,34 @@ func noop() {
 }
 
 func TestCheck(t *testing.T) {
-	cases := []struct {
-		intention string
-		instance  MailRequest
-		wantErr   error
+	cases := map[string]struct {
+		instance MailRequest
+		wantErr  error
 	}{
-		{
-			"empty",
+		"empty": {
 			NewMailRequest(),
 			errors.New("from email is required"),
 		},
-		{
-			"no recipients",
+		"no recipients": {
 			NewMailRequest().From("nobody@localhost.fr"),
 			errors.New("recipients are required"),
 		},
-		{
-			"empty recipients",
+		"empty recipients": {
 			NewMailRequest().From("nobody@localhost.fr").To("john@doe.fr", "").To("john@john.fr"),
 			errors.New("recipient at index 1 is empty"),
 		},
-		{
-			"empty template",
+		"empty template": {
 			NewMailRequest().From("nobody@localhost.fr").To("john@doe.fr"),
 			errors.New("template name is required"),
 		},
-		{
-			"valid",
+		"valid": {
 			NewMailRequest().From("nobody@localhost.fr").To("john@doe.fr").WithSubject("test").Template("test"),
 			nil,
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.intention, func(t *testing.T) {
+	for intention, tc := range cases {
+		t.Run(intention, func(t *testing.T) {
 			gotErr := tc.instance.Check()
 
 			failed := false
@@ -70,13 +64,11 @@ func TestGetSubject(t *testing.T) {
 		payload any
 	}
 
-	cases := []struct {
-		intention string
-		args      args
-		want      string
+	cases := map[string]struct {
+		args args
+		want string
 	}{
-		{
-			"simple",
+		"simple": {
 			args{
 				subject: "All is fine",
 				payload: map[string]any{
@@ -85,8 +77,7 @@ func TestGetSubject(t *testing.T) {
 			},
 			"All is fine",
 		},
-		{
-			"invalid template",
+		"invalid template": {
 			args{
 				subject: "All is fine {{-. toto}",
 				payload: map[string]any{
@@ -95,8 +86,7 @@ func TestGetSubject(t *testing.T) {
 			},
 			"All is fine {{-. toto}",
 		},
-		{
-			"invalid exec",
+		"invalid exec": {
 			args{
 				subject: "All is fine Mr {{ .Name.Test }}",
 				payload: map[string]any{
@@ -105,8 +95,7 @@ func TestGetSubject(t *testing.T) {
 			},
 			"All is fine Mr {{ .Name.Test }}",
 		},
-		{
-			"valid exec",
+		"valid exec": {
 			args{
 				subject: "All is fine Mr {{ .Name }}",
 				payload: map[string]any{
@@ -117,8 +106,8 @@ func TestGetSubject(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.intention, func(t *testing.T) {
+	for intention, tc := range cases {
+		t.Run(intention, func(t *testing.T) {
 			if got := getSubject(tc.args.subject, tc.args.payload); got != tc.want {
 				t.Errorf("getSubject() = `%s`, want `%s`", got, tc.want)
 			}

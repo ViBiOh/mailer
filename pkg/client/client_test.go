@@ -13,18 +13,15 @@ import (
 )
 
 func TestEnabled(t *testing.T) {
-	cases := []struct {
-		intention string
-		instance  App
-		want      bool
+	cases := map[string]struct {
+		instance App
+		want     bool
 	}{
-		{
-			"empty",
+		"empty": {
 			App{},
 			false,
 		},
-		{
-			"simple",
+		"simple": {
 			App{
 				req: request.Post("http://mailer"),
 			},
@@ -32,8 +29,8 @@ func TestEnabled(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.intention, func(t *testing.T) {
+	for intention, tc := range cases {
+		t.Run(intention, func(t *testing.T) {
 			if got := tc.instance.Enabled(); got != tc.want {
 				t.Errorf("Enabled() = %t, want %t", got, tc.want)
 			}
@@ -54,22 +51,19 @@ func TestSend(t *testing.T) {
 		mailRequest model.MailRequest
 	}
 
-	cases := []struct {
-		intention string
-		instance  App
-		args      args
-		wantErr   error
+	cases := map[string]struct {
+		instance App
+		args     args
+		wantErr  error
 	}{
-		{
-			"not enabled",
+		"not enabled": {
 			App{},
 			args{
 				mailRequest: model.NewMailRequest(),
 			},
 			ErrNotEnabled,
 		},
-		{
-			"invalid request",
+		"invalid request": {
 			App{
 				req: request.Post("http://mailer"),
 			},
@@ -78,8 +72,7 @@ func TestSend(t *testing.T) {
 			},
 			errors.New("from email is required"),
 		},
-		{
-			"invalid http",
+		"invalid http": {
 			App{
 				req: request.Post(testServer.URL),
 			},
@@ -88,8 +81,7 @@ func TestSend(t *testing.T) {
 			},
 			errors.New("HTTP/401"),
 		},
-		{
-			"http",
+		"http": {
 			App{
 				req: request.Post(testServer.URL).BasicAuth("admin", "password"),
 			},
@@ -100,8 +92,8 @@ func TestSend(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.intention, func(t *testing.T) {
+	for intention, tc := range cases {
+		t.Run(intention, func(t *testing.T) {
 			gotErr := tc.instance.Send(context.Background(), tc.args.mailRequest)
 
 			failed := false
