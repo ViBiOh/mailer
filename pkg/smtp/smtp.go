@@ -39,10 +39,10 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		address:  flags.New(prefix, "smtp", "Address").Default("localhost:25", nil).Label("Address").ToString(fs),
-		username: flags.New(prefix, "smtp", "Username").Default("", nil).Label("Plain Auth Username").ToString(fs),
-		password: flags.New(prefix, "smtp", "Password").Default("", nil).Label("Plain Auth Password").ToString(fs),
-		host:     flags.New(prefix, "smtp", "Host").Default("localhost", nil).Label("Plain Auth host").ToString(fs),
+		address:  flags.String(fs, prefix, "smtp", "Address", "Address", "localhost:25", nil),
+		username: flags.String(fs, prefix, "smtp", "Username", "Plain Auth Username", "", nil),
+		password: flags.String(fs, prefix, "smtp", "Password", "Plain Auth Password", "", nil),
+		host:     flags.String(fs, prefix, "smtp", "Host", "Plain Auth host", "localhost", nil),
 	}
 }
 
