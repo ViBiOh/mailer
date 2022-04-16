@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/ViBiOh/flags v1.0.0
-	github.com/ViBiOh/httputils/v4 v4.39.4
+	github.com/ViBiOh/httputils/v4 v4.41.0
 	github.com/prometheus/client_golang v1.12.1
 	github.com/streadway/amqp v1.0.0
 	go.opentelemetry.io/otel/trace v1.6.3
