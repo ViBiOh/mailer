@@ -103,11 +103,8 @@ func (a App) Enabled() bool {
 func (a App) AmqpHandler(message amqp.Delivery) error {
 	ctx := context.Background()
 
-	if a.tracer != nil {
-		var span trace.Span
-		ctx, span = a.tracer.Start(ctx, "amqp")
-		defer span.End()
-	}
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "amqp")
+	defer end()
 
 	var mailRequest model.MailRequest
 	if err := json.Unmarshal(message.Body, &mailRequest); err != nil {
@@ -124,11 +121,8 @@ func (a App) AmqpHandler(message amqp.Delivery) error {
 
 // Render email
 func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
-	if a.tracer != nil {
-		var span trace.Span
-		ctx, span = a.tracer.Start(ctx, "render", trace.WithSpanKind(trace.SpanKindInternal))
-		defer span.End()
-	}
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "render", trace.WithSpanKind(trace.SpanKindInternal))
+	defer end()
 
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
@@ -155,11 +149,8 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 
 // Send email
 func (a App) Send(ctx context.Context, mail model.Mail) error {
-	if a.tracer != nil {
-		var span trace.Span
-		ctx, span = a.tracer.Start(ctx, "send", trace.WithSpanKind(trace.SpanKindInternal))
-		defer span.End()
-	}
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "send", trace.WithSpanKind(trace.SpanKindInternal))
+	defer end()
 
 	return a.senderApp.Send(ctx, mail)
 }
