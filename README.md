@@ -82,8 +82,8 @@ Usage of mailer:
         [amqp] Prefetch count for QoS {MAILER_AMQP_PREFETCH} (default 1)
   -amqpQueue string
         [amqp] Queue name {MAILER_AMQP_QUEUE} (default "mailer")
-  -amqpRetryInterval string
-        [amqp] Interval duration when send fails {MAILER_AMQP_RETRY_INTERVAL} (default "1h")
+  -amqpRetryInterval duration
+        [amqp] Interval duration when send fails {MAILER_AMQP_RETRY_INTERVAL} (default 1h0m0s)
   -amqpRoutingKey string
         [amqp] RoutingKey name {MAILER_AMQP_ROUTING_KEY}
   -amqpURI string
@@ -104,12 +104,12 @@ Usage of mailer:
         [owasp] Content-Security-Policy {MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/")
   -frameOptions string
         [owasp] X-Frame-Options {MAILER_FRAME_OPTIONS} (default "deny")
-  -graceDuration string
-        [http] Grace duration when SIGTERM received {MAILER_GRACE_DURATION} (default "30s")
+  -graceDuration duration
+        [http] Grace duration when SIGTERM received {MAILER_GRACE_DURATION} (default 30s)
   -hsts
         [owasp] Indicate Strict Transport Security {MAILER_HSTS} (default true)
-  -idleTimeout string
-        [server] Idle Timeout {MAILER_IDLE_TIMEOUT} (default "2m")
+  -idleTimeout duration
+        [server] Idle Timeout {MAILER_IDLE_TIMEOUT} (default 2m0s)
   -key string
         [server] Key file {MAILER_KEY}
   -loggerJson
@@ -138,24 +138,24 @@ Usage of mailer:
         [prometheus] Certificate file {MAILER_PROMETHEUS_CERT}
   -prometheusGzip
         [prometheus] Enable gzip compression of metrics output {MAILER_PROMETHEUS_GZIP}
-  -prometheusIdleTimeout string
-        [prometheus] Idle Timeout {MAILER_PROMETHEUS_IDLE_TIMEOUT} (default "10s")
+  -prometheusIdleTimeout duration
+        [prometheus] Idle Timeout {MAILER_PROMETHEUS_IDLE_TIMEOUT} (default 10s)
   -prometheusIgnore string
         [prometheus] Ignored path prefixes for metrics, comma separated {MAILER_PROMETHEUS_IGNORE}
   -prometheusKey string
         [prometheus] Key file {MAILER_PROMETHEUS_KEY}
   -prometheusPort uint
         [prometheus] Listen port (0 to disable) {MAILER_PROMETHEUS_PORT} (default 9090)
-  -prometheusReadTimeout string
-        [prometheus] Read Timeout {MAILER_PROMETHEUS_READ_TIMEOUT} (default "5s")
-  -prometheusShutdownTimeout string
-        [prometheus] Shutdown Timeout {MAILER_PROMETHEUS_SHUTDOWN_TIMEOUT} (default "5s")
-  -prometheusWriteTimeout string
-        [prometheus] Write Timeout {MAILER_PROMETHEUS_WRITE_TIMEOUT} (default "10s")
-  -readTimeout string
-        [server] Read Timeout {MAILER_READ_TIMEOUT} (default "5s")
-  -shutdownTimeout string
-        [server] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default "10s")
+  -prometheusReadTimeout duration
+        [prometheus] Read Timeout {MAILER_PROMETHEUS_READ_TIMEOUT} (default 5s)
+  -prometheusShutdownTimeout duration
+        [prometheus] Shutdown Timeout {MAILER_PROMETHEUS_SHUTDOWN_TIMEOUT} (default 5s)
+  -prometheusWriteTimeout duration
+        [prometheus] Write Timeout {MAILER_PROMETHEUS_WRITE_TIMEOUT} (default 10s)
+  -readTimeout duration
+        [server] Read Timeout {MAILER_READ_TIMEOUT} (default 5s)
+  -shutdownTimeout duration
+        [server] Shutdown Timeout {MAILER_SHUTDOWN_TIMEOUT} (default 10s)
   -smtpAddress string
         [smtp] Address {MAILER_SMTP_ADDRESS} (default "localhost:25")
   -smtpHost string
@@ -174,6 +174,6 @@ Usage of mailer:
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
         [alcotest] User-Agent for check {MAILER_USER_AGENT} (default "Alcotest")
-  -writeTimeout string
-        [server] Write Timeout {MAILER_WRITE_TIMEOUT} (default "10s")
+  -writeTimeout duration
+        [server] Write Timeout {MAILER_WRITE_TIMEOUT} (default 10s)
 ```
