@@ -75,7 +75,7 @@ func main() {
 
 	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
-		logger.Fatal(fmt.Errorf("unable to create amqp client: %s", err))
+		logger.Fatal(err)
 	}
 
 	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, mailerApp.AmqpHandler)
