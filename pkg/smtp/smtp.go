@@ -76,7 +76,7 @@ func (a App) Send(_ context.Context, mail model.Mail) error {
 	body.WriteString("\r\n")
 
 	if _, err := io.Copy(body, mail.Content); err != nil {
-		return fmt.Errorf("unable to read mail content: %s", err)
+		return fmt.Errorf("read mail content: %s", err)
 	}
 
 	body.WriteString("\r\n")

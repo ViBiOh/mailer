@@ -24,7 +24,7 @@ func Create(prometheusRegisterer prometheus.Registerer, name string) {
 	}, []string{"state"})
 
 	if err := prometheusRegisterer.Register(counter); err != nil {
-		logger.Error("unable to register `%s` metric: %s", name, err)
+		logger.Error("register `%s` metric: %s", name, err)
 	}
 
 	metrics[name] = counter

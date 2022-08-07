@@ -41,7 +41,7 @@ func (a App) ListFixtures(name string) ([]string, error) {
 
 	files, err := os.ReadDir(templatePath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read templates directory: %s", err)
+		return nil, fmt.Errorf("read templates directory: %s", err)
 	}
 
 	var fixtureList []string
@@ -68,18 +68,18 @@ func (a App) GetFixture(name, fixture string) (map[string]any, error) {
 
 	reader, err := os.OpenFile(fixturePath, os.O_RDONLY, 0o600)
 	if err != nil {
-		return nil, fmt.Errorf("unable to open file `%s`: %w", fixturePath, err)
+		return nil, fmt.Errorf("open file `%s`: %w", fixturePath, err)
 	}
 
 	defer func() {
 		if closeErr := reader.Close(); closeErr != nil {
-			logger.WithField("fn", "mailer.GetFixture").WithField("item", fixturePath).Error("unable to close: %s", err)
+			logger.WithField("fn", "mailer.GetFixture").WithField("item", fixturePath).Error("close: %s", err)
 		}
 	}()
 
 	var content map[string]any
 	if err := json.NewDecoder(reader).Decode(&content); err != nil {
-		return nil, fmt.Errorf("unable to parse JSON fixture: %w", err)
+		return nil, fmt.Errorf("parse JSON fixture: %w", err)
 	}
 
 	return content, nil

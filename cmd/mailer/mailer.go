@@ -80,7 +80,7 @@ func main() {
 
 	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, mailerApp.AmqpHandler)
 	if err != nil {
-		logger.Error("unable to create amqp handler: %s", err)
+		logger.Error("create amqp handler: %s", err)
 	}
 
 	healthApp := health.New(healthConfig)
