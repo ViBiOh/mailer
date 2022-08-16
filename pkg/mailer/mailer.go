@@ -108,12 +108,12 @@ func (a App) AmqpHandler(message amqp.Delivery) error {
 
 	var mailRequest model.MailRequest
 	if err := json.Unmarshal(message.Body, &mailRequest); err != nil {
-		return fmt.Errorf("parse payload: %s", err)
+		return fmt.Errorf("parse payload: %w", err)
 	}
 
 	output, err := a.Render(ctx, mailRequest)
 	if err != nil {
-		return fmt.Errorf("render email: %s", err)
+		return fmt.Errorf("render email: %w", err)
 	}
 
 	return a.Send(ctx, mailRequest.ConvertToMail(output))

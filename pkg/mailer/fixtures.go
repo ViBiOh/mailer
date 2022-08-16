@@ -41,7 +41,7 @@ func (a App) ListFixtures(name string) ([]string, error) {
 
 	files, err := os.ReadDir(templatePath)
 	if err != nil {
-		return nil, fmt.Errorf("read templates directory: %s", err)
+		return nil, fmt.Errorf("read templates directory: %w", err)
 	}
 
 	var fixtureList []string

@@ -19,7 +19,7 @@ func (a App) getContent(r *http.Request, name string) (map[string]any, error) {
 
 	var content map[string]any
 	if err := httpjson.Parse(r, &content); err != nil {
-		return nil, fmt.Errorf("parse content: %s", err)
+		return nil, fmt.Errorf("parse content: %w", err)
 	}
 
 	return content, nil

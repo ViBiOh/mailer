@@ -79,12 +79,12 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 	resp, err := a.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {
 		metric.Increase("mjml", "error")
-		return "", fmt.Errorf("render mjml template: %s", err)
+		return "", fmt.Errorf("render mjml template: %w", err)
 	}
 
 	var response mjmlResponse
 	if err := httpjson.Read(resp, &response); err != nil {
-		return "", fmt.Errorf("read mjml response: %s", err)
+		return "", fmt.Errorf("read mjml response: %w", err)
 	}
 
 	metric.Increase("mjml", "success")

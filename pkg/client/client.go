@@ -57,11 +57,11 @@ func New(config Config, prometheusRegister prometheus.Registerer) (App, error) {
 	if strings.HasPrefix(url, "amqp") {
 		client, err := amqpclient.NewFromURI(url, 1, prometheusRegister)
 		if err != nil {
-			return App{}, fmt.Errorf("create amqp client: %s", err)
+			return App{}, fmt.Errorf("create amqp client: %w", err)
 		}
 
 		if err := client.Publisher(name, "direct", nil); err != nil {
-			return App{}, fmt.Errorf("configure amqp producer: %s", err)
+			return App{}, fmt.Errorf("configure amqp producer: %w", err)
 		}
 
 		return App{
