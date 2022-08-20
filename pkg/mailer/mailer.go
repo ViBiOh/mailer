@@ -63,7 +63,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer prometheus.Registerer, tracerApp tracer.App) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer prometheus.Registerer, tracer trace.Tracer) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")
@@ -90,7 +90,7 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer
 
 		mjmlApp:   mjmlApp,
 		senderApp: senderApp,
-		tracer:    tracerApp.GetTracer("mailer"),
+		tracer:    tracer,
 	}
 }
 
@@ -121,7 +121,7 @@ func (a App) AmqpHandler(message amqp.Delivery) error {
 
 // Render email
 func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "render", trace.WithSpanKind(trace.SpanKindInternal))
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "render")
 	defer end()
 
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
@@ -149,7 +149,7 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 
 // Send email
 func (a App) Send(ctx context.Context, mail model.Mail) error {
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "send", trace.WithSpanKind(trace.SpanKindInternal))
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "send")
 	defer end()
 
 	return a.senderApp.Send(ctx, mail)

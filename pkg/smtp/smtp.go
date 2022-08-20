@@ -11,9 +11,11 @@ import (
 	"sync"
 
 	"github.com/ViBiOh/flags"
+	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var bufferPool = sync.Pool{
@@ -25,6 +27,7 @@ var bufferPool = sync.Pool{
 // App of package
 type App struct {
 	auth    smtp.Auth
+	tracer  trace.Tracer
 	address string
 }
 
@@ -47,7 +50,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, prometheusRegisterer prometheus.Registerer) App {
+func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace.Tracer) App {
 	var auth smtp.Auth
 
 	user := strings.TrimSpace(*config.username)
@@ -60,11 +63,15 @@ func New(config Config, prometheusRegisterer prometheus.Registerer) App {
 	return App{
 		address: strings.TrimSpace(*config.address),
 		auth:    auth,
+		tracer:  tracer,
 	}
 }
 
 // Send email by smtp
-func (a App) Send(_ context.Context, mail model.Mail) error {
+func (a App) Send(ctx context.Context, mail model.Mail) error {
+	_, end := tracer.StartSpan(ctx, a.tracer, "send")
+	defer end()
+
 	body := bufferPool.Get().(*bytes.Buffer)
 	defer bufferPool.Put(body)
 	body.Reset()

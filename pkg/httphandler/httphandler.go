@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/ViBiOh/httputils/v4/pkg/httperror"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -22,10 +21,10 @@ type App struct {
 }
 
 // New creates new App
-func New(mailerApp mailer.App, tracerApp tracer.App) App {
+func New(mailerApp mailer.App, tracer trace.Tracer) App {
 	return App{
 		mailerApp: mailerApp,
-		tracer:    tracerApp.GetTracer("handler"),
+		tracer:    tracer,
 	}
 }
 

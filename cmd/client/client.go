@@ -20,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client, err := client.New(mailerConfig, prometheus.DefaultRegisterer)
+	client, err := client.New(mailerConfig, prometheus.DefaultRegisterer, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

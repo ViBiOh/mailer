@@ -69,9 +69,9 @@ func main() {
 	promServer := server.New(promServerConfig)
 	prometheusApp := prometheus.New(prometheusConfig)
 
-	mjmlApp := mjml.New(mjmlConfig, prometheusApp.Registerer())
-	senderApp := smtp.New(smtpConfig, prometheusApp.Registerer())
-	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer(), tracerApp)
+	mjmlApp := mjml.New(mjmlConfig, prometheusApp.Registerer(), tracerApp.GetTracer("mjml"))
+	senderApp := smtp.New(smtpConfig, prometheusApp.Registerer(), tracerApp.GetTracer("smtp"))
+	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer(), tracerApp.GetTracer("mailer"))
 
 	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
@@ -87,7 +87,7 @@ func main() {
 
 	go amqpApp.Start(healthApp.Done())
 
-	appHandler := httphandler.New(mailerApp, tracerApp).Handler()
+	appHandler := httphandler.New(mailerApp, tracerApp.GetTracer("handler")).Handler()
 
 	go promServer.Start("prometheus", healthApp.End(), prometheusApp.Handler())
 	go appServer.Start("http", healthApp.End(), httputils.Handler(appHandler, healthApp, recoverer.Middleware, prometheusApp.Middleware, tracerApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))

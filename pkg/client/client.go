@@ -11,8 +11,10 @@ import (
 	"github.com/ViBiOh/flags"
 	amqpclient "github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
+	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -25,6 +27,7 @@ var (
 // App of package
 type App struct {
 	amqpClient *amqpclient.Client
+	tracer     trace.Tracer
 	exchange   string
 	req        request.Request
 }
@@ -46,7 +49,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, prometheusRegister prometheus.Registerer) (App, error) {
+func New(config Config, prometheusRegister prometheus.Registerer, tracer trace.Tracer) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}, nil
@@ -67,6 +70,7 @@ func New(config Config, prometheusRegister prometheus.Registerer) (App, error) {
 		return App{
 			amqpClient: client,
 			exchange:   name,
+			tracer:     tracer,
 		}, nil
 	}
 
@@ -97,6 +101,9 @@ func (a App) amqpEnabled() bool {
 
 // Send sends emails with Mailer for defined parameters
 func (a App) Send(ctx context.Context, mailRequest model.MailRequest) error {
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "send")
+	defer end()
+
 	if !a.Enabled() {
 		return ErrNotEnabled
 	}

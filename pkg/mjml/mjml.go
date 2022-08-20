@@ -10,8 +10,10 @@ import (
 	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
+	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var prefix = []byte("<mjml>")
@@ -27,7 +29,8 @@ type mjmlResponse struct {
 
 // App of package
 type App struct {
-	req request.Request
+	tracer trace.Tracer
+	req    request.Request
 }
 
 // Config of package
@@ -47,7 +50,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, prometheusRegisterer prometheus.Registerer) App {
+func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace.Tracer) App {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}
@@ -56,7 +59,8 @@ func New(config Config, prometheusRegisterer prometheus.Registerer) App {
 	metric.Create(prometheusRegisterer, "mjml")
 
 	return App{
-		req: request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
+		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
+		tracer: tracer,
 	}
 }
 
@@ -75,6 +79,9 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 	if !a.Enabled() {
 		return template, nil
 	}
+
+	ctx, end := tracer.StartSpan(ctx, a.tracer, "render")
+	defer end()
 
 	resp, err := a.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {

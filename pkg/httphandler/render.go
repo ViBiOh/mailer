@@ -12,6 +12,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
 	"github.com/ViBiOh/httputils/v4/pkg/query"
+	"github.com/ViBiOh/httputils/v4/pkg/tracer"
 	"github.com/ViBiOh/mailer/pkg/model"
 )
 
@@ -23,6 +24,9 @@ var bufferPool = sync.Pool{
 
 func (a App) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx, end := tracer.StartSpan(r.Context(), a.tracer, "render")
+		defer end()
+
 		if query.IsRoot(r) {
 			if r.Method != http.MethodGet {
 				w.WriteHeader(http.StatusMethodNotAllowed)
@@ -45,8 +49,6 @@ func (a App) renderHandler() http.Handler {
 			httperror.InternalServerError(w, err)
 			return
 		}
-
-		ctx := r.Context()
 
 		mr = mr.Data(content)
 		output, err := a.mailerApp.Render(ctx, mr)
