@@ -13,6 +13,8 @@ import (
 )
 
 func TestEnabled(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
 		instance App
 		want     bool
@@ -29,16 +31,22 @@ func TestEnabled(t *testing.T) {
 		},
 	}
 
-	for intention, tc := range cases {
+	for intention, testCase := range cases {
+		intention, testCase := intention, testCase
+
 		t.Run(intention, func(t *testing.T) {
-			if got := tc.instance.Enabled(); got != tc.want {
-				t.Errorf("Enabled() = %t, want %t", got, tc.want)
+			t.Parallel()
+
+			if got := testCase.instance.Enabled(); got != testCase.want {
+				t.Errorf("Enabled() = %t, want %t", got, testCase.want)
 			}
 		})
 	}
 }
 
 func TestSend(t *testing.T) {
+	t.Parallel()
+
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") == "" {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -92,22 +100,24 @@ func TestSend(t *testing.T) {
 		},
 	}
 
-	for intention, tc := range cases {
+	for intention, testCase := range cases {
+		intention, testCase := intention, testCase
+
 		t.Run(intention, func(t *testing.T) {
-			gotErr := tc.instance.Send(context.Background(), tc.args.mailRequest)
+			gotErr := testCase.instance.Send(context.Background(), testCase.args.mailRequest)
 
 			failed := false
 
-			if tc.wantErr == nil && gotErr != nil {
+			if testCase.wantErr == nil && gotErr != nil {
 				failed = true
-			} else if tc.wantErr != nil && gotErr == nil {
+			} else if testCase.wantErr != nil && gotErr == nil {
 				failed = true
-			} else if tc.wantErr != nil && !strings.Contains(gotErr.Error(), tc.wantErr.Error()) {
+			} else if testCase.wantErr != nil && !strings.Contains(gotErr.Error(), testCase.wantErr.Error()) {
 				failed = true
 			}
 
 			if failed {
-				t.Errorf("Send() = `%s`, want `%s`", gotErr, tc.wantErr)
+				t.Errorf("Send() = `%s`, want `%s`", gotErr, testCase.wantErr)
 			}
 		})
 	}

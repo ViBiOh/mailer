@@ -11,6 +11,8 @@ func noop() {
 }
 
 func TestCheck(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
 		instance MailRequest
 		wantErr  error
@@ -37,28 +39,34 @@ func TestCheck(t *testing.T) {
 		},
 	}
 
-	for intention, tc := range cases {
+	for intention, testCase := range cases {
+		intention, testCase := intention, testCase
+
 		t.Run(intention, func(t *testing.T) {
-			gotErr := tc.instance.Check()
+			t.Parallel()
+
+			gotErr := testCase.instance.Check()
 
 			failed := false
 
-			if tc.wantErr == nil && gotErr != nil {
+			if testCase.wantErr == nil && gotErr != nil {
 				failed = true
-			} else if tc.wantErr != nil && gotErr == nil {
+			} else if testCase.wantErr != nil && gotErr == nil {
 				failed = true
-			} else if tc.wantErr != nil && !strings.Contains(gotErr.Error(), tc.wantErr.Error()) {
+			} else if testCase.wantErr != nil && !strings.Contains(gotErr.Error(), testCase.wantErr.Error()) {
 				failed = true
 			}
 
 			if failed {
-				t.Errorf("Check() = `%s`, want `%s`", gotErr, tc.wantErr)
+				t.Errorf("Check() = `%s`, want `%s`", gotErr, testCase.wantErr)
 			}
 		})
 	}
 }
 
 func TestGetSubject(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		subject string
 		payload any
@@ -106,10 +114,14 @@ func TestGetSubject(t *testing.T) {
 		},
 	}
 
-	for intention, tc := range cases {
+	for intention, testCase := range cases {
+		intention, testCase := intention, testCase
+
 		t.Run(intention, func(t *testing.T) {
-			if got := getSubject(tc.args.subject, tc.args.payload); got != tc.want {
-				t.Errorf("getSubject() = `%s`, want `%s`", got, tc.want)
+			t.Parallel()
+
+			if got := getSubject(testCase.args.subject, testCase.args.payload); got != testCase.want {
+				t.Errorf("getSubject() = `%s`, want `%s`", got, testCase.want)
 			}
 		})
 	}
