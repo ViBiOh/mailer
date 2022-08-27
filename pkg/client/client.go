@@ -58,7 +58,7 @@ func New(config Config, prometheusRegister prometheus.Registerer, tracer trace.T
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := amqpclient.NewFromURI(url, 1, prometheusRegister)
+		client, err := amqpclient.NewFromURI(url, 1, prometheusRegister, tracer)
 		if err != nil {
 			return App{}, fmt.Errorf("create amqp client: %w", err)
 		}
