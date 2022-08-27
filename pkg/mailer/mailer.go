@@ -100,9 +100,7 @@ func (a App) Enabled() bool {
 }
 
 // AmqpHandler handler amqp message
-func (a App) AmqpHandler(message amqp.Delivery) error {
-	ctx := context.Background()
-
+func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) error {
 	ctx, end := tracer.StartSpan(ctx, a.tracer, "amqp")
 	defer end()
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -73,19 +74,19 @@ func main() {
 	senderApp := smtp.New(smtpConfig, prometheusApp.Registerer(), tracerApp.GetTracer("smtp"))
 	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer(), tracerApp.GetTracer("mailer"))
 
-	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer())
+	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer(), tracerApp.GetTracer("amqp"))
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		logger.Fatal(err)
 	}
 
-	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, mailerApp.AmqpHandler)
+	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, tracerApp.GetTracer("amqp_handler"), mailerApp.AmqpHandler)
 	if err != nil {
 		logger.Error("create amqp handler: %s", err)
 	}
 
 	healthApp := health.New(healthConfig)
 
-	go amqpApp.Start(healthApp.Done())
+	go amqpApp.Start(context.Background(), healthApp.Done())
 
 	appHandler := httphandler.New(mailerApp, tracerApp.GetTracer("handler")).Handler()
 
