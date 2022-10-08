@@ -113,7 +113,7 @@ func (a App) Send(ctx context.Context, mailRequest model.MailRequest) error {
 	}
 
 	if a.amqpEnabled() {
-		return a.amqpClient.PublishJSON(mailRequest, a.exchange, "")
+		return a.amqpClient.PublishJSON(ctx, mailRequest, a.exchange, "")
 	}
 	return a.httpSend(ctx, mailRequest)
 }
