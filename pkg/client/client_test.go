@@ -104,7 +104,7 @@ func TestSend(t *testing.T) {
 		intention, testCase := intention, testCase
 
 		t.Run(intention, func(t *testing.T) {
-			gotErr := testCase.instance.Send(context.Background(), testCase.args.mailRequest)
+			gotErr := testCase.instance.Send(context.TODO(), testCase.args.mailRequest)
 
 			failed := false
 
