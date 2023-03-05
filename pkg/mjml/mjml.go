@@ -80,8 +80,10 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return template, nil
 	}
 
+	var err error
+
 	ctx, end := tracer.StartSpan(ctx, a.tracer, "render")
-	defer end()
+	defer end(&err)
 
 	resp, err := a.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {
@@ -90,7 +92,7 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 	}
 
 	var response mjmlResponse
-	if err := httpjson.Read(resp, &response); err != nil {
+	if err = httpjson.Read(resp, &response); err != nil {
 		return "", fmt.Errorf("read mjml response: %w", err)
 	}
 

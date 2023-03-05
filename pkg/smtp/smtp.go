@@ -69,8 +69,10 @@ func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace
 
 // Send email by smtp
 func (a App) Send(ctx context.Context, mail model.Mail) error {
+	var err error
+
 	_, end := tracer.StartSpan(ctx, a.tracer, "send")
-	defer end()
+	defer end(&err)
 
 	body := bufferPool.Get().(*bytes.Buffer)
 	defer bufferPool.Put(body)
@@ -82,13 +84,13 @@ func (a App) Send(ctx context.Context, mail model.Mail) error {
 	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
 	body.WriteString("\r\n")
 
-	if _, err := io.Copy(body, mail.Content); err != nil {
+	if _, err = io.Copy(body, mail.Content); err != nil {
 		return fmt.Errorf("read mail content: %w", err)
 	}
 
 	body.WriteString("\r\n")
 
-	err := smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
+	err = smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
 
 	if err != nil {
 		metric.Increase("smtp", "error")

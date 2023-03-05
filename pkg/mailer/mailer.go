@@ -100,9 +100,9 @@ func (a App) Enabled() bool {
 }
 
 // AmqpHandler handler amqp message
-func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) error {
+func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error) {
 	ctx, end := tracer.StartSpan(ctx, a.tracer, "amqp")
-	defer end()
+	defer end(&err)
 
 	var mailRequest model.MailRequest
 	if err := json.Unmarshal(message.Body, &mailRequest); err != nil {
@@ -119,8 +119,10 @@ func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) error {
 
 // Render email
 func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
+	var err error
+
 	ctx, end := tracer.StartSpan(ctx, a.tracer, "render")
-	defer end()
+	defer end(&err)
 
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
@@ -131,14 +133,14 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 	defer bufferPool.Put(buffer)
 	buffer.Reset()
 
-	if err := tpl.Execute(buffer, mailRequest.Payload); err != nil {
+	if err = tpl.Execute(buffer, mailRequest.Payload); err != nil {
 		metric.Increase("render", "error")
 		return nil, err
 	}
 
 	metric.Increase("render", "success")
 
-	if err := a.convertMjml(ctx, buffer); err != nil {
+	if err = a.convertMjml(ctx, buffer); err != nil {
 		return nil, err
 	}
 
@@ -146,9 +148,9 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 }
 
 // Send email
-func (a App) Send(ctx context.Context, mail model.Mail) error {
+func (a App) Send(ctx context.Context, mail model.Mail) (err error) {
 	ctx, end := tracer.StartSpan(ctx, a.tracer, "send")
-	defer end()
+	defer end(&err)
 
 	return a.senderApp.Send(ctx, mail)
 }

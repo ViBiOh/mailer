@@ -100,9 +100,9 @@ func (a App) amqpEnabled() bool {
 }
 
 // Send sends emails with Mailer for defined parameters
-func (a App) Send(ctx context.Context, mailRequest model.MailRequest) error {
+func (a App) Send(ctx context.Context, mailRequest model.MailRequest) (err error) {
 	ctx, end := tracer.StartSpan(ctx, a.tracer, "send")
-	defer end()
+	defer end(&err)
 
 	if !a.Enabled() {
 		return ErrNotEnabled

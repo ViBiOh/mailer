@@ -24,8 +24,10 @@ var bufferPool = sync.Pool{
 
 func (a App) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
 		ctx, end := tracer.StartSpan(r.Context(), a.tracer, "render")
-		defer end()
+		defer end(&err)
 
 		if query.IsRoot(r) {
 			if r.Method != http.MethodGet {

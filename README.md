@@ -167,9 +167,9 @@ Usage of mailer:
   -templates string
         [mailer] Templates directory {MAILER_TEMPLATES} (default "./templates/")
   -tracerRate string
-        [tracer] Jaeger sample rate, 'always', 'never' or a float value {MAILER_TRACER_RATE} (default "always")
+        [tracer] OpenTracing sample rate, 'always', 'never' or a float value {MAILER_TRACER_RATE} (default "always")
   -tracerURL string
-        [tracer] Jaeger endpoint URL (e.g. http://jaeger:14268/api/traces) {MAILER_TRACER_URL}
+        [tracer] OpenTracing gRPC endpoint (e.g. otel-exporter:4317) {MAILER_TRACER_URL}
   -url string
         [alcotest] URL to check {MAILER_URL}
   -userAgent string
