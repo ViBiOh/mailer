@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/ViBiOh/flags v1.2.0
-	github.com/ViBiOh/httputils/v4 v4.54.4
+	github.com/ViBiOh/httputils/v4 v4.55.0
 	github.com/prometheus/client_golang v1.14.0
-	github.com/streadway/amqp v1.0.0
+	github.com/rabbitmq/amqp091-go v1.7.0
 	go.opentelemetry.io/otel/trace v1.14.0
 )
 

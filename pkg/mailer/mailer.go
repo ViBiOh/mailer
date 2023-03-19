@@ -22,7 +22,7 @@ import (
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel/trace"
 )
 
