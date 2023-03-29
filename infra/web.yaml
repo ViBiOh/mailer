@@ -27,6 +27,7 @@ spec:
       name: vibioh/mailer
       tag: "202303220908" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     config:
+      GOMAXPROCS: "1"
       MAILER_LOGGER_JSON: "true"
       MAILER_MJML_URL: http://mjml
       MAILER_TRACER_URL: otel-collector.monitoring:4317
