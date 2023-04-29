@@ -3,6 +3,7 @@ package smtp
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io"
@@ -29,6 +30,7 @@ type App struct {
 	auth    smtp.Auth
 	tracer  trace.Tracer
 	address string
+	host    string
 }
 
 // Config of package
@@ -63,6 +65,7 @@ func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace
 	return App{
 		address: strings.TrimSpace(*config.address),
 		auth:    auth,
+		host:    *config.host,
 		tracer:  tracer,
 	}
 }
@@ -90,7 +93,7 @@ func (a App) Send(ctx context.Context, mail model.Mail) error {
 
 	body.WriteString("\r\n")
 
-	err = smtp.SendMail(a.address, a.auth, mail.From, mail.To, body.Bytes())
+	err = SendMail(a.address, a.host, a.auth, mail.From, mail.To, body.Bytes())
 
 	if err != nil {
 		metric.Increase("smtp", "error")
@@ -99,4 +102,51 @@ func (a App) Send(ctx context.Context, mail model.Mail) error {
 	}
 
 	return err
+}
+
+func SendMail(addr, host string, auth smtp.Auth, from string, to []string, body []byte) error {
+	smtpConn, err := tls.Dial("tcp", addr, &tls.Config{
+		ServerName: host,
+	})
+	if err != nil {
+		return fmt.Errorf("dial: %w", err)
+	}
+
+	smtpClient, err := smtp.NewClient(smtpConn, host)
+	if err != nil {
+		return fmt.Errorf("client: %w", err)
+	}
+
+	defer smtpClient.Close()
+
+	if auth != nil {
+		if err = smtpClient.Auth(auth); err != nil {
+			return fmt.Errorf("auth: %w", err)
+		}
+	}
+
+	if err = smtpClient.Mail(from); err != nil {
+		return fmt.Errorf("mail: %w", err)
+	}
+
+	for _, recipient := range to {
+		if err = smtpClient.Rcpt(recipient); err != nil {
+			return fmt.Errorf("recipient `%s`: %w", recipient, err)
+		}
+	}
+
+	writer, err := smtpClient.Data()
+	if err != nil {
+		return fmt.Errorf("data: %w", err)
+	}
+
+	if _, err = writer.Write(body); err != nil {
+		return fmt.Errorf("write: %w", err)
+	}
+
+	if err = writer.Close(); err != nil {
+		return fmt.Errorf("close: %w", err)
+	}
+
+	return smtpClient.Quit()
 }
