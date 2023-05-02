@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
@@ -60,7 +59,7 @@ func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace
 	metric.Create(prometheusRegisterer, "mjml")
 
 	return App{
-		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password).WithClient(request.CreateClient(time.Minute, request.NoRedirection)),
+		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
 		tracer: tracer,
 	}
 }
