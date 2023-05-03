@@ -58,7 +58,7 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		templatesDir: flags.String(fs, prefix, "mailer", "Templates", "Templates directory", "./templates/", nil),
+		templatesDir: flags.New("Templates", "Templates directory").Prefix(prefix).DocPrefix("mailer").String(fs, "./templates/", nil),
 	}
 }
 

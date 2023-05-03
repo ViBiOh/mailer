@@ -42,9 +42,9 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:      flags.String(fs, prefix, "mailer", "URL", "URL (https?:// or amqps?://)", "", nil),
-		name:     flags.String(fs, prefix, "mailer", "Name", "HTTP Username or AMQP Exchange name", "mailer", nil),
-		password: flags.String(fs, prefix, "mailer", "Password", "HTTP Pass", "", nil),
+		url:      flags.New("URL", "URL (https?:// or amqps?://)").Prefix(prefix).DocPrefix("mailer").String(fs, "", nil),
+		name:     flags.New("Name", "HTTP Username or AMQP Exchange name").Prefix(prefix).DocPrefix("mailer").String(fs, "mailer", nil),
+		password: flags.New("Password", "HTTP Pass").Prefix(prefix).DocPrefix("mailer").String(fs, "", nil),
 	}
 }
 

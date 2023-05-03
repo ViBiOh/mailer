@@ -43,9 +43,9 @@ type Config struct {
 // Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
 	return Config{
-		url:      flags.String(fs, prefix, "mjml", "URL", "MJML API Converter URL", "https://api.mjml.io/v1/render", nil),
-		username: flags.String(fs, prefix, "mjml", "Username", "Application ID or Basic Auth username", "", nil),
-		password: flags.String(fs, prefix, "mjml", "Password", "Secret Key or Basic Auth password", "", nil),
+		url:      flags.New("URL", "MJML API Converter URL").Prefix(prefix).DocPrefix("mjml").String(fs, "https://api.mjml.io/v1/render", nil),
+		username: flags.New("Username", "Application ID or Basic Auth username").Prefix(prefix).DocPrefix("mjml").String(fs, "", nil),
+		password: flags.New("Password", "Secret Key or Basic Auth password").Prefix(prefix).DocPrefix("mjml").String(fs, "", nil),
 	}
 }
 
