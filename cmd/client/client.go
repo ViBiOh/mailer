@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/mailer/pkg/client"
 	"github.com/ViBiOh/mailer/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
@@ -13,6 +14,7 @@ import (
 
 func main() {
 	fs := flag.NewFlagSet("client", flag.ExitOnError)
+	fs.Usage = flags.Usage(fs)
 
 	mailerConfig := client.Flags(fs, "mailer")
 
