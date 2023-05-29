@@ -102,7 +102,7 @@ func main() {
 	server.GracefulWait(appServer.Done(), promServer.Done(), amqpApp.Done())
 }
 
-func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpApp amqphandler.App) <-chan struct{} {
+func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpApp *amqphandler.App) <-chan struct{} {
 	if amqpClient == nil {
 		return httpDone
 	}
