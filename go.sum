@@ -36,8 +36,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ViBiOh/flags v1.3.1 h1:OHkGtVBPb6CpgWUST1VS9heKvHWBgwpyM8fXnuJRRVU=
 github.com/ViBiOh/flags v1.3.1/go.mod h1:yQAIBf4HTymJDCF0Bl8QQHvQTr5uiUMQBa/A/ao1oM4=
-github.com/ViBiOh/httputils/v4 v4.58.1 h1:OLEiWGh6W/KxZ3ZbTP1D3TTJwVMVhjDHG7JxDHyz0Fc=
-github.com/ViBiOh/httputils/v4 v4.58.1/go.mod h1:sYnHKhQ1wkboVX70+ABf2TbxA679wdcJoHDn4B50nQY=
+github.com/ViBiOh/httputils/v4 v4.58.2 h1:DvPY7VRiCaAM51Ut62cxppTVhU7xOAE1U+Fv7egSoG0=
+github.com/ViBiOh/httputils/v4 v4.58.2/go.mod h1:sYnHKhQ1wkboVX70+ABf2TbxA679wdcJoHDn4B50nQY=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
