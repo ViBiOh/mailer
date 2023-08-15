@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -52,7 +53,9 @@ func main() {
 	mjmlConfig := mjml.Flags(fs, "mjml")
 	mailerConfig := mailer.Flags(fs, "")
 
-	logger.Fatal(fs.Parse(os.Args[1:]))
+	if err := fs.Parse(os.Args[1:]); err != nil {
+		log.Fatal(err)
+	}
 
 	alcotest.DoAndExit(alcotestConfig)
 	logger.Global(logger.New(loggerConfig))
