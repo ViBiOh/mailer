@@ -11,9 +11,9 @@ import (
 	"github.com/ViBiOh/flags"
 	amqpclient "github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
+	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
 	"github.com/ViBiOh/mailer/pkg/model"
-	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -49,7 +49,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, prometheusRegister prometheus.Registerer, tracer trace.Tracer) (App, error) {
+func New(config Config, meter metric.Meter, tracer trace.Tracer) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}, nil
@@ -58,7 +58,7 @@ func New(config Config, prometheusRegister prometheus.Registerer, tracer trace.T
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := amqpclient.NewFromURI(url, 1, prometheusRegister, tracer)
+		client, err := amqpclient.NewFromURI(url, 1, meter, tracer)
 		if err != nil {
 			return App{}, fmt.Errorf("create amqp client: %w", err)
 		}
@@ -101,7 +101,7 @@ func (a App) amqpEnabled() bool {
 
 // Send sends emails with Mailer for defined parameters
 func (a App) Send(ctx context.Context, mailRequest model.MailRequest) (err error) {
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "send")
+	ctx, end := telemetry.StartSpan(ctx, a.tracer, "send")
 	defer end(&err)
 
 	if !a.Enabled() {
@@ -115,6 +115,7 @@ func (a App) Send(ctx context.Context, mailRequest model.MailRequest) (err error
 	if a.amqpEnabled() {
 		return a.amqpClient.PublishJSON(ctx, mailRequest, a.exchange, "")
 	}
+
 	return a.httpSend(ctx, mailRequest)
 }
 

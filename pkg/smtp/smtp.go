@@ -12,10 +12,10 @@ import (
 	"sync"
 
 	"github.com/ViBiOh/flags"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
-	"github.com/ViBiOh/mailer/pkg/metric"
+	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
+	mailer_metric "github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/model"
-	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -52,7 +52,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace.Tracer) App {
+func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
 	var auth smtp.Auth
 
 	user := strings.TrimSpace(*config.username)
@@ -60,7 +60,7 @@ func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace
 		auth = smtp.PlainAuth("", user, *config.password, strings.TrimSpace(*config.host))
 	}
 
-	metric.Create(prometheusRegisterer, "smtp")
+	mailer_metric.Create(meter, "smtp")
 
 	return App{
 		address: strings.TrimSpace(*config.address),
@@ -74,7 +74,7 @@ func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace
 func (a App) Send(ctx context.Context, mail model.Mail) error {
 	var err error
 
-	_, end := tracer.StartSpan(ctx, a.tracer, "send")
+	_, end := telemetry.StartSpan(ctx, a.tracer, "send")
 	defer end(&err)
 
 	body := bufferPool.Get().(*bytes.Buffer)
@@ -96,9 +96,9 @@ func (a App) Send(ctx context.Context, mail model.Mail) error {
 	err = SendMail(a.address, a.host, a.auth, mail.From, mail.To, body.Bytes())
 
 	if err != nil {
-		metric.Increase("smtp", "error")
+		mailer_metric.Increase(ctx, "smtp", "error")
 	} else {
-		metric.Increase("smtp", "success")
+		mailer_metric.Increase(ctx, "smtp", "success")
 	}
 
 	return err

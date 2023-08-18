@@ -1,40 +1,32 @@
 package metric
 
 import (
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
-	"github.com/prometheus/client_golang/prometheus"
+	"context"
+	"log/slog"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 )
 
-const (
-	namespace = "mailer"
-)
+var metrics = make(map[string]metric.Int64Counter)
 
-var metrics = make(map[string]*prometheus.CounterVec)
-
-// Create creates a metrics for the mailer
-func Create(prometheusRegisterer prometheus.Registerer, name string) {
-	if prometheusRegisterer == nil {
+func Create(meter metric.Meter, name string) {
+	if meter == nil {
 		return
 	}
 
-	counter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: namespace,
-		Subsystem: name,
-		Name:      "item",
-	}, []string{"state"})
-
-	if err := prometheusRegisterer.Register(counter); err != nil {
-		logger.Error("register `%s` metric: %s", name, err)
+	counter, err := meter.Int64Counter(name)
+	if err != nil {
+		slog.Error("create metric", "err", err, "name", name)
 	}
 
 	metrics[name] = counter
 }
 
-// Increase increases the given metric for given state
-func Increase(name, state string) {
+func Increase(ctx context.Context, name, state string) {
 	if gauge, ok := metrics[name]; ok {
-		gauge.With(prometheus.Labels{
-			"state": state,
-		}).Inc()
+		gauge.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("state", state),
+		))
 	}
 }

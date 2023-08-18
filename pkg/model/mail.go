@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"strings"
-
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
 )
 
 // MailRequest describes an email to be sent
@@ -101,14 +100,14 @@ func getSubject(subject string, payload any) string {
 
 	tpl, err := template.New("subject").Parse(subject)
 	if err != nil {
-		logger.Warn("cannot parse template subject `%s`: %s", subject, err)
+		slog.Warn("cannot parse template subject", "err", err, "subject", subject)
 		return subject
 	}
 
 	subjectOutput := strings.Builder{}
 
 	if err := tpl.Execute(&subjectOutput, payload); err != nil {
-		logger.Warn("cannot execute template subject `%s`: %s", subject, err)
+		slog.Warn("cannot execute template subject", "err", err, "subject", subject)
 		return subject
 	}
 
@@ -138,6 +137,6 @@ type Mail struct {
 // LoggedCloser closes a ressources with handling error
 func LoggedCloser(closer io.Closer) {
 	if err := closer.Close(); err != nil {
-		logger.Error("error while closing: %s", err)
+		slog.Error("close", "err", err)
 	}
 }

@@ -10,9 +10,9 @@ import (
 	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
-	"github.com/ViBiOh/mailer/pkg/metric"
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
+	mailer_metric "github.com/ViBiOh/mailer/pkg/metric"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -50,13 +50,13 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, prometheusRegisterer prometheus.Registerer, tracer trace.Tracer) App {
+func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}
 	}
 
-	metric.Create(prometheusRegisterer, "mjml")
+	mailer_metric.Create(meter, "mjml")
 
 	return App{
 		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
@@ -82,12 +82,12 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 
 	var err error
 
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "render")
+	ctx, end := telemetry.StartSpan(ctx, a.tracer, "render")
 	defer end(&err)
 
 	resp, err := a.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {
-		metric.Increase("mjml", "error")
+		mailer_metric.Increase(ctx, "mjml", "error")
 		return "", fmt.Errorf("render mjml template: %w", err)
 	}
 
@@ -96,7 +96,7 @@ func (a App) Render(ctx context.Context, template string) (string, error) {
 		return "", fmt.Errorf("read mjml response: %w", err)
 	}
 
-	metric.Increase("mjml", "success")
+	mailer_metric.Increase(ctx, "mjml", "success")
 
 	return response.HTML, nil
 }

@@ -6,9 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
-	"time"
 
 	_ "net/http/pprof"
 
@@ -21,11 +21,10 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httputils"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/owasp"
-	"github.com/ViBiOh/httputils/v4/pkg/prometheus"
 	"github.com/ViBiOh/httputils/v4/pkg/recoverer"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/httputils/v4/pkg/server"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
+	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
 	"github.com/ViBiOh/mailer/pkg/httphandler"
 	"github.com/ViBiOh/mailer/pkg/mailer"
 	"github.com/ViBiOh/mailer/pkg/mjml"
@@ -37,13 +36,11 @@ func main() {
 	fs.Usage = flags.Usage(fs)
 
 	appServerConfig := server.Flags(fs, "")
-	promServerConfig := server.Flags(fs, "prometheus", flags.NewOverride("Port", uint(9090)), flags.NewOverride("IdleTimeout", 10*time.Second), flags.NewOverride("ShutdownTimeout", 5*time.Second))
 	healthConfig := health.Flags(fs, "")
 
 	alcotestConfig := alcotest.Flags(fs, "")
 	loggerConfig := logger.Flags(fs, "logger")
-	tracerConfig := tracer.Flags(fs, "tracer")
-	prometheusConfig := prometheus.Flags(fs, "prometheus", flags.NewOverride("Gzip", false))
+	tracerConfig := telemetry.Flags(fs, "telemetry")
 	owaspConfig := owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/"))
 	corsConfig := cors.Flags(fs, "cors")
 
@@ -58,51 +55,56 @@ func main() {
 	}
 
 	alcotest.DoAndExit(alcotestConfig)
-	logger.Global(logger.New(loggerConfig))
-	defer logger.Close()
+
+	logger.Init(loggerConfig)
 
 	ctx := context.Background()
 
-	tracerApp, err := tracer.New(ctx, tracerConfig)
-	logger.Fatal(err)
-	defer tracerApp.Close(ctx)
-	request.AddTracerToDefaultClient(tracerApp.GetProvider())
+	telemetryApp, err := telemetry.New(ctx, tracerConfig)
+	if err != nil {
+		slog.Error("telemetry", "err", err)
+		os.Exit(1)
+	}
+
+	defer telemetryApp.Close(ctx)
+	request.AddOpenTelemetryToDefaultClient(telemetryApp.GetMeterProvider(), telemetryApp.GetTraceProvider())
 
 	go func() {
 		fmt.Println(http.ListenAndServe("localhost:9999", http.DefaultServeMux))
 	}()
 
 	appServer := server.New(appServerConfig)
-	promServer := server.New(promServerConfig)
-	prometheusApp := prometheus.New(prometheusConfig)
 
-	mjmlApp := mjml.New(mjmlConfig, prometheusApp.Registerer(), tracerApp.GetTracer("mjml"))
-	senderApp := smtp.New(smtpConfig, prometheusApp.Registerer(), tracerApp.GetTracer("smtp"))
-	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, prometheusApp.Registerer(), tracerApp.GetTracer("mailer"))
+	meter := telemetryApp.GetMeter("mailer")
 
-	amqpClient, err := amqp.New(amqpConfig, prometheusApp.Registerer(), tracerApp.GetTracer("amqp"))
+	mjmlApp := mjml.New(mjmlConfig, meter, telemetryApp.GetTracer("mjml"))
+	senderApp := smtp.New(smtpConfig, meter, telemetryApp.GetTracer("smtp"))
+	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, meter, telemetryApp.GetTracer("mailer"))
+
+	amqpClient, err := amqp.New(amqpConfig, meter, telemetryApp.GetTracer("amqp"))
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
-		logger.Fatal(err)
+		slog.Error("create amqp", "err", err)
+		os.Exit(1)
 	}
 
-	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, tracerApp.GetTracer("amqp_handler"), mailerApp.AmqpHandler)
+	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryApp.GetTracer("amqp_handler"), mailerApp.AmqpHandler)
 	if err != nil {
-		logger.Error("create amqp handler: %s", err)
+		slog.Error("create amqp handler", "err", err)
+		os.Exit(1)
 	}
 
 	healthApp := health.New(healthConfig)
 
 	go amqpApp.Start(healthApp.Done(ctx))
 
-	appHandler := httphandler.New(mailerApp, tracerApp.GetTracer("handler")).Handler()
+	appHandler := httphandler.New(mailerApp, telemetryApp.GetTracer("handler")).Handler()
 
 	endCtx := healthApp.End(ctx)
 
-	go promServer.Start(endCtx, "prometheus", prometheusApp.Handler())
-	go appServer.Start(endCtx, "http", httputils.Handler(appHandler, healthApp, recoverer.Middleware, prometheusApp.Middleware, tracerApp.Middleware, owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
+	go appServer.Start(endCtx, "http", httputils.Handler(appHandler, healthApp, recoverer.Middleware, telemetryApp.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
 	healthApp.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpApp))
-	server.GracefulWait(appServer.Done(), promServer.Done(), amqpApp.Done())
+	server.GracefulWait(appServer.Done(), amqpApp.Done())
 }
 
 func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpApp *amqphandler.App) <-chan struct{} {
