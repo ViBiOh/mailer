@@ -72,7 +72,7 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, meter metric.Meter, 
 		slog.Error("get templates", "err", err)
 	}
 
-	mailer_metric.Create(meter, "render")
+	mailer_metric.Create(meter, "mailer_render")
 
 	return App{
 		templatesDir: templatesDir,

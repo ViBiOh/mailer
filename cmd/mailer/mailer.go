@@ -75,7 +75,7 @@ func main() {
 
 	appServer := server.New(appServerConfig)
 
-	meter := telemetryApp.GetMeter("mailer")
+	meter := telemetryApp.GetMeter("github.com/ViBiOh/mailer/cmd/mailer")
 
 	mjmlApp := mjml.New(mjmlConfig, meter, telemetryApp.GetTracer("mjml"))
 	senderApp := smtp.New(smtpConfig, meter, telemetryApp.GetTracer("smtp"))

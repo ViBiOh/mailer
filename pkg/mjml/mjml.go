@@ -56,7 +56,7 @@ func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
 		return App{}
 	}
 
-	mailer_metric.Create(meter, "mjml")
+	mailer_metric.Create(meter, "mailer_mjml")
 
 	return App{
 		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),

@@ -60,7 +60,7 @@ func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
 		auth = smtp.PlainAuth("", user, *config.password, strings.TrimSpace(*config.host))
 	}
 
-	mailer_metric.Create(meter, "smtp")
+	mailer_metric.Create(meter, "mailer_smtp")
 
 	return App{
 		address: strings.TrimSpace(*config.address),
