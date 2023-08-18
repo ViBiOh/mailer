@@ -12,7 +12,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
 	"github.com/ViBiOh/httputils/v4/pkg/query"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
+	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
 	"github.com/ViBiOh/mailer/pkg/model"
 )
 
@@ -26,7 +26,7 @@ func (a App) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		ctx, end := tracer.StartSpan(r.Context(), a.tracer, "render")
+		ctx, end := telemetry.StartSpan(r.Context(), a.tracer, "render")
 		defer end(&err)
 
 		if query.IsRoot(r) {

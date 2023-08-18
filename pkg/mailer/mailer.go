@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -15,14 +16,13 @@ import (
 	"text/template"
 
 	"github.com/ViBiOh/flags"
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
-	"github.com/ViBiOh/httputils/v4/pkg/tracer"
-	"github.com/ViBiOh/mailer/pkg/metric"
+	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
+	mailer_metric "github.com/ViBiOh/mailer/pkg/metric"
 	"github.com/ViBiOh/mailer/pkg/mjml"
 	"github.com/ViBiOh/mailer/pkg/model"
-	"github.com/prometheus/client_golang/prometheus"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -63,16 +63,16 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender, prometheusRegisterer prometheus.Registerer, tracer trace.Tracer) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender, meter metric.Meter, tracer trace.Tracer) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
-	logger.WithField("dir", templatesDir).WithField("extension", templateExtension).Info("Loading templates...")
+	slog.Info("Loading templates...", "dir", templatesDir, "extension", templateExtension)
 	appTemplates, err := getTemplates(templatesDir, templateExtension)
 	if err != nil {
-		logger.Error("%s", err)
+		slog.Error("get templates", "err", err)
 	}
 
-	metric.Create(prometheusRegisterer, "render")
+	mailer_metric.Create(meter, "render")
 
 	return App{
 		templatesDir: templatesDir,
@@ -101,7 +101,7 @@ func (a App) Enabled() bool {
 
 // AmqpHandler handler amqp message
 func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error) {
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "amqp")
+	ctx, end := telemetry.StartSpan(ctx, a.tracer, "amqp")
 	defer end(&err)
 
 	var mailRequest model.MailRequest
@@ -121,7 +121,7 @@ func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error)
 func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
 	var err error
 
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "render")
+	ctx, end := telemetry.StartSpan(ctx, a.tracer, "render")
 	defer end(&err)
 
 	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
@@ -134,11 +134,11 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 	buffer.Reset()
 
 	if err = tpl.Execute(buffer, mailRequest.Payload); err != nil {
-		metric.Increase("render", "error")
+		mailer_metric.Increase(ctx, "render", "error")
 		return nil, err
 	}
 
-	metric.Increase("render", "success")
+	mailer_metric.Increase(ctx, "render", "success")
 
 	if err = a.convertMjml(ctx, buffer); err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 
 // Send email
 func (a App) Send(ctx context.Context, mail model.Mail) (err error) {
-	ctx, end := tracer.StartSpan(ctx, a.tracer, "send")
+	ctx, end := telemetry.StartSpan(ctx, a.tracer, "send")
 	defer end(&err)
 
 	return a.senderApp.Send(ctx, mail)

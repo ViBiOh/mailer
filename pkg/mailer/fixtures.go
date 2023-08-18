@@ -3,11 +3,11 @@ package mailer
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/model"
 )
 
@@ -73,7 +73,7 @@ func (a App) GetFixture(name, fixture string) (map[string]any, error) {
 
 	defer func() {
 		if closeErr := reader.Close(); closeErr != nil {
-			logger.WithField("fn", "mailer.GetFixture").WithField("item", fixturePath).Error("close: %s", err)
+			slog.Error("close", "err", err, "fn", "mailer.GetFixture", "item", fixturePath)
 		}
 	}()
 
