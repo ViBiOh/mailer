@@ -52,7 +52,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
+func New(config Config, meterProvider metric.MeterProvider, tracer trace.Tracer) App {
 	var auth smtp.Auth
 
 	user := strings.TrimSpace(*config.username)
@@ -60,7 +60,7 @@ func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
 		auth = smtp.PlainAuth("", user, *config.password, strings.TrimSpace(*config.host))
 	}
 
-	mailer_metric.Create(meter, "mailer_smtp")
+	mailer_metric.Create(meterProvider, "mailer_smtp")
 
 	return App{
 		address: strings.TrimSpace(*config.address),

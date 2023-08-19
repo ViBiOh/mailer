@@ -10,10 +10,12 @@ import (
 
 var metrics = make(map[string]metric.Int64Counter)
 
-func Create(meter metric.Meter, name string) {
-	if meter == nil {
+func Create(meterProvider metric.MeterProvider, name string) {
+	if meterProvider == nil {
 		return
 	}
+
+	meter := meterProvider.Meter("github.com/ViBiOh/mailer/pkg/metric")
 
 	counter, err := meter.Int64Counter(name)
 	if err != nil {

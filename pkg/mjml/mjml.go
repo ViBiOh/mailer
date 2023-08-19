@@ -50,13 +50,13 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, meter metric.Meter, tracer trace.Tracer) App {
+func New(config Config, meterProvider metric.MeterProvider, tracer trace.Tracer) App {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}
 	}
 
-	mailer_metric.Create(meter, "mailer_mjml")
+	mailer_metric.Create(meterProvider, "mailer_mjml")
 
 	return App{
 		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),

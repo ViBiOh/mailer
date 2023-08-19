@@ -75,13 +75,11 @@ func main() {
 
 	appServer := server.New(appServerConfig)
 
-	meter := telemetryApp.GetMeter("github.com/ViBiOh/mailer/cmd/mailer")
+	mjmlApp := mjml.New(mjmlConfig, telemetryApp.GetMeterProvider(), telemetryApp.GetTracer("mjml"))
+	senderApp := smtp.New(smtpConfig, telemetryApp.GetMeterProvider(), telemetryApp.GetTracer("smtp"))
+	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, telemetryApp.GetMeterProvider(), telemetryApp.GetTracer("mailer"))
 
-	mjmlApp := mjml.New(mjmlConfig, meter, telemetryApp.GetTracer("mjml"))
-	senderApp := smtp.New(smtpConfig, meter, telemetryApp.GetTracer("smtp"))
-	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, meter, telemetryApp.GetTracer("mailer"))
-
-	amqpClient, err := amqp.New(amqpConfig, meter, telemetryApp.GetTracer("amqp"))
+	amqpClient, err := amqp.New(amqpConfig, telemetryApp.GetMeter("mailer"), telemetryApp.GetTracer("amqp"))
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		slog.Error("create amqp", "err", err)
 		os.Exit(1)

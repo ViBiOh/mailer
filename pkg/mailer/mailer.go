@@ -63,7 +63,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender, meter metric.Meter, tracer trace.Tracer) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric.MeterProvider, tracer trace.Tracer) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	slog.Info("Loading templates...", "dir", templatesDir, "extension", templateExtension)
@@ -72,7 +72,7 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, meter metric.Meter, 
 		slog.Error("get templates", "err", err)
 	}
 
-	mailer_metric.Create(meter, "mailer_render")
+	mailer_metric.Create(meterProvider, "mailer_render")
 
 	return App{
 		templatesDir: templatesDir,
