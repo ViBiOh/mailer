@@ -63,7 +63,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric.MeterProvider, tracer trace.Tracer) App {
+func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) App {
 	templatesDir := strings.TrimSpace(*config.templatesDir)
 
 	slog.Info("Loading templates...", "dir", templatesDir, "extension", templateExtension)
@@ -72,9 +72,9 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric
 		slog.Error("get templates", "err", err)
 	}
 
-	mailer_metric.Create(meterProvider, "mailer_render")
+	mailer_metric.Create(meterProvider, "mailer.render")
 
-	return App{
+	app := App{
 		templatesDir: templatesDir,
 		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
 			"odd": func(i int) bool {
@@ -90,8 +90,13 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric
 
 		mjmlApp:   mjmlApp,
 		senderApp: senderApp,
-		tracer:    tracer,
 	}
+
+	if tracerProvider != nil {
+		app.tracer = tracerProvider.Tracer("mailer")
+	}
+
+	return app
 }
 
 // Enabled checks if requirements are met

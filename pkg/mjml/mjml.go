@@ -50,18 +50,23 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, meterProvider metric.MeterProvider, tracer trace.Tracer) App {
+func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) App {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}
 	}
 
-	mailer_metric.Create(meterProvider, "mailer_mjml")
+	mailer_metric.Create(meterProvider, "mailer.mjml")
 
-	return App{
-		req:    request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
-		tracer: tracer,
+	app := App{
+		req: request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
 	}
+
+	if tracerProvider != nil {
+		app.tracer = tracerProvider.Tracer("mjml")
+	}
+
+	return app
 }
 
 // IsMJML determines if provided content is a MJML template or not

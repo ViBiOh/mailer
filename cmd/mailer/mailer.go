@@ -67,7 +67,7 @@ func main() {
 	}
 
 	defer telemetryApp.Close(ctx)
-	request.AddOpenTelemetryToDefaultClient(telemetryApp.GetMeterProvider(), telemetryApp.GetTraceProvider())
+	request.AddOpenTelemetryToDefaultClient(telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 
 	go func() {
 		fmt.Println(http.ListenAndServe("localhost:9999", http.DefaultServeMux))
@@ -75,17 +75,17 @@ func main() {
 
 	appServer := server.New(appServerConfig)
 
-	mjmlApp := mjml.New(mjmlConfig, telemetryApp.GetMeterProvider(), telemetryApp.GetTracer("mjml"))
-	senderApp := smtp.New(smtpConfig, telemetryApp.GetMeterProvider(), telemetryApp.GetTracer("smtp"))
-	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, telemetryApp.GetMeterProvider(), telemetryApp.GetTracer("mailer"))
+	mjmlApp := mjml.New(mjmlConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	senderApp := smtp.New(smtpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 
-	amqpClient, err := amqp.New(amqpConfig, telemetryApp.GetMeter("mailer"), telemetryApp.GetTracer("amqp"))
+	amqpClient, err := amqp.New(amqpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		slog.Error("create amqp", "err", err)
 		os.Exit(1)
 	}
 
-	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryApp.GetTracer("amqp_handler"), mailerApp.AmqpHandler)
+	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryApp.MeterProvider(), telemetryApp.TracerProvider(), mailerApp.AmqpHandler)
 	if err != nil {
 		slog.Error("create amqp handler", "err", err)
 		os.Exit(1)
@@ -95,7 +95,7 @@ func main() {
 
 	go amqpApp.Start(healthApp.Done(ctx))
 
-	appHandler := httphandler.New(mailerApp, telemetryApp.GetTracer("handler")).Handler()
+	appHandler := httphandler.New(mailerApp, telemetryApp.TracerProvider()).Handler()
 
 	endCtx := healthApp.End(ctx)
 

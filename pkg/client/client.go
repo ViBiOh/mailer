@@ -49,7 +49,7 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 }
 
 // New creates new App from Config
-func New(config Config, meter metric.Meter, tracer trace.Tracer) (App, error) {
+func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (App, error) {
 	url := strings.TrimSpace(*config.url)
 	if len(url) == 0 {
 		return App{}, nil
@@ -58,7 +58,7 @@ func New(config Config, meter metric.Meter, tracer trace.Tracer) (App, error) {
 	name := strings.TrimSpace(*config.name)
 
 	if strings.HasPrefix(url, "amqp") {
-		client, err := amqpclient.NewFromURI(url, 1, meter, tracer)
+		client, err := amqpclient.NewFromURI(url, 1, meterProvider, tracerProvider)
 		if err != nil {
 			return App{}, fmt.Errorf("create amqp client: %w", err)
 		}
@@ -67,11 +67,16 @@ func New(config Config, meter metric.Meter, tracer trace.Tracer) (App, error) {
 			return App{}, fmt.Errorf("configure amqp producer: %w", err)
 		}
 
-		return App{
+		app := App{
 			amqpClient: client,
 			exchange:   name,
-			tracer:     tracer,
-		}, nil
+		}
+
+		if tracerProvider != nil {
+			app.tracer = tracerProvider.Tracer("mailer")
+		}
+
+		return app, nil
 	}
 
 	return App{

@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/ViBiOh/flags v1.3.1
-	github.com/ViBiOh/httputils/v4 v4.63.1
+	github.com/ViBiOh/httputils/v4 v4.63.2
 	github.com/rabbitmq/amqp091-go v1.8.1
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/metric v1.16.0

@@ -21,11 +21,16 @@ type App struct {
 }
 
 // New creates new App
-func New(mailerApp mailer.App, tracer trace.Tracer) App {
-	return App{
+func New(mailerApp mailer.App, tracerProvider trace.TracerProvider) App {
+	app := App{
 		mailerApp: mailerApp,
-		tracer:    tracer,
 	}
+
+	if tracerProvider != nil {
+		app.tracer = tracerProvider.Tracer("mailer_http")
+	}
+
+	return app
 }
 
 // Handler for Render request. Should be use with net/http
