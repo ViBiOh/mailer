@@ -22,7 +22,7 @@ var bufferPool = sync.Pool{
 	},
 }
 
-func (a App) renderHandler() http.Handler {
+func (a Service) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
@@ -35,7 +35,7 @@ func (a App) renderHandler() http.Handler {
 				return
 			}
 
-			httpjson.WriteArray(w, http.StatusOK, a.mailerApp.ListTemplates())
+			httpjson.WriteArray(w, http.StatusOK, a.mailerService.ListTemplates())
 			return
 		}
 
@@ -53,7 +53,7 @@ func (a App) renderHandler() http.Handler {
 		}
 
 		mr = mr.Data(content)
-		output, err := a.mailerApp.Render(ctx, mr)
+		output, err := a.mailerService.Render(ctx, mr)
 		if httperror.HandleError(w, err) {
 			return
 		}
@@ -81,13 +81,13 @@ func writeOutput(w http.ResponseWriter, output io.Reader) {
 	}
 }
 
-func (a App) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.MailRequest, output io.Reader) {
+func (a Service) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.MailRequest, output io.Reader) {
 	if err := mr.Check(); err != nil {
 		httperror.HandleError(w, httpModel.WrapInvalid(err))
 		return
 	}
 
-	if httperror.HandleError(w, a.mailerApp.Send(ctx, mr.ConvertToMail(output))) {
+	if httperror.HandleError(w, a.mailerService.Send(ctx, mr.ConvertToMail(output))) {
 		return
 	}
 

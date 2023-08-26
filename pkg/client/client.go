@@ -18,73 +18,68 @@ import (
 )
 
 var (
-	_ fmt.Stringer = App{}
+	_ fmt.Stringer = Service{}
 
 	// ErrNotEnabled occurs when no configuration is provided
 	ErrNotEnabled = errors.New("mailer not enabled")
 )
 
-// App of package
-type App struct {
+type Service struct {
 	amqpClient *amqpclient.Client
 	tracer     trace.Tracer
 	exchange   string
 	req        request.Request
 }
 
-// Config of package
 type Config struct {
-	url      *string
-	name     *string
-	password *string
+	URL      string
+	Name     string
+	Password string
 }
 
-// Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
-	return Config{
-		url:      flags.New("URL", "URL (https?:// or amqps?://)").Prefix(prefix).DocPrefix("mailer").String(fs, "", nil),
-		name:     flags.New("Name", "HTTP Username or AMQP Exchange name").Prefix(prefix).DocPrefix("mailer").String(fs, "mailer", nil),
-		password: flags.New("Password", "HTTP Pass").Prefix(prefix).DocPrefix("mailer").String(fs, "", nil),
-	}
+	var config Config
+
+	flags.New("URL", "URL (https?:// or amqps?://)").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.URL, "", nil)
+	flags.New("Name", "HTTP Username or AMQP Exchange name").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.Name, "mailer", nil)
+	flags.New("Password", "HTTP Pass").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.Password, "", nil)
+
+	return config
 }
 
-// New creates new App from Config
-func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (App, error) {
-	url := strings.TrimSpace(*config.url)
-	if len(url) == 0 {
-		return App{}, nil
+func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (Service, error) {
+	if len(config.URL) == 0 {
+		return Service{}, nil
 	}
 
-	name := strings.TrimSpace(*config.name)
-
-	if strings.HasPrefix(url, "amqp") {
-		client, err := amqpclient.NewFromURI(url, 1, meterProvider, tracerProvider)
+	if strings.HasPrefix(config.URL, "amqp") {
+		client, err := amqpclient.NewFromURI(config.URL, 1, meterProvider, tracerProvider)
 		if err != nil {
-			return App{}, fmt.Errorf("create amqp client: %w", err)
+			return Service{}, fmt.Errorf("create amqp client: %w", err)
 		}
 
-		if err := client.Publisher(name, "direct", nil); err != nil {
-			return App{}, fmt.Errorf("configure amqp producer: %w", err)
+		if err := client.Publisher(config.Name, "direct", nil); err != nil {
+			return Service{}, fmt.Errorf("configure amqp producer: %w", err)
 		}
 
-		app := App{
+		service := Service{
 			amqpClient: client,
-			exchange:   name,
+			exchange:   config.Name,
 		}
 
 		if tracerProvider != nil {
-			app.tracer = tracerProvider.Tracer("mailer")
+			service.tracer = tracerProvider.Tracer("mailer")
 		}
 
-		return app, nil
+		return service, nil
 	}
 
-	return App{
-		req: request.Post(url).BasicAuth(name, *config.password),
+	return Service{
+		req: request.Post(config.URL).BasicAuth(config.Name, config.Password),
 	}, nil
 }
 
-func (a App) String() string {
+func (a Service) String() string {
 	if !a.Enabled() {
 		return "not enabled"
 	}
@@ -95,17 +90,16 @@ func (a App) String() string {
 	return fmt.Sprintf("Sending emails via HTTP to `%v`.", a.req)
 }
 
-// Enabled checks if requirements are met
-func (a App) Enabled() bool {
+func (a Service) Enabled() bool {
 	return !a.req.IsZero() || a.amqpEnabled()
 }
 
-func (a App) amqpEnabled() bool {
+func (a Service) amqpEnabled() bool {
 	return a.amqpClient != nil && a.amqpClient.Enabled()
 }
 
 // Send sends emails with Mailer for defined parameters
-func (a App) Send(ctx context.Context, mailRequest model.MailRequest) (err error) {
+func (a Service) Send(ctx context.Context, mailRequest model.MailRequest) (err error) {
 	ctx, end := telemetry.StartSpan(ctx, a.tracer, "send")
 	defer end(&err)
 
@@ -124,14 +118,13 @@ func (a App) Send(ctx context.Context, mailRequest model.MailRequest) (err error
 	return a.httpSend(ctx, mailRequest)
 }
 
-// Close client
-func (a App) Close() {
+func (a Service) Close() {
 	if a.amqpEnabled() {
 		a.amqpClient.Close()
 	}
 }
 
-func (a App) httpSend(ctx context.Context, mail model.MailRequest) error {
+func (a Service) httpSend(ctx context.Context, mail model.MailRequest) error {
 	query := url.Values{
 		"from":    []string{mail.FromEmail},
 		"sender":  []string{mail.Sender},

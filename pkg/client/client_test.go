@@ -16,15 +16,15 @@ func TestEnabled(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
-		instance App
+		instance Service
 		want     bool
 	}{
 		"empty": {
-			App{},
+			Service{},
 			false,
 		},
 		"simple": {
-			App{
+			Service{
 				req: request.Post("http://mailer"),
 			},
 			true,
@@ -60,19 +60,19 @@ func TestSend(t *testing.T) {
 	}
 
 	cases := map[string]struct {
-		instance App
+		instance Service
 		args     args
 		wantErr  error
 	}{
 		"not enabled": {
-			App{},
+			Service{},
 			args{
 				mailRequest: model.NewMailRequest(),
 			},
 			ErrNotEnabled,
 		},
 		"invalid request": {
-			App{
+			Service{
 				req: request.Post("http://mailer"),
 			},
 			args{
@@ -81,7 +81,7 @@ func TestSend(t *testing.T) {
 			errors.New("from email is required"),
 		},
 		"invalid http": {
-			App{
+			Service{
 				req: request.Post(testServer.URL),
 			},
 			args{
@@ -90,7 +90,7 @@ func TestSend(t *testing.T) {
 			errors.New("HTTP/401"),
 		},
 		"http": {
-			App{
+			Service{
 				req: request.Post(testServer.URL).BasicAuth("admin", "password"),
 			},
 			args{

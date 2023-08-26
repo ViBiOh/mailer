@@ -1,5 +1,5 @@
-github.com/ViBiOh/flags v1.3.1 h1:OHkGtVBPb6CpgWUST1VS9heKvHWBgwpyM8fXnuJRRVU=
-github.com/ViBiOh/flags v1.3.1/go.mod h1:yQAIBf4HTymJDCF0Bl8QQHvQTr5uiUMQBa/A/ao1oM4=
+github.com/ViBiOh/flags v1.4.1 h1:qEAO70rWTYcVlU9BgCuz0SgMjth12oi502cq3SHDudg=
+github.com/ViBiOh/flags v1.4.1/go.mod h1:Ocgx/QhY7WYNfGokFT3kw5C05pDooQyLbI/9ZWwylI4=
 github.com/ViBiOh/httputils/v4 v4.63.4 h1:FJ+hpWFgmhcdYCvAHLdc54pPQbhgKq7asZaGfPPlHSw=
 github.com/ViBiOh/httputils/v4 v4.63.4/go.mod h1:Kx0R7H2NGQ7wUDGnSg5idi2D3TDDIJB6GiTOMERO1C8=
 github.com/cenkalti/backoff/v4 v4.2.1 h1:y4OZtCnogmCPw98Zjyt5a6+QwPLGkiQsYW5oUqylYbM=

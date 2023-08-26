@@ -41,41 +41,37 @@ var bufferPool = sync.Pool{
 	},
 }
 
-// App of package
-type App struct {
-	senderApp    sender
-	tpl          *template.Template
-	templatesDir string
-	tracer       trace.Tracer
-	mjmlApp      mjml.App
+type Service struct {
+	senderService sender
+	tpl           *template.Template
+	templatesDir  string
+	tracer        trace.Tracer
+	mjmlService   mjml.Service
 }
 
-// Config of package
 type Config struct {
-	templatesDir *string
+	TemplatesDir string
 }
 
-// Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
-	return Config{
-		templatesDir: flags.New("Templates", "Templates directory").Prefix(prefix).DocPrefix("mailer").String(fs, "./templates/", nil),
-	}
+	var config Config
+
+	flags.New("Templates", "Templates directory").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.TemplatesDir, "./templates/", nil)
+
+	return config
 }
 
-// New creates new App from Config
-func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) App {
-	templatesDir := strings.TrimSpace(*config.templatesDir)
-
-	slog.Info("Loading templates...", "dir", templatesDir, "extension", templateExtension)
-	appTemplates, err := getTemplates(templatesDir, templateExtension)
+func New(config Config, mjmlService mjml.Service, senderService sender, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
+	slog.Info("Loading templates...", "dir", config.TemplatesDir, "extension", templateExtension)
+	appTemplates, err := getTemplates(config.TemplatesDir, templateExtension)
 	if err != nil {
 		slog.Error("get templates", "err", err)
 	}
 
 	mailer_metric.Create(meterProvider, "mailer.render")
 
-	app := App{
-		templatesDir: templatesDir,
+	service := Service{
+		templatesDir: config.TemplatesDir,
 		tpl: template.Must(template.New("mailer").Funcs(template.FuncMap{
 			"odd": func(i int) bool {
 				return i%2 == 0
@@ -88,24 +84,22 @@ func New(config Config, mjmlApp mjml.App, senderApp sender, meterProvider metric
 			},
 		}).ParseFiles(appTemplates...)),
 
-		mjmlApp:   mjmlApp,
-		senderApp: senderApp,
+		mjmlService:   mjmlService,
+		senderService: senderService,
 	}
 
 	if tracerProvider != nil {
-		app.tracer = tracerProvider.Tracer("mailer")
+		service.tracer = tracerProvider.Tracer("mailer")
 	}
 
-	return app
+	return service
 }
 
-// Enabled checks if requirements are met
-func (a App) Enabled() bool {
+func (a Service) Enabled() bool {
 	return a.tpl != nil
 }
 
-// AmqpHandler handler amqp message
-func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error) {
+func (a Service) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error) {
 	ctx, end := telemetry.StartSpan(ctx, a.tracer, "amqp")
 	defer end(&err)
 
@@ -122,8 +116,7 @@ func (a App) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error)
 	return a.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
-// Render email
-func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
+func (a Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
 	var err error
 
 	ctx, end := telemetry.StartSpan(ctx, a.tracer, "render")
@@ -152,16 +145,14 @@ func (a App) Render(ctx context.Context, mailRequest model.MailRequest) (io.Read
 	return buffer, nil
 }
 
-// Send email
-func (a App) Send(ctx context.Context, mail model.Mail) (err error) {
+func (a Service) Send(ctx context.Context, mail model.Mail) (err error) {
 	ctx, end := telemetry.StartSpan(ctx, a.tracer, "send")
 	defer end(&err)
 
-	return a.senderApp.Send(ctx, mail)
+	return a.senderService.Send(ctx, mail)
 }
 
-// ListTemplates availables to render
-func (a App) ListTemplates() []string {
+func (a Service) ListTemplates() []string {
 	var templatesList []string
 
 	for _, tpl := range a.tpl.Templates() {
@@ -189,8 +180,8 @@ func getTemplates(dir, extension string) ([]string, error) {
 	})
 }
 
-func (a App) convertMjml(ctx context.Context, content *bytes.Buffer) error {
-	if !a.mjmlApp.Enabled() {
+func (a Service) convertMjml(ctx context.Context, content *bytes.Buffer) error {
+	if !a.mjmlService.Enabled() {
 		return nil
 	}
 
@@ -199,7 +190,7 @@ func (a App) convertMjml(ctx context.Context, content *bytes.Buffer) error {
 		return nil
 	}
 
-	output, err := a.mjmlApp.Render(ctx, string(payload))
+	output, err := a.mjmlService.Render(ctx, string(payload))
 	if err != nil {
 		return err
 	}

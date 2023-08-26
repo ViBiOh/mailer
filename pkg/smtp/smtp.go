@@ -25,58 +25,54 @@ var bufferPool = sync.Pool{
 	},
 }
 
-// App of package
-type App struct {
+type Service struct {
 	auth    smtp.Auth
 	tracer  trace.Tracer
 	address string
 	host    string
 }
 
-// Config of package
 type Config struct {
-	address  *string
-	username *string
-	password *string
-	host     *string
+	Address  string
+	Username string
+	Password string
+	Host     string
 }
 
-// Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
-	return Config{
-		address:  flags.New("Address", "Address").Prefix(prefix).DocPrefix("smtp").String(fs, "localhost:25", nil),
-		username: flags.New("Username", "Plain Auth Username").Prefix(prefix).DocPrefix("smtp").String(fs, "", nil),
-		password: flags.New("Password", "Plain Auth Password").Prefix(prefix).DocPrefix("smtp").String(fs, "", nil),
-		host:     flags.New("Host", "Plain Auth host").Prefix(prefix).DocPrefix("smtp").String(fs, "localhost", nil),
-	}
+	var config Config
+
+	flags.New("Address", "Address").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Address, "localhost:25", nil)
+	flags.New("Username", "Plain Auth Username").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Username, "", nil)
+	flags.New("Password", "Plain Auth Password").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Password, "", nil)
+	flags.New("Host", "Plain Auth host").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Host, "localhost", nil)
+
+	return config
 }
 
-// New creates new App from Config
-func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) App {
+func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
 	var auth smtp.Auth
 
-	user := strings.TrimSpace(*config.username)
-	if len(user) > 0 {
-		auth = smtp.PlainAuth("", user, *config.password, strings.TrimSpace(*config.host))
+	if len(config.Username) > 0 {
+		auth = smtp.PlainAuth("", config.Username, config.Password, config.Host)
 	}
 
 	mailer_metric.Create(meterProvider, "mailer.smtp")
 
-	app := App{
-		address: strings.TrimSpace(*config.address),
+	service := Service{
+		address: config.Address,
 		auth:    auth,
-		host:    *config.host,
+		host:    config.Host,
 	}
 
 	if tracerProvider != nil {
-		app.tracer = tracerProvider.Tracer("smtp")
+		service.tracer = tracerProvider.Tracer("smtp")
 	}
 
-	return app
+	return service
 }
 
-// Send email by smtp
-func (a App) Send(ctx context.Context, mail model.Mail) error {
+func (a Service) Send(ctx context.Context, mail model.Mail) error {
 	var err error
 
 	_, end := telemetry.StartSpan(ctx, a.tracer, "send")

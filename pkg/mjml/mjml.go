@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"strings"
 
 	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
@@ -27,60 +26,54 @@ type mjmlResponse struct {
 	Mjml string `json:"mjml"`
 }
 
-// App of package
-type App struct {
+type Service struct {
 	tracer trace.Tracer
 	req    request.Request
 }
 
-// Config of package
 type Config struct {
-	url      *string
-	username *string
-	password *string
+	URL      string
+	Username string
+	Password string
 }
 
-// Flags adds flags for configuring package
 func Flags(fs *flag.FlagSet, prefix string) Config {
-	return Config{
-		url:      flags.New("URL", "MJML API Converter URL").Prefix(prefix).DocPrefix("mjml").String(fs, "https://api.mjml.io/v1/render", nil),
-		username: flags.New("Username", "Application ID or Basic Auth username").Prefix(prefix).DocPrefix("mjml").String(fs, "", nil),
-		password: flags.New("Password", "Secret Key or Basic Auth password").Prefix(prefix).DocPrefix("mjml").String(fs, "", nil),
-	}
+	var config Config
+
+	flags.New("URL", "MJML API Converter URL").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.URL, "https://api.mjml.io/v1/render", nil)
+	flags.New("Username", "Application ID or Basic Auth username").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.Username, "", nil)
+	flags.New("Password", "Secret Key or Basic Auth password").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.Password, "", nil)
+
+	return config
 }
 
-// New creates new App from Config
-func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) App {
-	url := strings.TrimSpace(*config.url)
-	if len(url) == 0 {
-		return App{}
+func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
+	if len(config.URL) == 0 {
+		return Service{}
 	}
 
 	mailer_metric.Create(meterProvider, "mailer.mjml")
 
-	app := App{
-		req: request.Post(url).BasicAuth(strings.TrimSpace(*config.username), *config.password),
+	service := Service{
+		req: request.Post(config.URL).BasicAuth(config.Username, config.Password),
 	}
 
 	if tracerProvider != nil {
-		app.tracer = tracerProvider.Tracer("mjml")
+		service.tracer = tracerProvider.Tracer("mjml")
 	}
 
-	return app
+	return service
 }
 
-// IsMJML determines if provided content is a MJML template or not
 func IsMJML(content []byte) bool {
 	return bytes.HasPrefix(bytes.TrimSpace(content), prefix)
 }
 
-// Enabled checks if requirements are met
-func (a App) Enabled() bool {
+func (a Service) Enabled() bool {
 	return !a.req.IsZero()
 }
 
-// Render MJML template
-func (a App) Render(ctx context.Context, template string) (string, error) {
+func (a Service) Render(ctx context.Context, template string) (string, error) {
 	if !a.Enabled() {
 		return template, nil
 	}

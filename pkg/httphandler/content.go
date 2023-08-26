@@ -7,14 +7,14 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 )
 
-func (a App) getContent(r *http.Request, name string) (map[string]any, error) {
+func (a Service) getContent(r *http.Request, name string) (map[string]any, error) {
 	if r.Method == http.MethodGet {
 		fixtureName := r.URL.Query().Get("fixture")
 		if fixtureName == "" {
 			fixtureName = "default"
 		}
 
-		return a.mailerApp.GetFixture(name, fixtureName)
+		return a.mailerService.GetFixture(name, fixtureName)
 	}
 
 	var content map[string]any

@@ -14,27 +14,24 @@ const (
 	fixturesPath = "/fixtures"
 )
 
-// App of package
-type App struct {
-	tracer    trace.Tracer
-	mailerApp mailer.App
+type Service struct {
+	tracer        trace.Tracer
+	mailerService mailer.Service
 }
 
-// New creates new App
-func New(mailerApp mailer.App, tracerProvider trace.TracerProvider) App {
-	app := App{
-		mailerApp: mailerApp,
+func New(mailerService mailer.Service, tracerProvider trace.TracerProvider) Service {
+	service := Service{
+		mailerService: mailerService,
 	}
 
 	if tracerProvider != nil {
-		app.tracer = tracerProvider.Tracer("mailer_http")
+		service.tracer = tracerProvider.Tracer("mailer_http")
 	}
 
-	return app
+	return service
 }
 
-// Handler for Render request. Should be use with net/http
-func (a App) Handler() http.Handler {
+func (a Service) Handler() http.Handler {
 	renderHandler := http.StripPrefix(renderPath, a.renderHandler())
 	fixtureHandler := http.StripPrefix(fixturesPath, a.fixturesHandler())
 

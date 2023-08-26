@@ -60,14 +60,14 @@ func main() {
 
 	ctx := context.Background()
 
-	telemetryApp, err := telemetry.New(ctx, tracerConfig)
+	telemetryService, err := telemetry.New(ctx, tracerConfig)
 	if err != nil {
 		slog.Error("telemetry", "err", err)
 		os.Exit(1)
 	}
 
-	defer telemetryApp.Close(ctx)
-	request.AddOpenTelemetryToDefaultClient(telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	defer telemetryService.Close(ctx)
+	request.AddOpenTelemetryToDefaultClient(telemetryService.MeterProvider(), telemetryService.TracerProvider())
 
 	go func() {
 		fmt.Println(http.ListenAndServe("localhost:9999", http.DefaultServeMux))
@@ -75,37 +75,37 @@ func main() {
 
 	appServer := server.New(appServerConfig)
 
-	mjmlApp := mjml.New(mjmlConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
-	senderApp := smtp.New(smtpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
-	mailerApp := mailer.New(mailerConfig, mjmlApp, senderApp, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	mjmlService := mjml.New(mjmlConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
+	senderService := smtp.New(smtpConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
+	mailerService := mailer.New(mailerConfig, mjmlService, senderService, telemetryService.MeterProvider(), telemetryService.TracerProvider())
 
-	amqpClient, err := amqp.New(amqpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	amqpClient, err := amqp.New(amqpConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		slog.Error("create amqp", "err", err)
 		os.Exit(1)
 	}
 
-	amqpApp, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryApp.MeterProvider(), telemetryApp.TracerProvider(), mailerApp.AmqpHandler)
+	amqpService, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryService.MeterProvider(), telemetryService.TracerProvider(), mailerService.AmqpHandler)
 	if err != nil {
 		slog.Error("create amqp handler", "err", err)
 		os.Exit(1)
 	}
 
-	healthApp := health.New(healthConfig)
+	healthService := health.New(healthConfig)
 
-	go amqpApp.Start(healthApp.Done(ctx))
+	go amqpService.Start(healthService.Done(ctx))
 
-	appHandler := httphandler.New(mailerApp, telemetryApp.TracerProvider()).Handler()
+	appHandler := httphandler.New(mailerService, telemetryService.TracerProvider()).Handler()
 
-	endCtx := healthApp.End(ctx)
+	endCtx := healthService.End(ctx)
 
-	go appServer.Start(endCtx, "http", httputils.Handler(appHandler, healthApp, recoverer.Middleware, telemetryApp.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
+	go appServer.Start(endCtx, "http", httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryService.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
-	healthApp.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpApp))
-	server.GracefulWait(appServer.Done(), amqpApp.Done())
+	healthService.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpService))
+	server.GracefulWait(appServer.Done(), amqpService.Done())
 }
 
-func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpApp *amqphandler.App) <-chan struct{} {
+func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpService *amqphandler.App) <-chan struct{} {
 	if amqpClient == nil {
 		return httpDone
 	}
@@ -116,7 +116,7 @@ func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpApp *amq
 
 		select {
 		case <-httpDone:
-		case <-amqpApp.Done():
+		case <-amqpService.Done():
 		}
 	}()
 
