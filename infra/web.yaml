@@ -25,7 +25,7 @@ spec:
     nameOverride: mailer
     image:
       name: vibioh/mailer
-      tag: "202308261434" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202308261623" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     config:
       GOMAXPROCS: "1"
       MAILER_LOGGER_JSON: "true"
