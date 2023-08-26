@@ -31,9 +31,9 @@ func New(mailerService mailer.Service, tracerProvider trace.TracerProvider) Serv
 	return service
 }
 
-func (a Service) Handler() http.Handler {
-	renderHandler := http.StripPrefix(renderPath, a.renderHandler())
-	fixtureHandler := http.StripPrefix(fixturesPath, a.fixturesHandler())
+func (s Service) Handler() http.Handler {
+	renderHandler := http.StripPrefix(renderPath, s.renderHandler())
+	fixtureHandler := http.StripPrefix(fixturesPath, s.fixturesHandler())
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, renderPath) {

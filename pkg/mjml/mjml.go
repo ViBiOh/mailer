@@ -69,21 +69,21 @@ func IsMJML(content []byte) bool {
 	return bytes.HasPrefix(bytes.TrimSpace(content), prefix)
 }
 
-func (a Service) Enabled() bool {
-	return !a.req.IsZero()
+func (s Service) Enabled() bool {
+	return !s.req.IsZero()
 }
 
-func (a Service) Render(ctx context.Context, template string) (string, error) {
-	if !a.Enabled() {
+func (s Service) Render(ctx context.Context, template string) (string, error) {
+	if !s.Enabled() {
 		return template, nil
 	}
 
 	var err error
 
-	ctx, end := telemetry.StartSpan(ctx, a.tracer, "render")
+	ctx, end := telemetry.StartSpan(ctx, s.tracer, "render")
 	defer end(&err)
 
-	resp, err := a.req.JSON(ctx, mjmlRequest{template})
+	resp, err := s.req.JSON(ctx, mjmlRequest{template})
 	if err != nil {
 		mailer_metric.Increase(ctx, "mjml", "error")
 		return "", fmt.Errorf("render mjml template: %w", err)

@@ -8,7 +8,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 )
 
-func (a Service) fixturesHandler() http.Handler {
+func (s Service) fixturesHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		query := strings.Trim(r.URL.Path, "/")
 		if len(query) == 0 {
@@ -19,7 +19,7 @@ func (a Service) fixturesHandler() http.Handler {
 		urlParts := strings.Split(query, "/")
 
 		if len(urlParts) == 1 {
-			fixturesList, err := a.mailerService.ListFixtures(urlParts[0])
+			fixturesList, err := s.mailerService.ListFixtures(urlParts[0])
 			if httperror.HandleError(w, err) {
 				return
 			}
@@ -29,7 +29,7 @@ func (a Service) fixturesHandler() http.Handler {
 		}
 
 		if len(urlParts) == 2 {
-			content, err := a.mailerService.GetFixture(urlParts[0], urlParts[1])
+			content, err := s.mailerService.GetFixture(urlParts[0], urlParts[1])
 			if httperror.HandleError(w, err) {
 				return
 			}

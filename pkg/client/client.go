@@ -79,31 +79,30 @@ func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace
 	}, nil
 }
 
-func (a Service) String() string {
-	if !a.Enabled() {
+func (s Service) String() string {
+	if !s.Enabled() {
 		return "not enabled"
 	}
 
-	if a.amqpEnabled() {
-		return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", a.exchange, a.amqpClient.Vhost())
+	if s.amqpEnabled() {
+		return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", s.exchange, s.amqpClient.Vhost())
 	}
-	return fmt.Sprintf("Sending emails via HTTP to `%v`.", a.req)
+	return fmt.Sprintf("Sending emails via HTTP to `%v`.", s.req)
 }
 
-func (a Service) Enabled() bool {
-	return !a.req.IsZero() || a.amqpEnabled()
+func (s Service) Enabled() bool {
+	return !s.req.IsZero() || s.amqpEnabled()
 }
 
-func (a Service) amqpEnabled() bool {
-	return a.amqpClient != nil && a.amqpClient.Enabled()
+func (s Service) amqpEnabled() bool {
+	return s.amqpClient != nil && s.amqpClient.Enabled()
 }
 
-// Send sends emails with Mailer for defined parameters
-func (a Service) Send(ctx context.Context, mailRequest model.MailRequest) (err error) {
-	ctx, end := telemetry.StartSpan(ctx, a.tracer, "send")
+func (s Service) Send(ctx context.Context, mailRequest model.MailRequest) (err error) {
+	ctx, end := telemetry.StartSpan(ctx, s.tracer, "send")
 	defer end(&err)
 
-	if !a.Enabled() {
+	if !s.Enabled() {
 		return ErrNotEnabled
 	}
 
@@ -111,20 +110,20 @@ func (a Service) Send(ctx context.Context, mailRequest model.MailRequest) (err e
 		return err
 	}
 
-	if a.amqpEnabled() {
-		return a.amqpClient.PublishJSON(ctx, mailRequest, a.exchange, "")
+	if s.amqpEnabled() {
+		return s.amqpClient.PublishJSON(ctx, mailRequest, s.exchange, "")
 	}
 
-	return a.httpSend(ctx, mailRequest)
+	return s.httpSend(ctx, mailRequest)
 }
 
-func (a Service) Close() {
-	if a.amqpEnabled() {
-		a.amqpClient.Close()
+func (s Service) Close() {
+	if s.amqpEnabled() {
+		s.amqpClient.Close()
 	}
 }
 
-func (a Service) httpSend(ctx context.Context, mail model.MailRequest) error {
+func (s Service) httpSend(ctx context.Context, mail model.MailRequest) error {
 	query := url.Values{
 		"from":    []string{mail.FromEmail},
 		"sender":  []string{mail.Sender},
@@ -134,6 +133,6 @@ func (a Service) httpSend(ctx context.Context, mail model.MailRequest) error {
 
 	queryPath := fmt.Sprintf("/render/%s?%s", url.PathEscape(mail.Tpl), query.Encode())
 
-	_, err := a.req.Path(queryPath).JSON(ctx, mail.Payload)
+	_, err := s.req.Path(queryPath).JSON(ctx, mail.Payload)
 	return err
 }

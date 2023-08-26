@@ -95,12 +95,12 @@ func New(config Config, mjmlService mjml.Service, senderService sender, meterPro
 	return service
 }
 
-func (a Service) Enabled() bool {
-	return a.tpl != nil
+func (s Service) Enabled() bool {
+	return s.tpl != nil
 }
 
-func (a Service) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error) {
-	ctx, end := telemetry.StartSpan(ctx, a.tracer, "amqp")
+func (s Service) AmqpHandler(ctx context.Context, message amqp.Delivery) (err error) {
+	ctx, end := telemetry.StartSpan(ctx, s.tracer, "amqp")
 	defer end(&err)
 
 	var mailRequest model.MailRequest
@@ -108,21 +108,21 @@ func (a Service) AmqpHandler(ctx context.Context, message amqp.Delivery) (err er
 		return fmt.Errorf("parse payload: %w", err)
 	}
 
-	output, err := a.Render(ctx, mailRequest)
+	output, err := s.Render(ctx, mailRequest)
 	if err != nil {
 		return fmt.Errorf("render email: %w", err)
 	}
 
-	return a.Send(ctx, mailRequest.ConvertToMail(output))
+	return s.Send(ctx, mailRequest.ConvertToMail(output))
 }
 
-func (a Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
+func (s Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {
 	var err error
 
-	ctx, end := telemetry.StartSpan(ctx, a.tracer, "render")
+	ctx, end := telemetry.StartSpan(ctx, s.tracer, "render")
 	defer end(&err)
 
-	tpl := a.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
+	tpl := s.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
 		return nil, httpModel.ErrNotFound
 	}
@@ -138,24 +138,24 @@ func (a Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.
 
 	mailer_metric.Increase(ctx, "render", "success")
 
-	if err = a.convertMjml(ctx, buffer); err != nil {
+	if err = s.convertMjml(ctx, buffer); err != nil {
 		return nil, err
 	}
 
 	return buffer, nil
 }
 
-func (a Service) Send(ctx context.Context, mail model.Mail) (err error) {
-	ctx, end := telemetry.StartSpan(ctx, a.tracer, "send")
+func (s Service) Send(ctx context.Context, mail model.Mail) (err error) {
+	ctx, end := telemetry.StartSpan(ctx, s.tracer, "send")
 	defer end(&err)
 
-	return a.senderService.Send(ctx, mail)
+	return s.senderService.Send(ctx, mail)
 }
 
-func (a Service) ListTemplates() []string {
+func (s Service) ListTemplates() []string {
 	var templatesList []string
 
-	for _, tpl := range a.tpl.Templates() {
+	for _, tpl := range s.tpl.Templates() {
 		if strings.HasSuffix(tpl.Name(), templateExtension) {
 			templatesList = append(templatesList, strings.TrimSuffix(tpl.Name(), templateExtension))
 		}
@@ -180,8 +180,8 @@ func getTemplates(dir, extension string) ([]string, error) {
 	})
 }
 
-func (a Service) convertMjml(ctx context.Context, content *bytes.Buffer) error {
-	if !a.mjmlService.Enabled() {
+func (s Service) convertMjml(ctx context.Context, content *bytes.Buffer) error {
+	if !s.mjmlService.Enabled() {
 		return nil
 	}
 
@@ -190,7 +190,7 @@ func (a Service) convertMjml(ctx context.Context, content *bytes.Buffer) error {
 		return nil
 	}
 
-	output, err := a.mjmlService.Render(ctx, string(payload))
+	output, err := s.mjmlService.Render(ctx, string(payload))
 	if err != nil {
 		return err
 	}

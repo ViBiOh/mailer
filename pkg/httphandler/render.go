@@ -22,11 +22,11 @@ var bufferPool = sync.Pool{
 	},
 }
 
-func (a Service) renderHandler() http.Handler {
+func (s Service) renderHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		ctx, end := telemetry.StartSpan(r.Context(), a.tracer, "render")
+		ctx, end := telemetry.StartSpan(r.Context(), s.tracer, "render")
 		defer end(&err)
 
 		if query.IsRoot(r) {
@@ -35,7 +35,7 @@ func (a Service) renderHandler() http.Handler {
 				return
 			}
 
-			httpjson.WriteArray(w, http.StatusOK, a.mailerService.ListTemplates())
+			httpjson.WriteArray(w, http.StatusOK, s.mailerService.ListTemplates())
 			return
 		}
 
@@ -46,14 +46,14 @@ func (a Service) renderHandler() http.Handler {
 
 		mr := parseMailRequest(r)
 
-		content, err := a.getContent(r, mr.Tpl)
+		content, err := s.getContent(r, mr.Tpl)
 		if err != nil {
 			httperror.InternalServerError(w, err)
 			return
 		}
 
 		mr = mr.Data(content)
-		output, err := a.mailerService.Render(ctx, mr)
+		output, err := s.mailerService.Render(ctx, mr)
 		if httperror.HandleError(w, err) {
 			return
 		}
@@ -63,7 +63,7 @@ func (a Service) renderHandler() http.Handler {
 			return
 		}
 
-		a.sendOutput(ctx, w, mr, output)
+		s.sendOutput(ctx, w, mr, output)
 	})
 }
 
@@ -81,13 +81,13 @@ func writeOutput(w http.ResponseWriter, output io.Reader) {
 	}
 }
 
-func (a Service) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.MailRequest, output io.Reader) {
+func (s Service) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.MailRequest, output io.Reader) {
 	if err := mr.Check(); err != nil {
 		httperror.HandleError(w, httpModel.WrapInvalid(err))
 		return
 	}
 
-	if httperror.HandleError(w, a.mailerService.Send(ctx, mr.ConvertToMail(output))) {
+	if httperror.HandleError(w, s.mailerService.Send(ctx, mr.ConvertToMail(output))) {
 		return
 	}
 

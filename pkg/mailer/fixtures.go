@@ -11,12 +11,12 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/model"
 )
 
-func (a Service) getTemplatePath(templateName string) string {
-	return path.Join(a.templatesDir, templateName)
+func (s Service) getTemplatePath(templateName string) string {
+	return path.Join(s.templatesDir, templateName)
 }
 
-func (a Service) getFixturePath(templateName, fixtureName string) string {
-	return path.Join(a.templatesDir, templateName, fmt.Sprintf("%s%s", fixtureName, jsonExtension))
+func (s Service) getFixturePath(templateName, fixtureName string) string {
+	return path.Join(s.templatesDir, templateName, fmt.Sprintf("%s%s", fixtureName, jsonExtension))
 }
 
 func isExists(path string, directory bool) error {
@@ -32,9 +32,8 @@ func isExists(path string, directory bool) error {
 	return nil
 }
 
-// ListFixtures for a given template names
-func (a Service) ListFixtures(name string) ([]string, error) {
-	templatePath := a.getTemplatePath(name)
+func (s Service) ListFixtures(name string) ([]string, error) {
+	templatePath := s.getTemplatePath(name)
 	if err := isExists(templatePath, true); err != nil {
 		return nil, err
 	}
@@ -54,14 +53,13 @@ func (a Service) ListFixtures(name string) ([]string, error) {
 	return fixtureList, nil
 }
 
-// GetFixture for a template and a given name
-func (a Service) GetFixture(name, fixture string) (map[string]any, error) {
-	templatePath := a.getTemplatePath(name)
+func (s Service) GetFixture(name, fixture string) (map[string]any, error) {
+	templatePath := s.getTemplatePath(name)
 	if err := isExists(templatePath, true); err != nil {
 		return nil, err
 	}
 
-	fixturePath := a.getFixturePath(name, fixture)
+	fixturePath := s.getFixturePath(name, fixture)
 	if err := isExists(fixturePath, false); err != nil {
 		return nil, err
 	}

@@ -72,10 +72,10 @@ func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace
 	return service
 }
 
-func (a Service) Send(ctx context.Context, mail model.Mail) error {
+func (s Service) Send(ctx context.Context, mail model.Mail) error {
 	var err error
 
-	_, end := telemetry.StartSpan(ctx, a.tracer, "send")
+	_, end := telemetry.StartSpan(ctx, s.tracer, "send")
 	defer end(&err)
 
 	body := bufferPool.Get().(*bytes.Buffer)
@@ -94,7 +94,7 @@ func (a Service) Send(ctx context.Context, mail model.Mail) error {
 
 	body.WriteString("\r\n")
 
-	err = SendMail(a.address, a.host, a.auth, mail.From, mail.To, body.Bytes())
+	err = SendMail(s.address, s.host, s.auth, mail.From, mail.To, body.Bytes())
 
 	if err != nil {
 		mailer_metric.Increase(ctx, "smtp", "error")
