@@ -37,17 +37,17 @@ type Config struct {
 	Password string
 }
 
-func Flags(fs *flag.FlagSet, prefix string) Config {
+func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
 	flags.New("URL", "URL (https?:// or amqps?://)").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.URL, "", nil)
 	flags.New("Name", "HTTP Username or AMQP Exchange name").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.Name, "mailer", nil)
 	flags.New("Password", "HTTP Pass").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.Password, "", nil)
 
-	return config
+	return &config
 }
 
-func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (Service, error) {
+func New(config *Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (Service, error) {
 	if len(config.URL) == 0 {
 		return Service{}, nil
 	}

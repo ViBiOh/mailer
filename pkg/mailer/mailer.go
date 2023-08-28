@@ -53,15 +53,15 @@ type Config struct {
 	TemplatesDir string
 }
 
-func Flags(fs *flag.FlagSet, prefix string) Config {
+func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
 	flags.New("Templates", "Templates directory").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.TemplatesDir, "./templates/", nil)
 
-	return config
+	return &config
 }
 
-func New(config Config, mjmlService mjml.Service, senderService sender, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
+func New(config *Config, mjmlService mjml.Service, senderService sender, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
 	slog.Info("Loading templates...", "dir", config.TemplatesDir, "extension", templateExtension)
 	appTemplates, err := getTemplates(config.TemplatesDir, templateExtension)
 	if err != nil {

@@ -37,17 +37,17 @@ type Config struct {
 	Password string
 }
 
-func Flags(fs *flag.FlagSet, prefix string) Config {
+func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
 	flags.New("URL", "MJML API Converter URL").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.URL, "https://api.mjml.io/v1/render", nil)
 	flags.New("Username", "Application ID or Basic Auth username").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.Username, "", nil)
 	flags.New("Password", "Secret Key or Basic Auth password").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.Password, "", nil)
 
-	return config
+	return &config
 }
 
-func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
+func New(config *Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
 	if len(config.URL) == 0 {
 		return Service{}
 	}

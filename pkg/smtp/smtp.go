@@ -39,7 +39,7 @@ type Config struct {
 	Host     string
 }
 
-func Flags(fs *flag.FlagSet, prefix string) Config {
+func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
 	flags.New("Address", "Address").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Address, "localhost:25", nil)
@@ -47,10 +47,10 @@ func Flags(fs *flag.FlagSet, prefix string) Config {
 	flags.New("Password", "Plain Auth Password").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Password, "", nil)
 	flags.New("Host", "Plain Auth host").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Host, "localhost", nil)
 
-	return config
+	return &config
 }
 
-func New(config Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
+func New(config *Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
 	var auth smtp.Auth
 
 	if len(config.Username) > 0 {
