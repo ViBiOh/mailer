@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"syscall"
 
 	_ "net/http/pprof"
 
@@ -101,7 +102,7 @@ func main() {
 
 	go appServer.Start(endCtx, "http", httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryService.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
-	healthService.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpService))
+	healthService.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpService), syscall.SIGTERM)
 	server.GracefulWait(appServer.Done(), amqpService.Done())
 }
 
