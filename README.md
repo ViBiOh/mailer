@@ -58,7 +58,7 @@ You can reach HTTP or AMQP endpoints directly or use the provided package `clien
 - `POST /render/{templateName}?from={senderEmail}&sender={senderName}&subject={emailSubject}&to={recipient}`: render `{templateName}` with data from JSON payload in body and send it with the given parameters. The `emailSubject` can be a Golang template. The `to` parameters can be passed multiple times.
 
 - `GET /health`: healthcheck of server, always respond [`okStatus (default 204)`](#usage)
-- `GET /ready`: checks external dependencies availability and then respond [`okStatus (default 204)`](#usage) or `503` during [`graceDuration`](#usage) when `SIGTERM` is received
+- `GET /ready`: checks external dependencies availability and then respond [`okStatus (default 204)`](#usage) or `503` during [`graceDuration`](#usage) when close signal is received
 - `GET /version`: value of `VERSION` environment variable
 
 ## Usage
