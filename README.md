@@ -86,7 +86,7 @@ Usage of mailer:
   --corsOrigin         string    [cors] Access-Control-Allow-Origin ${MAILER_CORS_ORIGIN} (default "*")
   --csp                string    [owasp] Content-Security-Policy ${MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/")
   --frameOptions       string    [owasp] X-Frame-Options ${MAILER_FRAME_OPTIONS} (default "deny")
-  --graceDuration      duration  [http] Grace duration when SIGTERM received ${MAILER_GRACE_DURATION} (default 30s)
+  --graceDuration      duration  [http] Grace duration when signal received ${MAILER_GRACE_DURATION} (default 30s)
   --hsts                         [owasp] Indicate Strict Transport Security ${MAILER_HSTS} (default true)
   --idleTimeout        duration  [server] Idle Timeout ${MAILER_IDLE_TIMEOUT} (default 2m0s)
   --key                string    [server] Key file ${MAILER_KEY}
