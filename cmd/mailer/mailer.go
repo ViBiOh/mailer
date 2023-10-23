@@ -91,15 +91,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	healthService := health.New(healthConfig)
+	healthService := health.New(ctx, healthConfig)
 
-	go amqpService.Start(healthService.Done(ctx))
+	go amqpService.Start(healthService.DoneCtx())
 
 	appHandler := httphandler.New(mailerService, telemetryService.TracerProvider()).Handler()
 
-	endCtx := healthService.End(ctx)
-
-	go appServer.Start(endCtx, "http", httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryService.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
+	go appServer.Start(healthService.EndCtx(), httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryService.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
 	healthService.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpService))
 	server.GracefulWait(appServer.Done(), amqpService.Done())
