@@ -7,7 +7,7 @@
     </tr>
 
     {{ range $index, $fund := . }}
-      <tr {{- if odd $index }} style="background-color: #272727"{{- end -}}>
+      <tr {{- if odd $index }} style="background-color: #000000"{{- end -}}>
         <th scope="row" align="center">
           <a style="color: #6495ed" href="https://funds.vibioh.fr/?isin={{ $fund.isin }}">{{ $fund.isin }}</a>
         </th>
@@ -19,10 +19,10 @@
 {{ end -}}
 
 <mjml>
-  <mj-body background-color="#3b3b3b">
+  <mj-body background-color="#272727">
     {{ template "header" "Funds" }}
 
-    <mj-section background-color="#3b3b3b">
+    <mj-section background-color="#272727">
       <mj-column>
         <mj-text color="#c0c0c0">Bonjour,</mj-text>
 

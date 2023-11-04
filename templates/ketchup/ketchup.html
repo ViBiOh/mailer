@@ -31,14 +31,14 @@
 {{ end -}}
 
 <mjml>
-  <mj-body background-color="#3b3b3b">
+  <mj-body background-color="#272727">
     {{ template "header" "Ketchup|https://ketchup.vibioh.fr/app/" }}
 
     {{ $kind := "" }}
 
     {{ range $index, $release := .releases }}
       {{ if ne .repository.kind $kind }}
-        <mj-section full-width background-color="#3b3b3b">
+        <mj-section full-width background-color="#272727">
           <mj-column width="100%">
             {{ if eq .repository.kind "github" }}
               <mj-image alt="GitHub Logo" width="50px" src="https://ketchup.vibioh.fr/images/github.png" />
