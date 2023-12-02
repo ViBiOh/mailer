@@ -62,11 +62,13 @@ func main() {
 
 	telemetryService, err := telemetry.New(ctx, tracerConfig)
 	if err != nil {
-		slog.Error("telemetry", "err", err)
+		slog.ErrorContext(ctx, "telemetry", "err", err)
 		os.Exit(1)
 	}
 
 	defer telemetryService.Close(ctx)
+
+	logger.AddOpenTelemetryToDefaultLogger()
 	request.AddOpenTelemetryToDefaultClient(telemetryService.MeterProvider(), telemetryService.TracerProvider())
 
 	go func() {
@@ -81,13 +83,13 @@ func main() {
 
 	amqpClient, err := amqp.New(amqpConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
-		slog.Error("create amqp", "err", err)
+		slog.ErrorContext(ctx, "create amqp", "err", err)
 		os.Exit(1)
 	}
 
 	amqpService, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryService.MeterProvider(), telemetryService.TracerProvider(), mailerService.AmqpHandler)
 	if err != nil {
-		slog.Error("create amqp handler", "err", err)
+		slog.ErrorContext(ctx, "create amqp handler", "err", err)
 		os.Exit(1)
 	}
 

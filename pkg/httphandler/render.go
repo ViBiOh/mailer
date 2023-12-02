@@ -35,7 +35,7 @@ func (s Service) renderHandler() http.Handler {
 				return
 			}
 
-			httpjson.WriteArray(w, http.StatusOK, s.mailerService.ListTemplates())
+			httpjson.WriteArray(r.Context(), w, http.StatusOK, s.mailerService.ListTemplates())
 			return
 		}
 
@@ -48,18 +48,18 @@ func (s Service) renderHandler() http.Handler {
 
 		content, err := s.getContent(r, mr.Tpl)
 		if err != nil {
-			httperror.InternalServerError(w, err)
+			httperror.InternalServerError(r.Context(), w, err)
 			return
 		}
 
 		mr = mr.Data(content)
 		output, err := s.mailerService.Render(ctx, mr)
-		if httperror.HandleError(w, err) {
+		if httperror.HandleError(r.Context(), w, err) {
 			return
 		}
 
 		if r.Method == http.MethodGet {
-			writeOutput(w, output)
+			writeOutput(r.Context(), w, output)
 			return
 		}
 
@@ -67,7 +67,7 @@ func (s Service) renderHandler() http.Handler {
 	})
 }
 
-func writeOutput(w http.ResponseWriter, output io.Reader) {
+func writeOutput(ctx context.Context, w http.ResponseWriter, output io.Reader) {
 	w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 	w.Header().Add("Cache-Control", "no-cache")
 	w.Header().Add("X-UA-Compatible", "ie=edge")
@@ -77,17 +77,17 @@ func writeOutput(w http.ResponseWriter, output io.Reader) {
 	defer bufferPool.Put(buffer)
 
 	if _, err := io.CopyBuffer(w, output, buffer.Bytes()); err != nil {
-		httperror.InternalServerError(w, err)
+		httperror.InternalServerError(ctx, w, err)
 	}
 }
 
 func (s Service) sendOutput(ctx context.Context, w http.ResponseWriter, mr model.MailRequest, output io.Reader) {
 	if err := mr.Check(); err != nil {
-		httperror.HandleError(w, httpModel.WrapInvalid(err))
+		httperror.HandleError(ctx, w, httpModel.WrapInvalid(err))
 		return
 	}
 
-	if httperror.HandleError(w, s.mailerService.Send(ctx, mr.ConvertToMail(output))) {
+	if httperror.HandleError(ctx, w, s.mailerService.Send(ctx, mr.ConvertToMail(ctx, output))) {
 		return
 	}
 

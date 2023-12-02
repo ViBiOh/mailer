@@ -12,7 +12,7 @@ func (s Service) fixturesHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		query := strings.Trim(r.URL.Path, "/")
 		if len(query) == 0 {
-			httperror.NotFound(w)
+			httperror.NotFound(r.Context(), w)
 			return
 		}
 
@@ -20,23 +20,23 @@ func (s Service) fixturesHandler() http.Handler {
 
 		if len(urlParts) == 1 {
 			fixturesList, err := s.mailerService.ListFixtures(urlParts[0])
-			if httperror.HandleError(w, err) {
+			if httperror.HandleError(r.Context(), w, err) {
 				return
 			}
 
-			httpjson.WriteArray(w, http.StatusOK, fixturesList)
+			httpjson.WriteArray(r.Context(), w, http.StatusOK, fixturesList)
 			return
 		}
 
 		if len(urlParts) == 2 {
 			content, err := s.mailerService.GetFixture(urlParts[0], urlParts[1])
-			if httperror.HandleError(w, err) {
+			if httperror.HandleError(r.Context(), w, err) {
 				return
 			}
 
-			httpjson.Write(w, http.StatusOK, content)
+			httpjson.Write(r.Context(), w, http.StatusOK, content)
 		}
 
-		httperror.NotFound(w)
+		httperror.NotFound(r.Context(), w)
 	})
 }

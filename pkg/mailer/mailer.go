@@ -113,7 +113,7 @@ func (s Service) AmqpHandler(ctx context.Context, message amqp.Delivery) (err er
 		return fmt.Errorf("render email: %w", err)
 	}
 
-	return s.Send(ctx, mailRequest.ConvertToMail(output))
+	return s.Send(ctx, mailRequest.ConvertToMail(ctx, output))
 }
 
 func (s Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.Reader, error) {

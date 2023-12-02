@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -120,7 +121,7 @@ func TestGetSubject(t *testing.T) {
 		t.Run(intention, func(t *testing.T) {
 			t.Parallel()
 
-			if got := getSubject(testCase.args.subject, testCase.args.payload); got != testCase.want {
+			if got := getSubject(context.Background(), testCase.args.subject, testCase.args.payload); got != testCase.want {
 				t.Errorf("getSubject() = `%s`, want `%s`", got, testCase.want)
 			}
 		})

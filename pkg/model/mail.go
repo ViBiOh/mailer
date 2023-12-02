@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -93,21 +94,21 @@ func (mr MailRequest) Check() error {
 	return nil
 }
 
-func getSubject(subject string, payload any) string {
+func getSubject(ctx context.Context, subject string, payload any) string {
 	if !strings.Contains(subject, "{{") {
 		return subject
 	}
 
 	tpl, err := template.New("subject").Parse(subject)
 	if err != nil {
-		slog.Warn("cannot parse template subject", "err", err, "subject", subject)
+		slog.WarnContext(ctx, "cannot parse template subject", "err", err, "subject", subject)
 		return subject
 	}
 
 	subjectOutput := strings.Builder{}
 
 	if err := tpl.Execute(&subjectOutput, payload); err != nil {
-		slog.Warn("cannot execute template subject", "err", err, "subject", subject)
+		slog.WarnContext(ctx, "cannot execute template subject", "err", err, "subject", subject)
 		return subject
 	}
 
@@ -115,11 +116,11 @@ func getSubject(subject string, payload any) string {
 }
 
 // ConvertToMail convert mail request to Mail with given content
-func (mr MailRequest) ConvertToMail(content io.Reader) Mail {
+func (mr MailRequest) ConvertToMail(ctx context.Context, content io.Reader) Mail {
 	return Mail{
 		From:    mr.FromEmail,
 		Sender:  mr.Sender,
-		Subject: getSubject(mr.Subject, mr.Payload),
+		Subject: getSubject(ctx, mr.Subject, mr.Payload),
 		Content: content,
 		To:      mr.Recipients,
 	}
