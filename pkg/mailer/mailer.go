@@ -65,7 +65,7 @@ func New(config *Config, mjmlService mjml.Service, senderService sender, meterPr
 	slog.Info("Loading templates...", "dir", config.TemplatesDir, "extension", templateExtension)
 	appTemplates, err := getTemplates(config.TemplatesDir, templateExtension)
 	if err != nil {
-		slog.Error("get templates", "err", err)
+		slog.Error("get templates", "error", err)
 	}
 
 	mailer_metric.Create(meterProvider, "mailer.render")

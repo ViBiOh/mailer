@@ -71,7 +71,7 @@ func (s Service) GetFixture(name, fixture string) (map[string]any, error) {
 
 	defer func() {
 		if closeErr := reader.Close(); closeErr != nil {
-			slog.Error("close", "err", err, "fn", "mailer.GetFixture", "item", fixturePath)
+			slog.Error("close", "error", err, "fn", "mailer.GetFixture", "item", fixturePath)
 		}
 	}()
 

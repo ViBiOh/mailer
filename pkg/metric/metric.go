@@ -19,7 +19,7 @@ func Create(meterProvider metric.MeterProvider, name string) {
 
 	counter, err := meter.Int64Counter(name)
 	if err != nil {
-		slog.Error("create metric", "err", err, "name", name)
+		slog.Error("create metric", "error", err, "name", name)
 	}
 
 	metrics[name] = counter

@@ -101,14 +101,14 @@ func getSubject(ctx context.Context, subject string, payload any) string {
 
 	tpl, err := template.New("subject").Parse(subject)
 	if err != nil {
-		slog.WarnContext(ctx, "cannot parse template subject", "err", err, "subject", subject)
+		slog.WarnContext(ctx, "cannot parse template subject", "error", err, "subject", subject)
 		return subject
 	}
 
 	subjectOutput := strings.Builder{}
 
 	if err := tpl.Execute(&subjectOutput, payload); err != nil {
-		slog.WarnContext(ctx, "cannot execute template subject", "err", err, "subject", subject)
+		slog.WarnContext(ctx, "cannot execute template subject", "error", err, "subject", subject)
 		return subject
 	}
 
@@ -138,6 +138,6 @@ type Mail struct {
 // LoggedCloser closes a ressources with handling error
 func LoggedCloser(closer io.Closer) {
 	if err := closer.Close(); err != nil {
-		slog.Error("close", "err", err)
+		slog.Error("close", "error", err)
 	}
 }
