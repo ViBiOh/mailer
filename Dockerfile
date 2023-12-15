@@ -13,7 +13,10 @@ HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://localhost:1080/health"
 ENTRYPOINT [ "/mailer" ]
 
 ARG VERSION
-ENV VERSION=${VERSION}
+ENV VERSION ${VERSION}
+
+ARG GIT_SHA
+ENV GIT_SHA ${GIT_SHA}
 
 ARG TARGETOS
 ARG TARGETARCH
