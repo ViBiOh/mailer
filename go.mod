@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/ViBiOh/flags v1.4.1
+	github.com/ViBiOh/flags v1.5.0
 	github.com/ViBiOh/httputils/v4 v4.69.10
 	github.com/rabbitmq/amqp091-go v1.9.0
 	go.opentelemetry.io/otel v1.21.0
