@@ -69,47 +69,50 @@ Be careful when using the CLI values, if someone list the processes on the syste
 
 ```bash
 Usage of mailer:
-  --address            string    [server] Listen address ${MAILER_ADDRESS}
-  --amqpExchange       string    [amqp] Exchange name ${MAILER_AMQP_EXCHANGE} (default "mailer")
-  --amqpExclusive                [amqp] Queue exclusive mode (for fanout exchange) ${MAILER_AMQP_EXCLUSIVE} (default false)
-  --amqpMaxRetry       uint      [amqp] Max send retries ${MAILER_AMQP_MAX_RETRY} (default 3)
-  --amqpPrefetch       int       [amqp] Prefetch count for QoS ${MAILER_AMQP_PREFETCH} (default 1)
-  --amqpQueue          string    [amqp] Queue name ${MAILER_AMQP_QUEUE} (default "mailer")
-  --amqpRetryInterval  duration  [amqp] Interval duration when send fails ${MAILER_AMQP_RETRY_INTERVAL} (default 1h0m0s)
-  --amqpRoutingKey     string    [amqp] RoutingKey name ${MAILER_AMQP_ROUTING_KEY}
-  --amqpURI            string    [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> ${MAILER_AMQP_URI}
-  --cert               string    [server] Certificate file ${MAILER_CERT}
-  --corsCredentials              [cors] Access-Control-Allow-Credentials ${MAILER_CORS_CREDENTIALS} (default false)
-  --corsExpose         string    [cors] Access-Control-Expose-Headers ${MAILER_CORS_EXPOSE}
-  --corsHeaders        string    [cors] Access-Control-Allow-Headers ${MAILER_CORS_HEADERS} (default "Content-Type")
-  --corsMethods        string    [cors] Access-Control-Allow-Methods ${MAILER_CORS_METHODS} (default "GET")
-  --corsOrigin         string    [cors] Access-Control-Allow-Origin ${MAILER_CORS_ORIGIN} (default "*")
-  --csp                string    [owasp] Content-Security-Policy ${MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/")
-  --frameOptions       string    [owasp] X-Frame-Options ${MAILER_FRAME_OPTIONS} (default "deny")
-  --graceDuration      duration  [http] Grace duration when signal received ${MAILER_GRACE_DURATION} (default 30s)
-  --hsts                         [owasp] Indicate Strict Transport Security ${MAILER_HSTS} (default true)
-  --idleTimeout        duration  [server] Idle Timeout ${MAILER_IDLE_TIMEOUT} (default 2m0s)
-  --key                string    [server] Key file ${MAILER_KEY}
-  --loggerJson                   [logger] Log format as JSON ${MAILER_LOGGER_JSON} (default false)
-  --loggerLevel        string    [logger] Logger level ${MAILER_LOGGER_LEVEL} (default "INFO")
-  --loggerLevelKey     string    [logger] Key for level in JSON ${MAILER_LOGGER_LEVEL_KEY} (default "level")
-  --loggerMessageKey   string    [logger] Key for message in JSON ${MAILER_LOGGER_MESSAGE_KEY} (default "msg")
-  --loggerTimeKey      string    [logger] Key for timestamp in JSON ${MAILER_LOGGER_TIME_KEY} (default "time")
-  --mjmlPassword       string    [mjml] Secret Key or Basic Auth password ${MAILER_MJML_PASSWORD}
-  --mjmlURL            string    [mjml] MJML API Converter URL ${MAILER_MJML_URL} (default "https://api.mjml.io/v1/render")
-  --mjmlUsername       string    [mjml] Application ID or Basic Auth username ${MAILER_MJML_USERNAME}
-  --okStatus           int       [http] Healthy HTTP Status code ${MAILER_OK_STATUS} (default 204)
-  --port               uint      [server] Listen port (0 to disable) ${MAILER_PORT} (default 1080)
-  --readTimeout        duration  [server] Read Timeout ${MAILER_READ_TIMEOUT} (default 5s)
-  --shutdownTimeout    duration  [server] Shutdown Timeout ${MAILER_SHUTDOWN_TIMEOUT} (default 10s)
-  --smtpAddress        string    [smtp] Address ${MAILER_SMTP_ADDRESS} (default "localhost:25")
-  --smtpHost           string    [smtp] Plain Auth host ${MAILER_SMTP_HOST} (default "localhost")
-  --smtpPassword       string    [smtp] Plain Auth Password ${MAILER_SMTP_PASSWORD}
-  --smtpUsername       string    [smtp] Plain Auth Username ${MAILER_SMTP_USERNAME}
-  --telemetryRate      string    [telemetry] OpenTelemetry sample rate, 'always', 'never' or a float value ${MAILER_TELEMETRY_RATE} (default "always")
-  --telemetryURL       string    [telemetry] OpenTelemetry gRPC endpoint (e.g. otel-exporter:4317) ${MAILER_TELEMETRY_URL}
-  --templates          string    [mailer] Templates directory ${MAILER_TEMPLATES} (default "./templates/")
-  --url                string    [alcotest] URL to check ${MAILER_URL}
-  --userAgent          string    [alcotest] User-Agent for check ${MAILER_USER_AGENT} (default "Alcotest")
-  --writeTimeout       duration  [server] Write Timeout ${MAILER_WRITE_TIMEOUT} (default 10s)
+  --address              string    [server] Listen address ${MAILER_ADDRESS}
+  --amqpExchange         string    [amqp] Exchange name ${MAILER_AMQP_EXCHANGE} (default "mailer")
+  --amqpExclusive                  [amqp] Queue exclusive mode (for fanout exchange) ${MAILER_AMQP_EXCLUSIVE} (default false)
+  --amqpInactiveTimeout  duration  [amqp] When inactive during the given timeout, stop listening ${MAILER_AMQP_INACTIVE_TIMEOUT} (default 0s)
+  --amqpMaxRetry         uint      [amqp] Max send retries ${MAILER_AMQP_MAX_RETRY} (default 3)
+  --amqpPrefetch         int       [amqp] Prefetch count for QoS ${MAILER_AMQP_PREFETCH} (default 1)
+  --amqpQueue            string    [amqp] Queue name ${MAILER_AMQP_QUEUE} (default "mailer")
+  --amqpRetryInterval    duration  [amqp] Interval duration when send fails ${MAILER_AMQP_RETRY_INTERVAL} (default 1h0m0s)
+  --amqpRoutingKey       string    [amqp] RoutingKey name ${MAILER_AMQP_ROUTING_KEY}
+  --amqpURI              string    [amqp] Address in the form amqps?://<user>:<password>@<address>:<port>/<vhost> ${MAILER_AMQP_URI}
+  --cert                 string    [server] Certificate file ${MAILER_CERT}
+  --corsCredentials                [cors] Access-Control-Allow-Credentials ${MAILER_CORS_CREDENTIALS} (default false)
+  --corsExpose           string    [cors] Access-Control-Expose-Headers ${MAILER_CORS_EXPOSE}
+  --corsHeaders          string    [cors] Access-Control-Allow-Headers ${MAILER_CORS_HEADERS} (default "Content-Type")
+  --corsMethods          string    [cors] Access-Control-Allow-Methods ${MAILER_CORS_METHODS} (default "GET")
+  --corsOrigin           string    [cors] Access-Control-Allow-Origin ${MAILER_CORS_ORIGIN} (default "*")
+  --csp                  string    [owasp] Content-Security-Policy ${MAILER_CSP} (default "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/")
+  --frameOptions         string    [owasp] X-Frame-Options ${MAILER_FRAME_OPTIONS} (default "deny")
+  --graceDuration        duration  [http] Grace duration when signal received ${MAILER_GRACE_DURATION} (default 30s)
+  --hsts                           [owasp] Indicate Strict Transport Security ${MAILER_HSTS} (default true)
+  --idleTimeout          duration  [server] Idle Timeout ${MAILER_IDLE_TIMEOUT} (default 2m0s)
+  --key                  string    [server] Key file ${MAILER_KEY}
+  --loggerJson                     [logger] Log format as JSON ${MAILER_LOGGER_JSON} (default false)
+  --loggerLevel          string    [logger] Logger level ${MAILER_LOGGER_LEVEL} (default "INFO")
+  --loggerLevelKey       string    [logger] Key for level in JSON ${MAILER_LOGGER_LEVEL_KEY} (default "level")
+  --loggerMessageKey     string    [logger] Key for message in JSON ${MAILER_LOGGER_MESSAGE_KEY} (default "msg")
+  --loggerTimeKey        string    [logger] Key for timestamp in JSON ${MAILER_LOGGER_TIME_KEY} (default "time")
+  --mjmlPassword         string    [mjml] Secret Key or Basic Auth password ${MAILER_MJML_PASSWORD}
+  --mjmlURL              string    [mjml] MJML API Converter URL ${MAILER_MJML_URL} (default "https://api.mjml.io/v1/render")
+  --mjmlUsername         string    [mjml] Application ID or Basic Auth username ${MAILER_MJML_USERNAME}
+  --name                 string    [server] Name ${MAILER_NAME} (default "http")
+  --okStatus             int       [http] Healthy HTTP Status code ${MAILER_OK_STATUS} (default 204)
+  --port                 uint      [server] Listen port (0 to disable) ${MAILER_PORT} (default 1080)
+  --readTimeout          duration  [server] Read Timeout ${MAILER_READ_TIMEOUT} (default 5s)
+  --shutdownTimeout      duration  [server] Shutdown Timeout ${MAILER_SHUTDOWN_TIMEOUT} (default 10s)
+  --smtpAddress          string    [smtp] Address ${MAILER_SMTP_ADDRESS} (default "localhost:25")
+  --smtpHost             string    [smtp] Plain Auth host ${MAILER_SMTP_HOST} (default "localhost")
+  --smtpPassword         string    [smtp] Plain Auth Password ${MAILER_SMTP_PASSWORD}
+  --smtpUsername         string    [smtp] Plain Auth Username ${MAILER_SMTP_USERNAME}
+  --telemetryRate        string    [telemetry] OpenTelemetry sample rate, 'always', 'never' or a float value ${MAILER_TELEMETRY_RATE} (default "always")
+  --telemetryURL         string    [telemetry] OpenTelemetry gRPC endpoint (e.g. otel-exporter:4317) ${MAILER_TELEMETRY_URL}
+  --telemetryUint64                [telemetry] Change OpenTelemetry Trace ID format to an unsigned int 64 ${MAILER_TELEMETRY_UINT64} (default true)
+  --templates            string    [mailer] Templates directory ${MAILER_TEMPLATES} (default "./templates/")
+  --url                  string    [alcotest] URL to check ${MAILER_URL}
+  --userAgent            string    [alcotest] User-Agent for check ${MAILER_USER_AGENT} (default "Alcotest")
+  --writeTimeout         duration  [server] Write Timeout ${MAILER_WRITE_TIMEOUT} (default 10s)
 ```
