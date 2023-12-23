@@ -7,8 +7,8 @@ spec:
   interval: 120m
   chart:
     spec:
-      chart: app
-      version: "0.0.92"
+      chart: cron
+      version: "0.0.30"
       sourceRef:
         kind: HelmRepository
         name: vibioh
@@ -23,6 +23,9 @@ spec:
     cleanupOnFail: true
   values:
     nameOverride: mailer
+    jobLabels:
+      k8s-cleaner: "true"
+    schedule: "0 8 * * *"
     image:
       name: vibioh/mailer
       tag: "202312230008" # {"$imagepolicy": "default:flux-mailer-web:tag"}
@@ -34,10 +37,9 @@ spec:
       OTEL_RESOURCE_ATTRIBUTES: env=production,git.repository_url=github.com/ViBiOh/mailer
       OTEL_SERVICE_NAME: mailer
     secrets:
+      MAILER_AMQP_INACTIVE_TIMEOUT: 2m
       MAILER_AMQP_URI: AgCW/jVH9PW8ZIzA3HhQ7PqqKNfx7fE88Krxq2i+NrUkxeGYsVUZPstjqNoFILVmk86YYjC5pGSg6KhfUn72CVbxs8STI+gBxIwTOs3PwZK+xX8BByBhjJKm1bXab0TePcSV9or1Yq62XeAx5YbNle08orlUr0Bgn3J6x55QT5p0Al4n4kSg5bwtN4itE78aHecNFS92RBH2t1QxKHzoOkqCnrZfuocIrAJc/0HWHGLDRh0SADeCiRaNiDN7t4nYjr0l/2H3qk+CYfYQn8bm0hOjslCv5qNl8MBlaRUAE/hGU+7Dme5MsqoqVUr9ocIftIovZZTWsy3Dm46jAoR3T4r6005NokViQJ214dwvkO6CxS9rYJNEfkfnyKCoXU7Je0lSkznE3aqFitmTciLgJSoZ05+eALRKvU5X8FwU45q00mVPCvP1Dl4xBS7DS0bn03sjHNwkA/jYbzoD7gbh2lsAV4MXIqzt4eNKnKHDfCu5RrMC3tFaEtFpcCbe5E+dz6lZ3sWQwLbz1rRsvyZsyKOKjMawsheJvnueVm3Llt9Y6eS3xkW4klqbpxWA75TeITrz+ZnWGcoAwru//ui/q+bKSSE185INJiqjaFK+XK3wsrzyFj3B9jgFL/qKuEPqKHY+/TK8RhPtTaD7mOvG9stmAW6ZMo4UV/3vlgiR5UhVdrP2uT/CGfWvC/9bRjfNs8lDEr1T0ofXe5Mb01G2ZQ2jTP6tXSCapouPiWVCi6W7gALL1lohd+SBt/5W682DdWMI
       MAILER_SMTP_ADDRESS: AgA0QDVxpjye2tmyNQ4ZbjAXKimMRxECHmd8dSOzHYSgKITCGvxH9APQmH2Bv1JX6xhwMAgq3DLrmvUeyz3UcYDkZaovjB9uLAzbrAhRBo+UIeeRaXI160ls7x5BLcPn/AN9vJkbA+3CDHBLXm6QJeDrrU6J4jiusGv2rhj7ppaS1uzebA5AuF+17fO2OHk7CaQYq8UZwo1aV1baLlKCbi2XEZVRop+30vWxdwkQecUe/MSvtc8RDyVRI3pgchoEh/FffB5KecnOqDqBB0hrfUxxrWY+lWDaKedHf/DXjYLDqZEVyEEFVowsMdXbVQ3xbRm4fGVMEoXl2fM9VyOaqjNo6vw/uxtctUdN1PQDbWM7VEH4So+2YB5jSs4Aa4fqbf4J8TcBhzQd/M3PNHiM6StteAIRKp2UcMEAoOWxjTbGxrePqP7Wx8xsjzaMiClJ7l2nmByYoCVJ2YkLPGS6ovDnuHCkVcqGBQ9LgRqKj8GZ2j2YMXenxYzNjBEeehpA/1rPyvOXPxFBJ6FUR2Lrss98nNFtccWM5vpZDrtOJGK1Q+rrvh8IZURFffUXZETa/QGAt4HTGzeKop3cOJxUv4X1146aYRLqtfx47GgKsyNPSvJleVkwsn1F6HT82C/zcrF8YjV/+iQkDRqZf/tSnr4nbAX/ki3VPRN8ZkfCXC/+tTHzn+ZvcB/B5vAeLxcc3oDCZFSnv94EtajPkAqIr/xTECI9B67I
       MAILER_SMTP_HOST: AgB+YZ1TazxL8mJIHX/sfzaOlvUt8bESiRpafzHjeg7mftv6Cb/xo9URCZhL6z3smnBy88UTMNz0E7P9pyKbVHwn4Jal/cbUtkuhTa+LRmuFMsMnhh7iZwzrRBTsmGAfvD2/0x6mG3TgFD/QrDX9oyG7X1EptCC3It0r5O/cP/xiGjFWy8iHWhQu5Ivvm3DF3KlJnFY2s1JA+B32Vp03nVtHbNRf7DkBqPYoM//An5cwUvPzZQjJ1SeFmiM5JM7asWPkDTX0M7CHnTifvx1VeNVMWseRmwl0U9VTvLBYJPdZ9z3lbdEZrRlCPLhSjMhqSoEsUhBG4lB9squbMYKTxAecCfMAja7eXN+dzdM9NL5UQ8jJR2BTWv8pnRcUBoCiy3abWY/mBRgFMQvWYcjGNrfGUf7/Ku+eUYhaxZJXeuaHc8DX+kK8t6YNzPFV4voeYgGjT8Hd11gGkCuQvxRpEXwO2fWLNXjD30fA8uMqTmIN8UzezUIPJwBf+zyX5WnjUDbFzfNdjN2b7cAWW6xqdlXwinwvVCVu0w6mnOnKZ8BYZdvxv9PGb78ldM3CbKdp9aoOYYDUcf79eScgbcCw7fE+qKxxoXe4EfYDEd1Nits1TXkN5V6fD7Q/lTnL4sgL6KDmE9oK5QLQ8SYY5pRbrzaoLMdK/Lv6vu/Zyg2v1jUc+Lf0rPeG8bKdlv1OCTzSEbWDUhf7B8qZHiuwC9M4vjO27Pw=
       MAILER_SMTP_PASSWORD: AgC853Tpkaqtk/UzgZSvwvYSCZTFB2hUL5mm3Iz03WXj1YHRHHq1cCE4RMaTkLDF4yAXAzkoJTfqaN/pmMIpVtMIb+KHntN4ZN/hYawk9fuTzwV/TFKlK3QyB0vLCkOiyax6WdpLfsgVxNL2Q0/TOq0yQKvtpFXt1UsbIfN5Y5E4yPwR8s9NXDXUwHktlQK1P0wasWzgFmXvaF78uxmUSBZQ4TWMR/D22i9ZOBciPn+IXyeOPerDEhPzSbGgiqytRrFB/t679bFDxQuPRnYkEiVC8rXYctcxrSv7AAqxAAluAnHLAQjT0tty8r4FaTx3Ag9U3bfeBSARY3O68t2KmOantwORAjFvy/HeIKaBMS6odBdR1hh1Zncbdz1kD48OWYnGLflDXQ3aKh18ElrX5nQPTAyeGOX07DoAGyAtadFztjSpLuRYIHmwTwFqScuNi/2i1cqEMPqAHlkB7hlrZnxOANV5Qag1Jp6cTxSNfgU0wOEOk8SdBAw0ucT7SuqPEnVj79ShVjiYPNlsSc2KwUkOptd/n5IUsEESkb6kQu2t1WjSK4qrlieAKmiKOijuKTkN7dROWbn7u98ifqRyTA627a+iwx8z+mJmdahkzY67nS0RJkKODACobtFUQtiWB95Ny0CY+/6/77w69lP+U0HnE2qjB556B4b5ku0u+LRIY/RfyQF8jbo+tmzprZ616OlmmZk29yU5Ik5/G4u9Y577JmSGTdaDbXbCZSmJioRo9SQOYIo=
       MAILER_SMTP_USERNAME: AgAhfjShvP9aez+Mmwf2hEOnamwEWK3ByocTg6X2GyVtxn57kIeDtqK91C+GUklREYtY5KGOmz3dYQGRPhO3RGuQvarn9i/vDYHCIGRfCY0NlSw06qFfGdYPaEBqvxl2XCzAHJb/OmmyAFyadfb8xcru8L0iQ4FijcSvwp4wLm2uav6ahjUPOBeDvKhu+R/GuyNSHW9ebKsSL3BFpC+a8KSlXXFgw//yHLCvRnc5R+PcQbD5J4fvzZLxpRxx+hoxod17zfUQkEF+zm5gwX3bSmXuCDJUZz0K0jn2ppwvGOFASveg7qbuw1tByihe+2waADT3LYeundGKhDQ+4e2KeSb0ek0rK1eeRjtVnH4oI+LOz10UFEyTWYNVpeh37uLdFZcV1/vCDLfRHLUn+xJcizu/1KtPGOu726zwjDmYSxmknombv4IZF31wMU2H+JzRQcTHmkz2SvZbtUScWs0n5VaDuuiEQ7jbgZhRXal2i8mFBErvBGtcakpW4IoMdUkpi6VU5eP5FPrrxSGiRG6c/c2WYADSkf+V8505hpzD4Nf7k/C1GchSA5hGq6xXKMUgD28lEAV1oKAeTSKiSJXnfPA9YZaagy5nlV8Aq6b7hJ8XICltapqTqd6qxtJM/byughnUXOwVcq7zr+3rrMVWgTSuQ9VPic1C+eBU/ah24sobDljrxxzbbeYV4ZDPpzLyfVGMmPBribz/cgieaJJt5R0BhsrHH8Weako3cNgUr85e3iJvNcE=
-    pprof:
-      enabled: true
