@@ -28,7 +28,7 @@ spec:
     schedule: "0 8 * * *"
     image:
       name: vibioh/mailer
-      tag: "202312230008" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202312231535" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     config:
       GOMAXPROCS: "1"
       MAILER_LOGGER_JSON: "true"
