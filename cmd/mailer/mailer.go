@@ -61,10 +61,7 @@ func main() {
 	ctx := context.Background()
 
 	telemetryService, err := telemetry.New(ctx, tracerConfig)
-	if err != nil {
-		slog.ErrorContext(ctx, "telemetry", "error", err)
-		os.Exit(1)
-	}
+	logger.FatalfOnErr(ctx, err, "telemetry")
 
 	defer telemetryService.Close(ctx)
 
@@ -88,10 +85,7 @@ func main() {
 	}
 
 	amqpService, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryService.MeterProvider(), telemetryService.TracerProvider(), mailerService.AmqpHandler)
-	if err != nil {
-		slog.ErrorContext(ctx, "create amqp handler", "error", err)
-		os.Exit(1)
-	}
+	logger.FatalfOnErr(ctx, err, "create amqp handler")
 
 	healthService := health.New(ctx, healthConfig)
 
