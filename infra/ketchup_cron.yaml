@@ -28,7 +28,7 @@ spec:
     schedule: "0 8 * * *"
     image:
       name: vibioh/mailer
-      tag: "202312261236" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202312262225" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     config:
       GOMAXPROCS: "1"
       MAILER_AMQP_INACTIVE_TIMEOUT: 2m
