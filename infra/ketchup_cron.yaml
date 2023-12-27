@@ -26,6 +26,7 @@ spec:
     jobLabels:
       k8s-cleaner: "true"
     schedule: "0 8 * * *"
+    timeZone: "Europe/Paris"
     image:
       name: vibioh/mailer
       tag: "202312262225" # {"$imagepolicy": "default:flux-mailer-web:tag"}
