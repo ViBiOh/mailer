@@ -29,7 +29,7 @@ spec:
     timeZone: "Europe/Paris"
     image:
       name: vibioh/mailer
-      tag: "202401081017" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202401131351" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     config:
       GOMAXPROCS: "1"
       MAILER_AMQP_INACTIVE_TIMEOUT: 2m
