@@ -1,6 +1,7 @@
 package mailer
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -71,7 +72,7 @@ func (s Service) GetFixture(name, fixture string) (map[string]any, error) {
 
 	defer func() {
 		if closeErr := reader.Close(); closeErr != nil {
-			slog.Error("close", "error", err, "fn", "mailer.GetFixture", "item", fixturePath)
+			slog.LogAttrs(context.Background(), slog.LevelError, "close", slog.String("fn", "mailer.GetFixture"), slog.String("item", fixturePath), slog.Any("error", err))
 		}
 	}()
 

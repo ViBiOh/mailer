@@ -62,10 +62,10 @@ func Flags(fs *flag.FlagSet, prefix string) *Config {
 }
 
 func New(config *Config, mjmlService mjml.Service, senderService sender, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Service {
-	slog.Info("Loading templates...", "dir", config.TemplatesDir, "extension", templateExtension)
+	slog.LogAttrs(context.Background(), slog.LevelInfo, "Loading templates...", slog.String("dir", config.TemplatesDir), slog.String("extension", templateExtension))
 	appTemplates, err := getTemplates(config.TemplatesDir, templateExtension)
 	if err != nil {
-		slog.Error("get templates", "error", err)
+		slog.LogAttrs(context.Background(), slog.LevelError, "get templates", slog.Any("error", err))
 	}
 
 	mailer_metric.Create(meterProvider, "mailer.render")
