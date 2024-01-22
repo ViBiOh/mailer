@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: cron
-      version: "0.0.34"
+      version: "0.0.35"
       sourceRef:
         kind: HelmRepository
         name: vibioh
@@ -23,14 +23,13 @@ spec:
     cleanupOnFail: true
   values:
     nameOverride: mailer
-    jobLabels:
-      k8s-cleaner: "true"
     schedule: "0 8 * * *"
     timeZone: "Europe/Paris"
     image:
       name: vibioh/mailer
       tag: "202401192124" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     labels:
+      k8s-cleaner: "true"
       tags.datadoghq.com/env: "production"
       tags.datadoghq.com/service: "mailer"
       tags.datadoghq.com/version: "202401192124" # {"$imagepolicy": "default:flux-mailer-web:tag"}
