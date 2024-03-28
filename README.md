@@ -2,7 +2,6 @@
 
 [![Build](https://github.com/ViBiOh/mailer/workflows/Build/badge.svg)](https://github.com/ViBiOh/mailer/actions)
 [![codecov](https://codecov.io/gh/ViBiOh/mailer/branch/main/graph/badge.svg)](https://codecov.io/gh/ViBiOh/mailer)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ViBiOh_mailer&metric=alert_status)](https://sonarcloud.io/dashboard?id=ViBiOh_mailer)
 
 Mailer is a service for rendering and sending email based on Golang Template with the help of MJML.
 
