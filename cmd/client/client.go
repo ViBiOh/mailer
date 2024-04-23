@@ -17,9 +17,7 @@ func main() {
 
 	mailerConfig := client.Flags(fs, "mailer")
 
-	if err := fs.Parse(os.Args[1:]); err != nil {
-		log.Fatal(err)
-	}
+	_ = fs.Parse(os.Args[1:])
 
 	client, err := client.New(mailerConfig, nil, nil)
 	if err != nil {
