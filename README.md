@@ -100,6 +100,8 @@ Usage of mailer:
   --name                 string    [server] Name ${MAILER_NAME} (default "http")
   --okStatus             int       [http] Healthy HTTP Status code ${MAILER_OK_STATUS} (default 204)
   --port                 uint      [server] Listen port (0 to disable) ${MAILER_PORT} (default 1080)
+  --pprofAgent           string    [pprof] URL of the Datadog Trace Agent (e.g. http://datadog.observability:8126) ${MAILER_PPROF_AGENT}
+  --pprofPort            int       [pprof] Port of the HTTP server (0 to disable) ${MAILER_PPROF_PORT} (default 0)
   --readTimeout          duration  [server] Read Timeout ${MAILER_READ_TIMEOUT} (default 5s)
   --shutdownTimeout      duration  [server] Shutdown Timeout ${MAILER_SHUTDOWN_TIMEOUT} (default 10s)
   --smtpAddress          string    [smtp] Address ${MAILER_SMTP_ADDRESS} (default "localhost:25")

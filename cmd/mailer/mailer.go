@@ -4,12 +4,8 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
-
-	_ "net/http/pprof"
 
 	"github.com/ViBiOh/flags"
 	"github.com/ViBiOh/httputils/v4/pkg/alcotest"
@@ -20,6 +16,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httputils"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/owasp"
+	"github.com/ViBiOh/httputils/v4/pkg/pprof"
 	"github.com/ViBiOh/httputils/v4/pkg/recoverer"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/httputils/v4/pkg/server"
@@ -40,6 +37,7 @@ func main() {
 	alcotestConfig := alcotest.Flags(fs, "")
 	loggerConfig := logger.Flags(fs, "logger")
 	tracerConfig := telemetry.Flags(fs, "telemetry")
+	pprofConfig := pprof.Flags(fs, "pprof")
 	owaspConfig := owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/"))
 	corsConfig := cors.Flags(fs, "cors")
 
@@ -57,40 +55,41 @@ func main() {
 
 	ctx := context.Background()
 
-	telemetryService, err := telemetry.New(ctx, tracerConfig)
+	healthService := health.New(ctx, healthConfig)
+
+	telemetryApp, err := telemetry.New(ctx, tracerConfig)
 	logger.FatalfOnErr(ctx, err, "telemetry")
 
-	defer telemetryService.Close(ctx)
+	defer telemetryApp.Close(ctx)
 
-	logger.AddOpenTelemetryToDefaultLogger(telemetryService)
-	request.AddOpenTelemetryToDefaultClient(telemetryService.MeterProvider(), telemetryService.TracerProvider())
+	logger.AddOpenTelemetryToDefaultLogger(telemetryApp)
+	request.AddOpenTelemetryToDefaultClient(telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 
-	go func() {
-		fmt.Println(http.ListenAndServe("localhost:9999", http.DefaultServeMux))
-	}()
+	service, version, env := telemetryApp.GetServiceVersionAndEnv()
+	pprofService := pprof.New(pprofConfig, service, version, env)
+
+	go pprofService.Start(healthService.DoneCtx())
 
 	appServer := server.New(appServerConfig)
 
-	mjmlService := mjml.New(mjmlConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
-	senderService := smtp.New(smtpConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
-	mailerService := mailer.New(mailerConfig, mjmlService, senderService, telemetryService.MeterProvider(), telemetryService.TracerProvider())
+	mjmlService := mjml.New(mjmlConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	senderService := smtp.New(smtpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	mailerService := mailer.New(mailerConfig, mjmlService, senderService, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 
-	amqpClient, err := amqp.New(amqpConfig, telemetryService.MeterProvider(), telemetryService.TracerProvider())
+	amqpClient, err := amqp.New(amqpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		slog.LogAttrs(ctx, slog.LevelError, "create amqp", slog.Any("error", err))
 		os.Exit(1)
 	}
 
-	amqpService, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryService.MeterProvider(), telemetryService.TracerProvider(), mailerService.AmqpHandler)
+	amqpService, err := amqphandler.New(amqHandlerConfig, amqpClient, telemetryApp.MeterProvider(), telemetryApp.TracerProvider(), mailerService.AmqpHandler)
 	logger.FatalfOnErr(ctx, err, "create amqp handler")
-
-	healthService := health.New(ctx, healthConfig)
 
 	go amqpService.Start(healthService.DoneCtx())
 
-	appHandler := httphandler.New(mailerService, telemetryService.TracerProvider()).Handler()
+	appHandler := httphandler.New(mailerService, telemetryApp.TracerProvider()).Handler()
 
-	go appServer.Start(healthService.EndCtx(), httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryService.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
+	go appServer.Start(healthService.EndCtx(), httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryApp.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
 	healthService.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpService))
 	server.GracefulWait(appServer.Done(), amqpService.Done())
