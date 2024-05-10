@@ -19,11 +19,13 @@ func main() {
 
 	_ = fs.Parse(os.Args[1:])
 
-	client, err := client.New(mailerConfig, nil, nil)
+	ctx := context.Background()
+
+	client, err := client.New(ctx, mailerConfig, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
+	defer client.Close(ctx)
 
 	log.Printf("Mailer Client: %s\n", client)
 
