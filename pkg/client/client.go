@@ -47,13 +47,13 @@ func Flags(fs *flag.FlagSet, prefix string) *Config {
 	return &config
 }
 
-func New(config *Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (Service, error) {
+func New(ctx context.Context, config *Config, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) (Service, error) {
 	if len(config.URL) == 0 {
 		return Service{}, nil
 	}
 
 	if strings.HasPrefix(config.URL, "amqp") {
-		client, err := amqpclient.NewFromURI(config.URL, 1, meterProvider, tracerProvider)
+		client, err := amqpclient.NewFromURI(ctx, config.URL, 1, meterProvider, tracerProvider)
 		if err != nil {
 			return Service{}, fmt.Errorf("create amqp client: %w", err)
 		}
@@ -117,9 +117,9 @@ func (s Service) Send(ctx context.Context, mailRequest model.MailRequest) (err e
 	return s.httpSend(ctx, mailRequest)
 }
 
-func (s Service) Close() {
+func (s Service) Close(ctx context.Context) {
 	if s.amqpEnabled() {
-		s.amqpClient.Close()
+		s.amqpClient.Close(ctx)
 	}
 }
 

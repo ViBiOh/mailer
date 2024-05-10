@@ -17,7 +17,6 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/owasp"
 	"github.com/ViBiOh/httputils/v4/pkg/pprof"
-	"github.com/ViBiOh/httputils/v4/pkg/recoverer"
 	"github.com/ViBiOh/httputils/v4/pkg/request"
 	"github.com/ViBiOh/httputils/v4/pkg/server"
 	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
@@ -51,9 +50,9 @@ func main() {
 
 	alcotest.DoAndExit(alcotestConfig)
 
-	logger.Init(loggerConfig)
-
 	ctx := context.Background()
+
+	logger.Init(ctx, loggerConfig)
 
 	healthService := health.New(ctx, healthConfig)
 
@@ -76,7 +75,7 @@ func main() {
 	senderService := smtp.New(smtpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 	mailerService := mailer.New(mailerConfig, mjmlService, senderService, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 
-	amqpClient, err := amqp.New(amqpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
+	amqpClient, err := amqp.New(ctx, amqpConfig, telemetryApp.MeterProvider(), telemetryApp.TracerProvider())
 	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		slog.LogAttrs(ctx, slog.LevelError, "create amqp", slog.Any("error", err))
 		os.Exit(1)
@@ -89,7 +88,7 @@ func main() {
 
 	appHandler := httphandler.New(mailerService, telemetryApp.TracerProvider()).Handler()
 
-	go appServer.Start(healthService.EndCtx(), httputils.Handler(appHandler, healthService, recoverer.Middleware, telemetryApp.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
+	go appServer.Start(healthService.EndCtx(), httputils.Handler(appHandler, healthService, telemetryApp.Middleware("http"), owasp.New(owaspConfig).Middleware, cors.New(corsConfig).Middleware))
 
 	healthService.WaitForTermination(getDoneChan(appServer.Done(), amqpClient, amqpService))
 	server.GracefulWait(appServer.Done(), amqpService.Done())
