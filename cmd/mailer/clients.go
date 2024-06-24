@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/ViBiOh/httputils/v4/pkg/amqp"
@@ -38,7 +39,7 @@ func newClients(ctx context.Context, config configuration) (clients, error) {
 	output.pprof = pprof.New(config.pprof, service, version, env)
 
 	output.amqp, err = amqp.New(ctx, config.amqp, output.telemetry.MeterProvider(), output.telemetry.TracerProvider())
-	if err != nil {
+	if err != nil && !errors.Is(err, amqp.ErrNoConfig) {
 		return output, fmt.Errorf("amqp: %w", err)
 	}
 
