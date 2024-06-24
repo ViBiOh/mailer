@@ -11,7 +11,6 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/httperror"
 	"github.com/ViBiOh/httputils/v4/pkg/httpjson"
 	httpModel "github.com/ViBiOh/httputils/v4/pkg/model"
-	"github.com/ViBiOh/httputils/v4/pkg/query"
 	"github.com/ViBiOh/httputils/v4/pkg/telemetry"
 	"github.com/ViBiOh/mailer/pkg/model"
 )
@@ -22,49 +21,46 @@ var bufferPool = sync.Pool{
 	},
 }
 
-func (s Service) renderHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var err error
+func (s Service) HandleRoot(w http.ResponseWriter, r *http.Request) {
+	var err error
 
-		ctx, end := telemetry.StartSpan(r.Context(), s.tracer, "render")
-		defer end(&err)
+	_, end := telemetry.StartSpan(r.Context(), s.tracer, "root")
+	defer end(&err)
 
-		if query.IsRoot(r) {
-			if r.Method != http.MethodGet {
-				w.WriteHeader(http.StatusMethodNotAllowed)
-				return
-			}
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 
-			httpjson.WriteArray(r.Context(), w, http.StatusOK, s.mailerService.ListTemplates())
-			return
-		}
+	httpjson.WriteArray(r.Context(), w, http.StatusOK, s.mailerService.ListTemplates())
+}
 
-		if !(r.Method == http.MethodGet || r.Method == http.MethodPost) {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
+func (s Service) HandlerTemplate(w http.ResponseWriter, r *http.Request) {
+	var err error
 
-		mr := parseMailRequest(r)
+	ctx, end := telemetry.StartSpan(r.Context(), s.tracer, "render")
+	defer end(&err)
 
-		content, err := s.getContent(r, mr.Tpl)
-		if err != nil {
-			httperror.InternalServerError(r.Context(), w, err)
-			return
-		}
+	mr := parseMailRequest(r)
 
-		mr = mr.Data(content)
-		output, err := s.mailerService.Render(ctx, mr)
-		if httperror.HandleError(r.Context(), w, err) {
-			return
-		}
+	content, err := s.getContent(r, mr.Tpl)
+	if err != nil {
+		httperror.InternalServerError(r.Context(), w, err)
+		return
+	}
 
-		if r.Method == http.MethodGet {
-			writeOutput(r.Context(), w, output)
-			return
-		}
+	mr = mr.Data(content)
+	output, err := s.mailerService.Render(ctx, mr)
+	if httperror.HandleError(r.Context(), w, err) {
+		return
+	}
 
-		s.sendOutput(ctx, w, mr, output)
-	})
+	if r.Method == http.MethodGet {
+		writeOutput(r.Context(), w, output)
+		return
+	}
+
+	s.sendOutput(ctx, w, mr, output)
 }
 
 func writeOutput(ctx context.Context, w http.ResponseWriter, output io.Reader) {
@@ -97,7 +93,7 @@ func (s Service) sendOutput(ctx context.Context, w http.ResponseWriter, mr model
 func parseMailRequest(r *http.Request) model.MailRequest {
 	mr := model.NewMailRequest()
 
-	mr = mr.Template(strings.Trim(r.URL.Path, "/"))
+	mr = mr.Template(strings.Trim(r.PathValue("template"), "/"))
 	mr = mr.From(strings.TrimSpace(r.URL.Query().Get("from")))
 	mr = mr.As(strings.TrimSpace(r.URL.Query().Get("sender")))
 	mr = mr.WithSubject(strings.TrimSpace(r.URL.Query().Get("subject")))

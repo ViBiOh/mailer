@@ -8,7 +8,7 @@ endif
 APP_NAME = mailer
 PACKAGES ?= ./...
 
-MAIN_SOURCE = cmd/mailer/mailer.go
+MAIN_SOURCE = ./cmd/mailer/
 MAIN_RUNNER = go run $(MAIN_SOURCE)
 ifeq ($(DEBUG), true)
 	MAIN_RUNNER = dlv debug $(MAIN_SOURCE) --
