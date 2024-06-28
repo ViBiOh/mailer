@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/ViBiOh/httputils/v4/pkg/httputils"
 	"github.com/ViBiOh/mailer/pkg/httphandler"
 )
 
@@ -15,5 +16,9 @@ func newPort(clients clients, services services) http.Handler {
 	mux.HandleFunc("GET /render/{template...}", handler.HandlerTemplate)
 	mux.HandleFunc("GET /", handler.HandleRoot)
 
-	return mux
+	return httputils.Handler(mux, clients.health,
+		clients.telemetry.Middleware("http"),
+		services.owasp.Middleware,
+		services.cors.Middleware,
+	)
 }
