@@ -40,7 +40,7 @@ type configuration struct {
 }
 
 func newConfig() configuration {
-	fs := flag.NewFlagSet("api", flag.ExitOnError)
+	fs := flag.NewFlagSet("mailer", flag.ExitOnError)
 	fs.Usage = flags.Usage(fs)
 
 	config := configuration{
