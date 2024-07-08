@@ -53,7 +53,7 @@ spec:
       MAILER_AMQP_INACTIVE_TIMEOUT: 2m
       MAILER_LOGGER_JSON: "true"
       MAILER_MJML_URL: http://mjml
-      MAILER_PORT: 0
+      MAILER_PORT: "0"
       MAILER_PPROF_AGENT: http://datadog.observability:8126
       MAILER_TELEMETRY_URL: datadog.observability:4317
       OTEL_RESOURCE_ATTRIBUTES: env=production,git.repository_url=github.com/ViBiOh/mailer

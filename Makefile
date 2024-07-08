@@ -96,4 +96,9 @@ run:
 ## run-client: Locally run the client
 .PHONY: run-client
 run-client:
-	go run cmd/client/client.go
+	go run "./cmd/client/"
+
+## config: Create local configuration
+.PHONY: config
+config:
+	@cp .env.example .env
