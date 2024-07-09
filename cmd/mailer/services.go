@@ -27,6 +27,11 @@ func newServices(config configuration, clients clients) (services, error) {
 	var err error
 
 	output.server = server.New(config.server)
+
+	if clients.amqp == nil && output.server == nil {
+		return output, fmt.Errorf("no amqp or http listener")
+	}
+
 	output.owasp = owasp.New(config.owasp)
 	output.cors = cors.New(config.cors)
 

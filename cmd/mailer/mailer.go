@@ -32,13 +32,19 @@ func main() {
 
 	go services.server.Start(clients.health.EndCtx(), port)
 
-	clients.health.WaitForTermination(getDoneChan(services.server.Done(), clients.amqp, services.amqpHandler))
+	clients.health.WaitForTermination(getDoneChan(services.server, clients.amqp, services.amqpHandler))
 	server.GracefulWait(services.server.Done(), services.amqpHandler.Done())
 }
 
-func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpService *amqphandler.Service) <-chan struct{} {
-	if amqpClient == nil {
-		return httpDone
+func getDoneChan(httpServer *server.Server, amqpClient *amqp.Client, amqpService *amqphandler.Service) <-chan struct{} {
+	var httpDone <-chan struct{}
+	if httpServer != nil {
+		httpDone = httpServer.Done()
+	}
+
+	var amqpDone <-chan struct{}
+	if amqpClient != nil {
+		amqpDone = amqpService.Done()
 	}
 
 	done := make(chan struct{})
@@ -47,7 +53,7 @@ func getDoneChan(httpDone <-chan struct{}, amqpClient *amqp.Client, amqpService 
 
 		select {
 		case <-httpDone:
-		case <-amqpService.Done():
+		case <-amqpDone:
 		}
 	}()
 
