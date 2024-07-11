@@ -6,6 +6,7 @@ import (
 	"github.com/ViBiOh/httputils/v4/pkg/alcotest"
 	"github.com/ViBiOh/httputils/v4/pkg/amqp"
 	"github.com/ViBiOh/httputils/v4/pkg/amqphandler"
+	"github.com/ViBiOh/httputils/v4/pkg/health"
 	"github.com/ViBiOh/httputils/v4/pkg/logger"
 	"github.com/ViBiOh/httputils/v4/pkg/server"
 )
@@ -33,7 +34,7 @@ func main() {
 	go services.server.Start(clients.health.EndCtx(), port)
 
 	clients.health.WaitForTermination(getDoneChan(services.server, clients.amqp, services.amqpHandler))
-	server.GracefulWait(services.server.Done(), services.amqpHandler.Done())
+	health.WaitAll(services.server.Done(), services.amqpHandler.Done())
 }
 
 func getDoneChan(httpServer *server.Server, amqpClient *amqp.Client, amqpService *amqphandler.Service) <-chan struct{} {
