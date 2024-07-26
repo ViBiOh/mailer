@@ -27,11 +27,11 @@ spec:
     timeZone: "Europe/Paris"
     image:
       name: vibioh/mailer
-      tag: "202407191037" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202407260917" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     labels:
       tags.datadoghq.com/env: "production"
       tags.datadoghq.com/service: "mailer"
-      tags.datadoghq.com/version: "202407191037" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tags.datadoghq.com/version: "202407260917" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     env:
       - name: GOMAXPROCS
         valueFrom:
