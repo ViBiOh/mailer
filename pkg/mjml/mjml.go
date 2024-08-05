@@ -89,8 +89,8 @@ func (s Service) Render(ctx context.Context, template string) (string, error) {
 		return "", fmt.Errorf("render mjml template: %w", err)
 	}
 
-	var response mjmlResponse
-	if err = httpjson.Read(resp, &response); err != nil {
+	response, err := httpjson.Read[mjmlResponse](resp)
+	if err != nil {
 		return "", fmt.Errorf("read mjml response: %w", err)
 	}
 
