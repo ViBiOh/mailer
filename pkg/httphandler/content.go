@@ -17,8 +17,8 @@ func (s Service) getContent(r *http.Request, name string) (map[string]any, error
 		return s.mailerService.GetFixture(name, fixtureName)
 	}
 
-	var content map[string]any
-	if err := httpjson.Parse(r, &content); err != nil {
+	content, err := httpjson.Parse[map[string]any](r)
+	if err != nil {
 		return nil, fmt.Errorf("parse content: %w", err)
 	}
 
