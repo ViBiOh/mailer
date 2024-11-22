@@ -31,7 +31,7 @@ type sender interface {
 }
 
 const (
-	templateExtension = ".html"
+	templateExtension = ".tmpl"
 	jsonExtension     = ".json"
 )
 

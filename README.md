@@ -30,7 +30,7 @@ In order to use the MJML converter, you need to register to [MJML API](https://m
 
 ## Templating & fixtures
 
-Templates are read from the [`-templates option dir`](#usage). You can have a look at the [hello world example](templates/hello/hello.html) provided in this repository. Every files with `*.html` extension is parsed as a template.
+Templates are read from the [`-templates option dir`](#usage). You can have a look at the [hello world example](templates/hello/hello.tmpl) provided in this repository. Every files with `*.tmpl` extension is parsed as a template.
 
 Fixtures for each template are found from the directory where the template is. The default fixture is a file named `default.json`.
 
