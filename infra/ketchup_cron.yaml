@@ -23,7 +23,7 @@ spec:
     cleanupOnFail: true
   values:
     nameOverride: mailer
-    schedule: "0 8 * * *"
+    schedule: "59 7 * * *"
     timeZone: "Europe/Paris"
     image:
       name: rg.fr-par.scw.cloud/vibioh/mailer
@@ -50,7 +50,7 @@ spec:
           fieldRef:
             fieldPath: metadata.labels['tags.datadoghq.com/service']
     config:
-      MAILER_AMQP_INACTIVE_TIMEOUT: 2m
+      MAILER_AMQP_INACTIVE_TIMEOUT: 5m
       MAILER_LOGGER_JSON: "true"
       MAILER_MJML_URL: http://mjml
       MAILER_PORT: "0"
