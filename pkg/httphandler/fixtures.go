@@ -11,7 +11,7 @@ import (
 func (s Service) HandleFixture(w http.ResponseWriter, r *http.Request) {
 	query := strings.Trim(r.PathValue("fixture"), "/")
 	if len(query) == 0 {
-		httperror.NotFound(r.Context(), w)
+		httperror.NotFound(r.Context(), w, nil)
 		return
 	}
 
@@ -36,5 +36,5 @@ func (s Service) HandleFixture(w http.ResponseWriter, r *http.Request) {
 		httpjson.Write(r.Context(), w, http.StatusOK, content)
 	}
 
-	httperror.NotFound(r.Context(), w)
+	httperror.NotFound(r.Context(), w, nil)
 }
