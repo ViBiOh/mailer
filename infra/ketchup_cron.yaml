@@ -27,11 +27,11 @@ spec:
     timeZone: "Europe/Paris"
     image:
       name: rg.fr-par.scw.cloud/vibioh/mailer
-      tag: "202511211142" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202511240741" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     labels:
       tags.datadoghq.com/env: "production"
       tags.datadoghq.com/service: "mailer"
-      tags.datadoghq.com/version: "202511211142" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tags.datadoghq.com/version: "202511240741" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     env:
       - name: GOMEMLIMIT
         valueFrom:
