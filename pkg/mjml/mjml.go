@@ -54,6 +54,8 @@ func New(config *Config, meterProvider metric.MeterProvider, tracerProvider trac
 
 	mailer_metric.Create(meterProvider, "mailer.mjml")
 
+	fmt.Println(config.URL)
+
 	service := Service{
 		req: request.Post(config.URL).BasicAuth(config.Username, config.Password),
 	}

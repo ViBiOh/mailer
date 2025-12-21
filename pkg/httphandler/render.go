@@ -3,6 +3,7 @@ package httphandler
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -45,7 +46,7 @@ func (s Service) HandlerTemplate(w http.ResponseWriter, r *http.Request) {
 
 	content, err := s.getContent(r, mr.Tpl)
 	if err != nil {
-		httperror.InternalServerError(r.Context(), w, err)
+		httperror.InternalServerError(r.Context(), w, fmt.Errorf("get content for template `%s`: %w", mr.Tpl, err))
 		return
 	}
 

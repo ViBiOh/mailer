@@ -57,12 +57,12 @@ func (s Service) ListFixtures(name string) ([]string, error) {
 func (s Service) GetFixture(name, fixture string) (map[string]any, error) {
 	templatePath := s.getTemplatePath(name)
 	if err := isExists(templatePath, true); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("is exists `%s`: %w", templatePath, err)
 	}
 
 	fixturePath := s.getFixturePath(name, fixture)
 	if err := isExists(fixturePath, false); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("is exists `%s`: %w", fixturePath, err)
 	}
 
 	reader, err := os.OpenFile(fixturePath, os.O_RDONLY, 0o600)

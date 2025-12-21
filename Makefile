@@ -90,8 +90,7 @@ build:
 ## run: Locally run the application, e.g. node index.js, python -m myapp, go run myapp etc ...
 .PHONY: run
 run:
-	$(MAIN_RUNNER) \
-		-mjmlURL "http://localhost:4000"
+	$(MAIN_RUNNER)
 
 ## run-client: Locally run the client
 .PHONY: run-client

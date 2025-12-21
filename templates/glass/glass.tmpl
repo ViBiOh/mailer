@@ -1,0 +1,22 @@
+<mjml>
+  <mj-body background-color="#272727">
+    {{ template "header" "Glass" }}
+
+    <mj-section background-color="#272727">
+      <mj-column>
+        <mj-text color="#c0c0c0">You've been invited to the expense sharing <strong>{{ .Name }}</strong> !</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#272727">
+      <mj-column>
+        <mj-image alt="Discord Logo" width="100px" src="https://glass.vibioh.fr/images/discord.svg" />
+        <mj-button href="{{ .URL }}" target="_blank">
+          Sign up with Discord
+         </mj-button>
+      </mj-column>
+    </mj-section>
+
+    {{ template "footer" }}
+  </mj-body>
+</mjml>

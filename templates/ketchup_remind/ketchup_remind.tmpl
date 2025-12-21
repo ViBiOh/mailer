@@ -1,18 +1,3 @@
-{{ define "release_remind" }}
-  <mj-text color="#c0c0c0">
-    {{ if eq .repository.kind "helm" }}
-      <strong>{{ .repository.part }} @ </strong>
-    {{ end }}
-
-    <strong>{{ .repository.name }}</strong>
-    new version for pattern <pre style="display: inline; margin: 0; padding: 0; border: 0">{{ .pattern }}</pre> is
-
-    <strong>
-      <a style="color: #6495ed" href="{{ .url }}">{{ .version.name }}</a>
-    </strong>
-  </mj-text>
-{{ end -}}
-
 <mjml>
   <mj-body background-color="#272727">
     {{ template "header" "Ketchup" }}

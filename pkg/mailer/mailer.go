@@ -124,7 +124,7 @@ func (s Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.
 
 	tpl := s.tpl.Lookup(fmt.Sprintf("%s%s", mailRequest.Tpl, templateExtension))
 	if tpl == nil {
-		return nil, httpModel.ErrNotFound
+		return nil, fmt.Errorf("template `%s`: %w", mailRequest.Tpl, httpModel.ErrNotFound)
 	}
 
 	buffer := bufferPool.Get().(*bytes.Buffer)
@@ -133,13 +133,13 @@ func (s Service) Render(ctx context.Context, mailRequest model.MailRequest) (io.
 
 	if err = tpl.Execute(buffer, mailRequest.Payload); err != nil {
 		mailer_metric.Increase(ctx, "render", "error")
-		return nil, err
+		return nil, fmt.Errorf("execute: %w", err)
 	}
 
 	mailer_metric.Increase(ctx, "render", "success")
 
 	if err = s.convertMjml(ctx, buffer); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("convert mjml: %w", err)
 	}
 
 	return buffer, nil
@@ -156,8 +156,8 @@ func (s Service) ListTemplates() []string {
 	var templatesList []string
 
 	for _, tpl := range s.tpl.Templates() {
-		if strings.HasSuffix(tpl.Name(), templateExtension) {
-			templatesList = append(templatesList, strings.TrimSuffix(tpl.Name(), templateExtension))
+		if before, ok := strings.CutSuffix(tpl.Name(), templateExtension); ok {
+			templatesList = append(templatesList, before)
 		}
 	}
 
