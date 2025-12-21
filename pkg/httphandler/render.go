@@ -49,7 +49,7 @@ func (s Service) HandlerTemplate(w http.ResponseWriter, r *http.Request) {
 		fixtureName = "default"
 	}
 
-	content, err := s.mailerService.GetFixture(fixtureName, fixtureName)
+	content, err := s.mailerService.GetFixture(mr.Tpl, fixtureName)
 	if err != nil {
 		httperror.InternalServerError(r.Context(), w, fmt.Errorf("get content for template `%s`: %w", mr.Tpl, err))
 		return
