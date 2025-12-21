@@ -87,6 +87,7 @@ func (s Service) String() string {
 	if s.amqpEnabled() {
 		return fmt.Sprintf("Publishing emails to exchange `%s` on vhost `%s`", s.exchange, s.amqpClient.Vhost())
 	}
+
 	return fmt.Sprintf("Sending emails via HTTP to `%v`.", s.req)
 }
 

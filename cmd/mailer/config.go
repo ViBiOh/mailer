@@ -51,7 +51,7 @@ func newConfig() configuration {
 		health:    health.Flags(fs, ""),
 
 		server: server.Flags(fs, ""),
-		owasp:  owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/")),
+		owasp:  owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/ https://glass.vibioh.fr/images/")),
 		cors:   cors.Flags(fs, "cors"),
 
 		amqp:        amqp.Flags(fs, "amqp"),
