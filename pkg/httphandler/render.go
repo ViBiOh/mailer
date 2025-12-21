@@ -44,7 +44,12 @@ func (s Service) HandlerTemplate(w http.ResponseWriter, r *http.Request) {
 
 	mr := parseMailRequest(r)
 
-	content, err := s.getContent(r, mr.Tpl)
+	fixtureName := r.URL.Query().Get("fixture")
+	if fixtureName == "" {
+		fixtureName = "default"
+	}
+
+	content, err := s.mailerService.GetFixture(fixtureName, fixtureName)
 	if err != nil {
 		httperror.InternalServerError(r.Context(), w, fmt.Errorf("get content for template `%s`: %w", mr.Tpl, err))
 		return
@@ -52,12 +57,30 @@ func (s Service) HandlerTemplate(w http.ResponseWriter, r *http.Request) {
 
 	mr = mr.Data(content)
 	output, err := s.mailerService.Render(ctx, mr)
-	if httperror.HandleError(r.Context(), w, err) {
+	if httperror.HandleError(ctx, w, err) {
 		return
 	}
 
-	if r.Method == http.MethodGet {
-		writeOutput(r.Context(), w, output)
+	writeOutput(r.Context(), w, output)
+}
+
+func (s Service) HandlerSend(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	ctx, end := telemetry.StartSpan(r.Context(), s.tracer, "render")
+	defer end(&err)
+
+	mr := parseMailRequest(r)
+
+	content, err := httpjson.Parse[map[string]any](r)
+	if err != nil {
+		httperror.BadRequest(ctx, w, fmt.Errorf("parse content: %w", err))
+		return
+	}
+
+	mr = mr.Data(content)
+	output, err := s.mailerService.Render(ctx, mr)
+	if httperror.HandleError(r.Context(), w, err) {
 		return
 	}
 

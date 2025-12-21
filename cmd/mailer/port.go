@@ -14,6 +14,7 @@ func newPort(clients clients, services services) http.Handler {
 
 	mux.HandleFunc("GET /fixtures/{fixture...}", handler.HandleFixture)
 	mux.HandleFunc("GET /render/{template...}", handler.HandlerTemplate)
+	mux.HandleFunc("POST /render/{template...}", handler.HandlerTemplate)
 	mux.HandleFunc("GET /", handler.HandleRoot)
 
 	return httputils.Handler(mux, clients.health,
