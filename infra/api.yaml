@@ -31,6 +31,10 @@ spec:
       tags.datadoghq.com/service: "mailer"
       tags.datadoghq.com/version: "202512222358" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     env:
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
       - name: VERSION
         valueFrom:
           fieldRef:
