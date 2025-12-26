@@ -9,7 +9,7 @@ COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 COPY templates/ /templates
 
-HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://localhost:1080/health" ]
+HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://127.0.0.1:1080/health" ]
 ENTRYPOINT [ "/mailer" ]
 
 ARG VERSION
