@@ -42,10 +42,10 @@ type Config struct {
 func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
-	flags.New("Address", "Address").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Address, "localhost:25", nil)
+	flags.New("Address", "Address").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Address, "127.0.0.1:25", nil)
 	flags.New("Username", "Plain Auth Username").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Username, "", nil)
 	flags.New("Password", "Plain Auth Password").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Password, "", nil)
-	flags.New("Host", "Plain Auth host").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Host, "localhost", nil)
+	flags.New("Host", "Plain Auth host").Prefix(prefix).DocPrefix("smtp").StringVar(fs, &config.Host, "127.0.0.1", nil)
 
 	return &config
 }

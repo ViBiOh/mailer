@@ -102,8 +102,8 @@ Usage of mailer:
   --pprofPort            int       [pprof] Port of the HTTP server (0 to disable) ${MAILER_PPROF_PORT} (default 0)
   --readTimeout          duration  [server] Read Timeout ${MAILER_READ_TIMEOUT} (default 5s)
   --shutdownTimeout      duration  [server] Shutdown Timeout ${MAILER_SHUTDOWN_TIMEOUT} (default 10s)
-  --smtpAddress          string    [smtp] Address ${MAILER_SMTP_ADDRESS} (default "localhost:25")
-  --smtpHost             string    [smtp] Plain Auth host ${MAILER_SMTP_HOST} (default "localhost")
+  --smtpAddress          string    [smtp] Address ${MAILER_SMTP_ADDRESS} (default "127.0.0.1:25")
+  --smtpHost             string    [smtp] Plain Auth host ${MAILER_SMTP_HOST} (default "127.0.0.1")
   --smtpPassword         string    [smtp] Plain Auth Password ${MAILER_SMTP_PASSWORD}
   --smtpUsername         string    [smtp] Plain Auth Username ${MAILER_SMTP_USERNAME}
   --telemetryRate        string    [telemetry] OpenTelemetry sample rate, 'always', 'never' or a float value ${MAILER_TELEMETRY_RATE} (default "always")
