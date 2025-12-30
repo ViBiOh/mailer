@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -105,7 +106,7 @@ func (s Service) Send(ctx context.Context, mail model.Mail) error {
 	return err
 }
 
-func SendMail(addr, host string, auth smtp.Auth, from string, to []string, body []byte) error {
+func SendMail(addr, host string, auth smtp.Auth, from string, to []string, body []byte) (err error) {
 	smtpConn, err := tls.Dial("tcp", addr, &tls.Config{
 		ServerName: host,
 	})
@@ -118,7 +119,15 @@ func SendMail(addr, host string, auth smtp.Auth, from string, to []string, body 
 		return fmt.Errorf("client: %w", err)
 	}
 
-	defer smtpClient.Close()
+	defer func() {
+		if smtpErr := smtpClient.Close(); smtpErr != nil {
+			if err != nil {
+				err = errors.Join(err, smtpErr)
+			}
+
+			err = smtpErr
+		}
+	}()
 
 	if auth != nil {
 		if err = smtpClient.Auth(auth); err != nil {
