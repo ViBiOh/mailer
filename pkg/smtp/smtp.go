@@ -120,13 +120,11 @@ func SendMail(addr, host string, auth smtp.Auth, from string, to []string, body 
 	}
 
 	defer func() {
-		if smtpErr := smtpClient.Close(); smtpErr != nil {
-			if err != nil {
-				err = errors.Join(err, smtpErr)
-			}
-
-			err = smtpErr
+		if err == nil {
+			return
 		}
+
+		err = errors.Join(err, smtpClient.Close())
 	}()
 
 	if auth != nil {
