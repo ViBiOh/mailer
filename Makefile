@@ -68,7 +68,7 @@ format:
 .PHONY: style
 style:
 	fieldalignment -fix -test=false $(PACKAGES)
-	golangci-lint run --fix
+	golangci-lint run --fix --show-stats=false
 
 ## test: Shortcut to launch all the test tasks (unit, functional and integration).
 .PHONY: test
