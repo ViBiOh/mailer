@@ -46,8 +46,8 @@ func (s Service) ListFixtures(name string) ([]string, error) {
 
 	var fixtureList []string
 	for _, file := range files {
-		if strings.HasSuffix(file.Name(), jsonExtension) {
-			fixtureList = append(fixtureList, strings.TrimSuffix(file.Name(), jsonExtension))
+		if before, ok := strings.CutSuffix(file.Name(), jsonExtension); ok {
+			fixtureList = append(fixtureList, before)
 		}
 	}
 
