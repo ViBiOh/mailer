@@ -3,7 +3,7 @@ FROM rg.fr-par.scw.cloud/vibioh/scratch
 ENV MAILER_PORT 1080
 EXPOSE 1080
 
-ENV ZONEINFO /zoneinfo.zip
+ENV ZONEINFO=/zoneinfo.zip
 COPY zoneinfo.zip /zoneinfo.zip
 COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
@@ -13,10 +13,10 @@ HEALTHCHECK --retries=10 CMD [ "/mailer", "-url", "http://127.0.0.1:1080/health"
 ENTRYPOINT [ "/mailer" ]
 
 ARG VERSION
-ENV VERSION ${VERSION}
+ENV VERSION=${VERSION}
 
 ARG GIT_SHA
-ENV GIT_SHA ${GIT_SHA}
+ENV GIT_SHA=${GIT_SHA}
 
 ARG TARGETOS
 ARG TARGETARCH
