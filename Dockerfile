@@ -3,9 +3,7 @@ FROM rg.fr-par.scw.cloud/vibioh/scratch
 ENV MAILER_PORT 1080
 EXPOSE 1080
 
-ENV ZONEINFO=/zoneinfo.zip
-COPY zoneinfo.zip /zoneinfo.zip
-COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY cacert.pem /etc/ssl/cert.pem
 
 COPY templates/ /templates
 
