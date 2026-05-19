@@ -17,7 +17,8 @@ func newPort(clients clients, services services) http.Handler {
 	mux.HandleFunc("POST /render/{template...}", handler.HandlerSend)
 	mux.HandleFunc("GET /", handler.HandleRoot)
 
-	return httputils.Handler(mux, clients.health,
+	return httputils.Handler(
+		mux, clients.health,
 		clients.telemetry.Middleware("http"),
 		services.owasp.Middleware,
 		services.cors.Middleware,
