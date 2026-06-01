@@ -46,7 +46,7 @@ spec:
     config:
       MAILER_LOGGER_JSON: "true"
       MAILER_MJML_URL: http://mjml
-      MAILER_PPROF_AGENT: http://datadog.observability:8126
+      MAILER_PPROF_AGENT: ""
       MAILER_TELEMETRY_URL: otel-collector.observability:4317
       OTEL_RESOURCE_ATTRIBUTES: env=production,git.repository_url=github.com/ViBiOh/mailer
     secrets:
