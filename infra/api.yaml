@@ -25,11 +25,11 @@ spec:
     nameOverride: mailer
     image:
       name: rg.fr-par.scw.cloud/vibioh/mailer
-      tag: "202606171017" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tag: "202606191039" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     labels:
       tags.datadoghq.com/env: "production"
       tags.datadoghq.com/service: "mailer"
-      tags.datadoghq.com/version: "202606171017" # {"$imagepolicy": "default:flux-mailer-web:tag"}
+      tags.datadoghq.com/version: "202606191039" # {"$imagepolicy": "default:flux-mailer-web:tag"}
     env:
       - name: GOMEMLIMIT
         valueFrom:
