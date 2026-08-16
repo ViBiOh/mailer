@@ -2,8 +2,8 @@
 /scripts/
 
 # Golang
-bin/
-release/
+/bin/
+/release/
 coverage.*
 profile.out
 
