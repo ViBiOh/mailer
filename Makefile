@@ -53,21 +53,18 @@ app: init dev
 .PHONY: init
 init:
 	@curl --disable --silent --show-error --location --max-time 30 "https://raw.githubusercontent.com/ViBiOh/scripts/main/bootstrap.sh" | bash -s -- "-c" "coverage.sh"
-	go install "golang.org/x/tools/cmd/goimports@latest"
-	go install "golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@master"
-	go install "mvdan.cc/gofumpt@latest"
 	go mod tidy
 
 ## format: Format code. e.g Prettier (js), format (golang)
 .PHONY: format
 format:
-	find . -name "*.go" -exec goimports -w {} \+
-	find . -name "*.go" -exec gofumpt -extra -w {} \+
+	find . -name "*.go" -exec go tool "golang.org/x/tools/cmd/goimports" -w {} \+
+	find . -name "*.go" -exec go tool "mvdan.cc/gofumpt" -extra -w {} \+
 
 ## style: Check lint, code styling rules. e.g. pylint, phpcs, eslint, style (java) etc ...
 .PHONY: style
 style:
-	fieldalignment -fix -test=false $(PACKAGES)
+	go tool "golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment" -fix -test=false $(PACKAGES)
 	golangci-lint run --fix --show-stats=false --allow-parallel-runners
 
 ## test: Shortcut to launch all the test tasks (unit, functional and integration).
