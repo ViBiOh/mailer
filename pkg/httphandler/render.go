@@ -16,6 +16,8 @@ import (
 	"github.com/ViBiOh/mailer/pkg/model"
 )
 
+var bodySize int64 = 1 << 20
+
 var bufferPool = sync.Pool{
 	New: func() any {
 		return bytes.NewBuffer(make([]byte, 32*1024))
@@ -72,7 +74,7 @@ func (s Service) HandlerSend(w http.ResponseWriter, r *http.Request) {
 
 	mr := parseMailRequest(r)
 
-	content, err := httpjson.Parse[map[string]any](r)
+	content, err := httpjson.Parse[map[string]any](r, bodySize)
 	if err != nil {
 		httperror.BadRequest(ctx, w, fmt.Errorf("parse content: %w", err))
 		return
