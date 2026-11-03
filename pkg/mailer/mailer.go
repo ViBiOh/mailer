@@ -56,7 +56,7 @@ type Config struct {
 func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
-	flags.New("Templates", "Templates directory").Prefix(prefix).DocPrefix("mailer").StringVar(fs, &config.TemplatesDir, "./templates/", nil)
+	flags.New("Templates", "Templates directory").Prefix(prefix).DocPrefix("mailer").FlagVar(fs, &config.TemplatesDir, "./templates/", nil)
 
 	return &config
 }

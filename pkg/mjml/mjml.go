@@ -40,9 +40,9 @@ type Config struct {
 func Flags(fs *flag.FlagSet, prefix string) *Config {
 	var config Config
 
-	flags.New("URL", "MJML API Converter URL").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.URL, "https://api.mjml.io/v1/render", nil)
-	flags.New("Username", "Application ID or Basic Auth username").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.Username, "", nil)
-	flags.New("Password", "Secret Key or Basic Auth password").Prefix(prefix).DocPrefix("mjml").StringVar(fs, &config.Password, "", nil)
+	flags.New("URL", "MJML API Converter URL").Prefix(prefix).DocPrefix("mjml").FlagVar(fs, &config.URL, "https://api.mjml.io/v1/render", nil)
+	flags.New("Username", "Application ID or Basic Auth username").Prefix(prefix).DocPrefix("mjml").FlagVar(fs, &config.Username, "", nil)
+	flags.New("Password", "Secret Key or Basic Auth password").Prefix(prefix).DocPrefix("mjml").FlagVar(fs, &config.Password, "", nil)
 
 	return &config
 }
