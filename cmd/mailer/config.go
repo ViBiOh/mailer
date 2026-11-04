@@ -50,7 +50,7 @@ func newConfig() configuration {
 		pprof:     pprof.Flags(fs, "pprof"),
 		health:    health.Flags(fs, ""),
 
-		server: server.Flags(fs, ""),
+		server: server.Flags(fs, "server"),
 		owasp:  owasp.Flags(fs, "", flags.NewOverride("Csp", "default-src 'self'; base-uri 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: http://i.imgur.com grafana.com https://ketchup.vibioh.fr/images/ https://glass.vibioh.fr/images/")),
 		cors:   cors.Flags(fs, "cors"),
 
