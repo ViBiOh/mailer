@@ -2,7 +2,7 @@ package mailer
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"log/slog"
 	"os"
@@ -77,7 +77,7 @@ func (s Service) GetFixture(name, fixture string) (map[string]any, error) {
 	}()
 
 	var content map[string]any
-	if err := json.NewDecoder(reader).Decode(&content); err != nil {
+	if err := json.UnmarshalRead(reader, &content); err != nil {
 		return nil, fmt.Errorf("parse JSON fixture: %w", err)
 	}
 
